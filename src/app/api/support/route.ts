@@ -1,4 +1,5 @@
 import { sendEmail } from "@/lib/mail";
+import { requireAuth } from "@/lib/requireAuth";
 import { supportSchema } from "@/Schemas/support-schema";
 import { NextResponse } from "next/server";
 
@@ -13,6 +14,7 @@ const escapeHtml = (str: string) =>
 export async function POST(request: Request) {
 
   try {
+    await requireAuth(request)
     const body = await request.json()
     const { name, email, phoneNumber, message } = supportSchema.parse(body);
     const safeMessage = escapeHtml(message)

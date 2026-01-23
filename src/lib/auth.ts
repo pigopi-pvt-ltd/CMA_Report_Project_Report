@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { sendEmail } from "./mail";
+import { nextCookies } from "better-auth/next-js";
 
 const client = new MongoClient(process.env.MONGODB_URL || "");
 const db = client.db();
@@ -23,6 +24,13 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+      strategy: "compact" // or "jwt" or "jwe"
+    }
+  },
   secret: process.env.BETTER_AUTH_SECRET!,
   emailVerification: {
     sendOnSignUp: true,
@@ -36,4 +44,7 @@ export const auth = betterAuth({
       console.log("Verification email sent successfully")
     },
   },
+  plugins: [
+    nextCookies()
+  ]
 });
