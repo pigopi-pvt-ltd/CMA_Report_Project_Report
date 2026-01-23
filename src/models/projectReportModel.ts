@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
 export type businessRequirementsType = "machinery" | "land" | "building" | "computersAndAccessories" | "furnituresAndFixtures" | "vehicle" | "softwareWebsiteAndApp" | "liveStockFarmAnimals" | "otherFixedExpenses" | "consumablesStocks" | "rawMaterials" | "workingExpenses";
 export type monthlyExpensesType = "salary" | "purchaseOfEquipments" | "freight" | "powerAndFuel" | "printingAndStationery" | "advertisement" | "miscellaneousExpenses" | "postageAndCourier" | "transportAndConveyance" | "staffWelfare" | "repairAndMaintenance" | "rent" | "electricityExpenses" | "purchaseOfRawMaterials" | "otherExpenses"
@@ -27,6 +27,7 @@ export type businessDetailsType = {
 }
 
 export interface ProjectData extends Document {
+  userId: Types.ObjectId;
   businessName: string;
   businessType: string;
   industryType: "manufacturing" | "service" | "trading" | "agriculture";
@@ -44,6 +45,12 @@ export interface ProjectData extends Document {
 
 const ProjectReportSchema = new Schema<ProjectData>(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User", // 👈 MUST match User model name
+      required: true,
+      index: true, // 👈 very important for performance
+    },
     businessName: {
       type: String,
       required: true,
