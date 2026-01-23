@@ -1,12 +1,21 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { FolderOpen, Plus } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FolderOpen, ArrowDown, Pencil, Trash } from "lucide-react";
 
-export default function ProjectReports() {
+type ProjectReport = {
+  id: string;
+  name: string;
+  createdAt: string;
+};
+
+export default function ProjectReports({
+  reports,
+}: {
+  reports: ProjectReport[];
+}) {
   return (
-    <div className="p-1 ">
+    <div className="p-1">
       <Card className="w-full bg-card">
-        {/* Header */}
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <FolderOpen className="h-5 w-5 text-muted-foreground" />
@@ -14,26 +23,66 @@ export default function ProjectReports() {
           </CardTitle>
         </CardHeader>
 
-        {/* Content */}
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center bg-card ">
-            <div className="mb-4 rounded-full bg-muted p-4">
-              <FolderOpen className="h-10 w-10 text-muted-foreground" />
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b bg-muted/40">
+                <tr>
+                  <th className="px-4 py-3 text-left"> </th>
+                  <th className="px-4 py-3 text-left">REPORT NAME</th>
+                  <th className="px-4 py-3 text-left">CREATED DATE</th>
+                  <th className="px-4 py-3 text-right">ACTIONS</th>
+                </tr>
+              </thead>
 
-            <h2 className="text-xl font-semibold">No Reports Found</h2>
-            <p className="mt-2 max-w-md text-sm text-foreground">
-              You haven't created any reports yet. Click "Add Project Report"
-              to get started.
-            </p>
-
-            <Button className="mt-6 gap-2 ">
-              <Plus className="h-4 w-4" />
-              CREATE YOUR FIRST REPORT
-            </Button>
+              <tbody>
+                {reports?.length > 0 ? (
+                  reports.map((report) => (
+                    <tr key={report.id} className="border-b">
+                      <td className="px-4 py-3 font-medium">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 p-2"
+                        >
+                          <ArrowDown
+                            className="h-5 w-5 text-white"
+                            strokeWidth={3}
+                          />
+                        </Button>
+                      </td>
+                      <td className="px-4 py-3 font-medium">
+                         {report.name}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {report.createdAt}
+                      </td>
+                      <td className="px-4 py-3 flex justify-end gap-2">
+                        
+                        <Button size="sm" variant="secondary">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="destructive">
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="px-4 py-10 text-center text-muted-foreground"
+                    >
+                      No Project reports found. Click{" "}
+                      <b>Create Project Report</b> to get started.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

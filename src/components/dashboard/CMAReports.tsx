@@ -1,38 +1,105 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { FolderOpen, Plus } from "lucide-react"
+"use client";
 
-export default function CMAReports() {
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowDown, Pencil, Trash } from "lucide-react";
+import DashboardCreateReportButton from "./DashboardCreateReportButton";
+import DashboardSearch from "./DashboardSearch";
+
+/* ================= TYPES ================= */
+
+type CMAReport = {
+  id: string;
+  name: string;
+  createdAt: string;
+};
+
+/* ================= COMPONENT ================= */
+
+export default function CMAReports({
+  reports,
+}: {
+  reports: CMAReport[]; // ✅ DashboardPage se aane wala dynamic data
+}) {
   return (
-    <div className="p-1">
+    <div className="p-1 w-full">
       <Card className="w-full bg-card">
-        {/* Header */}
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FolderOpen className="h-5 w-5 text-muted-foreground" />
-            CMA Reports
+        {/* ================= HEADER ================= */}
+        <CardHeader className="pt-2 pb-2 -mt-5">
+          <CardTitle className="flex items-center justify-between w-full text-md">
+            <span className="font-semibold">CMA REPORTS</span>
+
+            {/* Search + Create */}
+            <div className="flex items-center gap-3">
+              <DashboardSearch />
+              <DashboardCreateReportButton />
+            </div>
           </CardTitle>
         </CardHeader>
 
-        {/* Content */}
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-4 rounded-full bg-muted p-4">
-              <FolderOpen className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold">No Reports Found</h2>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              You haven't created any reports yet. Click "Add CMA Report"
-              to get started.
-            </p>
+        {/* ================= TABLE ================= */}
+        <CardContent className="pt-2">
+          <div className="overflow-x-auto -mt-10">
+            <table className="w-full text-sm">
+              <thead className="border-b bg-muted/40">
+                <tr>
+                  <th className="px-4 py-3 text-left"></th>
+                  <th className="px-4 py-3 text-left">REPORT NAME</th>
+                  <th className="px-4 py-3 text-left">CREATED DATE</th>
+                  <th className="px-4 py-3 text-right">ACTIONS</th>
+                </tr>
+              </thead>
 
-            <Button className="mt-6 gap-2">
-              <Plus className="h-4 w-4" />
-              CREATE YOUR CMA REPORT
-            </Button>
+              <tbody>
+                {reports.length > 0 ? (
+                  reports.map((report) => (
+                    <tr key={report.id} className="border-b">
+                      <td className="px-4 py-3">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 p-2"
+                        >
+                          <ArrowDown
+                            className="h-5 w-5 text-white"
+                            strokeWidth={3}
+                          />
+                        </Button>
+                      </td>
+
+                      <td className="px-4 py-3 font-medium">
+                        {report.name}
+                      </td>
+
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {report.createdAt}
+                      </td>
+
+                      <td className="px-4 py-3 flex justify-end gap-2">
+                        <Button size="sm" variant="secondary">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="destructive">
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="py-10 text-center text-muted-foreground"
+                    >
+                      No CMA reports found. Click{" "}
+                      <b>Create CMA Report</b> to get started.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

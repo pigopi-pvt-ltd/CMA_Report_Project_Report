@@ -40,6 +40,7 @@ export default function SignUpForm() {
       setIsLoading(false);
     }
   }
+
   return (
     <Card className="w-full max-w-3xl h-full bg-card shadow-lg border-border rounded-[6px]">
       <CardHeader className="space-y-1">
@@ -89,7 +90,6 @@ export default function SignUpForm() {
               placeholder="eg. Lorem ipsum doler sit"
               type="textarea"
             />
-
 
             <Button
               type="submit"

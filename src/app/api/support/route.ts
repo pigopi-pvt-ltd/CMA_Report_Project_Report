@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { name, email, phoneNumber, message } = supportSchema.parse(body);
     const safeMessage = escapeHtml(message)
+    // send email to user that we have received their message
     await sendEmail({
       to: email,
       subject: "Support Query",
@@ -78,6 +79,53 @@ export async function POST(request: Request) {
 
         Best regards,
         Support Team
+        `,
+    })
+
+    // send email to admin that a new support query has been submitted
+    await sendEmail({
+      to: "aryansrivastawa@gmail.com",
+      subject: `New Support Query from ${name}`,
+      html: `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="margin-bottom: 10px;">New Support Query</h2>
+
+      <p>A new support query has been submitted.</p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3 style="margin-bottom: 8px;">📝 User Details</h3>
+
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone Number:</strong> ${phoneNumber}</p>
+
+      <p style="margin-top: 12px;"><strong>Message:</strong></p>
+      <blockquote
+        style="
+          margin: 0;
+          padding: 12px;
+          background: #f9f9f9;
+          border-left: 4px solid #6366f1;
+        "
+      >
+        ${message.replace(/\n/g, "<br />")}
+      </blockquote>
+    </div>
+  `,
+      text: `
+        New Support Query from ${name},
+
+        A new support query has been submitted.
+
+        --- User Details ---
+
+        Name: ${name}
+        Email: ${email}
+        Phone Number: ${phoneNumber}
+
+        Message:
+        ${message}
         `,
     })
 

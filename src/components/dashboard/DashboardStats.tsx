@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, FileText } from "lucide-react";
 import ReportsPage from "../dashboard/ProjectReports";
 import CMAReports from "../dashboard/CMAReports";
+import reportsData from "@/data/reports.json";
 import {
   Tabs,
   TabsContent,
@@ -12,6 +13,14 @@ import {
 } from "@/components/ui/tabs";
 
 export default function DashboardStats() {
+  const totalReports = reportsData.projectReports.length + reportsData.cmaReports.length;
+  
+  // Calculate today's reports (mocking for now based on '2024-01-20' as today if we want, or just generic)
+  const today = new Date().toISOString().split('T')[0];
+  const todayReportsCount = [...reportsData.projectReports, ...reportsData.cmaReports].filter(
+    report => report.createdAt === today
+  ).length;
+
   return (
     <div >
 
@@ -26,7 +35,7 @@ export default function DashboardStats() {
           }} className="p-1 flex justify-between items-center">
             <div>
               <p className="text-sm text-neutral-400">Today's Reports</p>
-              <p className="text-3xl font-bold">0</p>
+              <p className="text-3xl font-bold">{todayReportsCount}</p>
             </div>
             <div className="p-3 bg-neutral-800 rounded-xl">
               <FileText className="text-neutral-100" />
@@ -44,7 +53,7 @@ export default function DashboardStats() {
             }} className="p-6 flex justify-between items-center">
             <div>
               <p className="text-sm text-foreground">Total Reports</p>
-              <p className="text-3xl font-bold text-foreground">0</p>
+              <p className="text-3xl font-bold text-foreground">{totalReports}</p>
             </div>
             <div className="p-3 bg-neutral-800 rounded-xl">
               <BarChart3 className="text-neutral-100" />
