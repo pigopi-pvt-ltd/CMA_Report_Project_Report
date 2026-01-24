@@ -20,6 +20,11 @@ export const sidebarMenu = [
     icon: LayoutDashboard,
   },
   {
+    label: "Create Project Report",
+    href: "/create-project-report",
+    icon: FileText,
+  },
+  {
     label: "Billing",
     href: "/billing",
     icon: CreditCard,
