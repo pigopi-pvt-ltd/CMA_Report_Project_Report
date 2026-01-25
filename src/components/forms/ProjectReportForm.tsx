@@ -40,6 +40,7 @@ import { FieldContent } from "@/components/ui/field";
 import { EmailInput } from "@/components/ui/email-input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import axios from "axios";
 
 const formSchema = z.object({
   legalBusinessName: z
@@ -414,11 +415,34 @@ export const ProjectReportForm = () => {
   };
 
   const onSubmit = async (values: FormSchema) => {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
 
-    toast.success("Form successfully submitted");
+      const response = await axios.post("/api/download-report",
+        {
+          data: values
+        },
+        {
+          responseType: "blob", // 👈 CRITICAL
+        })
 
-    console.log(values);
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      })
+      const url = window.URL.createObjectURL(blob)
+
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "random-table-pdfkit.pdf"
+      document.body.appendChild(a)
+      a.click()
+
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(response.data.data.message);
+    } catch (error) {
+      toast.error("Error submitting form.")
+    }
+
   };
 
   const renderCurrentStepContent = () => {
