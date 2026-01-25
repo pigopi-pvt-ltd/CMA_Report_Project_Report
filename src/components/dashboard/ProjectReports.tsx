@@ -65,7 +65,7 @@ export default function ProjectReports({
             {/* CENTER — 50% */}
             <div className="flex justify-center items-center gap-3">
               <DashboardSearch />
-              <DashboardCreateReportButton />
+              <DashboardCreateReportButton href="/create-project-report" />
             </div>
 
             {/* RIGHT — 30% */}

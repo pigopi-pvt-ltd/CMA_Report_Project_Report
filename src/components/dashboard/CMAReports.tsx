@@ -65,7 +65,7 @@ export default function CMAReports({
             {/* CENTER — 50% */}
             <div className="flex justify-center items-center gap-3">
               <DashboardSearch />
-              <DashboardCreateReportButton />
+              <DashboardCreateReportButton href="" />
             </div>
 
             {/* RIGHT — 30% */}
@@ -123,7 +123,7 @@ export default function CMAReports({
         <CardContent className="pt-2">
           <div className="overflow-x-auto -mt-10">
             <table className="w-full text-sm">
-              <thead className="border-b bg-muted/40">
+              <thead className="border-b  bg-muted/40">
                 <tr>
                   <th className="px-4 py-3 text-left"></th>
                   <th className="px-4 py-3 text-left">REPORT NAME</th>
