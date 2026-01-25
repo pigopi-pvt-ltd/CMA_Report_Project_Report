@@ -1,19 +1,19 @@
 import { z } from "zod";
 
-
+// Enums
 export const industryTypeEnum = z.enum([
   "manufacturing",
   "service",
   "trading",
   "agriculture",
-]);
+], "Industry Type must be a valid option");
 
 export const loanTypeEnum = z.enum([
   "mudra",
   "pmegp",
   "msme",
   "others",
-]);
+], "Loan Type must be a valid option");
 
 export const salesTypeEnum = z.enum([
   "monthly",
@@ -105,7 +105,7 @@ export const monthlyExpensesKeyEnum = z.enum([
   "otherExpenses",
 ]);
 
-
+// Schemas
 export const businessRequirementsSchema = z.record(
   businessRequirementsKeyEnum,
   z.number().nonnegative().optional()
@@ -138,10 +138,13 @@ export const businessDetailsSchema = z.object({
 });
 
 export const projectReportZodSchema = z.object({
+  // step 1
   businessName: z.string().min(1),
+  // step 2
   businessType: z.string().min(1),
-
+  // step 3
   industryType: industryTypeEnum,
+  // step 4
   loanType: loanTypeEnum,
 
   businessRequirements: businessRequirementsSchema.optional(),

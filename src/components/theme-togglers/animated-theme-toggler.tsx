@@ -15,11 +15,12 @@ type AnimatedThemeTogglerProps = {
 
 export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null)
-  const [darkMode, setDarkMode] = useState(() =>
-    typeof window !== "undefined"
-      ? document.documentElement.classList.contains("dark")
-      : false
-  )
+  // const [darkMode, setDarkMode] = useState(() =>
+  //   typeof window !== "undefined"
+  //     ? document.documentElement.classList.contains("dark")
+  //     : false
+  // )
+  const [darkMode, setDarkMode] = useState(true)
 
   useEffect(() => {
     const syncTheme = () =>

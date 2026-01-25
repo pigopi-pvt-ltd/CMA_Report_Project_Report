@@ -32,7 +32,6 @@ const reportData = {
   whenDidYouStartTheBusiness: "612MonthsAgo",
 }
 
-
 type FixedCapitalKey = typeof FIXED_CAPITAL_KEYS[number]
 
 function isFixedCapitalKey(key: string): key is FixedCapitalKey {
@@ -60,8 +59,6 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     const additionalDetails = {
-
-
       fixedCapital: Object.entries(data.data).reduce(
         (total, [key, value]) => {
           if (
