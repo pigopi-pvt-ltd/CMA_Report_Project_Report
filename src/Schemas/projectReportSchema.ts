@@ -161,3 +161,15 @@ export const projectReportZodSchema = z.object({
   personalDetails: personalDetailsSchema,
   businessDetails: businessDetailsSchema,
 });
+export const LoanDetailsSchema = z.looseObject(
+  {
+    fixedCapitalInvested: z.number().nonnegative(),
+    workingCapitalInvested: z.number().nonnegative(),
+    totalProjectCost: z.number().nonnegative(),
+    termLoan: z.number().nonnegative(),
+    workingCapitalLoan: z.number().nonnegative(),
+    totalLoanAmountNeeded:z.number().nonnegative(),
+    averageDSCR: z.number(),
+
+  }
+)

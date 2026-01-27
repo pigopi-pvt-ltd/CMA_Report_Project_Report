@@ -42,6 +42,16 @@ export interface ProjectData extends Document {
   businessDetails: businessDetailsType;
 }
 
+export interface LoanDetails {
+  fixedCapitalInvested: number;
+  workingCapitalInvested: number;
+  totalProjectCost: number;
+  termLoan: number;
+  workingCapitalLoan: number;
+  TotalLoanAmountNeeded: number;
+  averageDSCR: number;
+}
+
 
 const ProjectReportSchema = new Schema<ProjectData>(
   {
