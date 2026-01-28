@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import './globals.css'
 import { Toaster } from "@/components/ui/sonner"
+import ThemeProvider from "@/components/providers/ThemeProvider"
 
 export const metadata: Metadata = {
   title: "CMA PLATFORM",
@@ -13,9 +14,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        {children}
+    <html lang="en" className="dark" suppressHydrationWarning={true}>
+      <body suppressHydrationWarning={true}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

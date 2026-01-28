@@ -42,7 +42,6 @@ export interface ProjectData extends Document {
   businessDetails: businessDetailsType;
 }
 
-
 const ProjectReportSchema = new Schema<ProjectData>(
   {
     userId: {

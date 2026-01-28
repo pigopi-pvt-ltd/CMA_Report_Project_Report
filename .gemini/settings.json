@@ -1,0 +1,10 @@
+{
+  "general": {
+    "vimMode": false
+  },
+  "tools": {
+    "shell": {
+      "showColor": true
+    }
+  }
+}

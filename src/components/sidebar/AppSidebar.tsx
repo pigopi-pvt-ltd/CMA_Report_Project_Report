@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { AnimatedThemeToggler } from "../theme-togglers/animated-theme-toggler";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -81,10 +80,6 @@ export function AppSidebar() {
             </Button>
           </Link>
         ))}
-        {/* Theme Toggle */}
-        <span className="flex justify-center items-center">
-          Theme: <AnimatedThemeToggler />
-        </span>
       </div>
     </div>
   );
