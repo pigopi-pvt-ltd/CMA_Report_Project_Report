@@ -1,5 +1,5 @@
 import { z } from "zod";
-
+ 
 // Enums
 export const industryTypeEnum = z.enum([
   "manufacturing",
@@ -7,32 +7,32 @@ export const industryTypeEnum = z.enum([
   "trading",
   "agriculture",
 ], "Industry Type must be a valid option");
-
+ 
 export const loanTypeEnum = z.enum([
   "mudra",
   "pmegp",
   "msme",
   "others",
 ], "Loan Type must be a valid option");
-
+ 
 export const salesTypeEnum = z.enum([
   "monthly",
   "unit",
 ]);
-
+ 
 export const genderEnum = z.enum([
   "male",
   "female",
   "other",
 ]);
-
+ 
 export const categoryEnum = z.enum([
   "general",
   "obc",
   "sc",
   "st",
 ]);
-
+ 
 export const educationQualificationEnum = z.enum([
   "8fail",
   "8pass",
@@ -42,14 +42,14 @@ export const educationQualificationEnum = z.enum([
   "postGraduate",
   "phd",
 ]);
-
+ 
 export const workExperienceEnum = z.enum([
   "0to2",
   "2to3",
   "3to5",
   "5+",
 ]);
-
+ 
 export const legalConstitutionEnum = z.enum([
   "proprietorship",
   "partnership",
@@ -57,21 +57,21 @@ export const legalConstitutionEnum = z.enum([
   "llp",
   "others",
 ]);
-
+ 
 export const employementPotentialEnum = z.enum([
   "0to2",
   "2to5",
   "5to10",
   "10+",
 ]);
-
+ 
 export const businessStartDateEnum = z.enum([
   "notStarted",
   "6monthsAgo",
   "6to12monthsAgo",
   "2to3yearsAgo",
 ]);
-
+ 
 export const businessRequirementsKeyEnum = z.enum([
   "machinery",
   "land",
@@ -86,7 +86,7 @@ export const businessRequirementsKeyEnum = z.enum([
   "rawMaterials",
   "workingExpenses",
 ]);
-
+ 
 export const monthlyExpensesKeyEnum = z.enum([
   "salary",
   "purchaseOfEquipments",
@@ -104,18 +104,18 @@ export const monthlyExpensesKeyEnum = z.enum([
   "purchaseOfRawMaterials",
   "otherExpenses",
 ]);
-
+ 
 // Schemas
 export const businessRequirementsSchema = z.record(
   businessRequirementsKeyEnum,
   z.number().nonnegative().optional()
 ).optional();
-
+ 
 export const monthlyExpensesSchema = z.record(
   monthlyExpensesKeyEnum,
   z.number().nonnegative().optional()
 ).optional();
-
+ 
 export const personalDetailsSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),
@@ -128,51 +128,43 @@ export const personalDetailsSchema = z.object({
   educationQualification: educationQualificationEnum,
   workExperience: workExperienceEnum,
 });
-
-
+ 
+ 
 export const businessDetailsSchema = z.object({
   businessName: z.string().min(1),
   legalConstitution: legalConstitutionEnum,
   employementPotential: employementPotentialEnum,
   businessStartDate: businessStartDateEnum,
 });
+ 
 
+ 
 export const projectReportZodSchema = z.object({
   // step 1
-  businessName: z.string().min(1),
+  businessName: z.string().min(1, "Legal Business Name is required")
+    .max(255, "Legal Business Name must be at most 255 characters"),
   // step 2
-  businessType: z.string().min(1),
+  businessType: z.string().min(1, "Legal Business Type is required").max(255, "Legal business type must be at most 255 characters"),
   // step 3
   industryType: industryTypeEnum,
   // step 4
   loanType: loanTypeEnum,
-
+ 
   businessRequirements: businessRequirementsSchema.optional(),
   monthlyExpenses: monthlyExpensesSchema.optional(),
-
+ 
   productName: z.string().min(1),
-
+ 
   salesType: salesTypeEnum,
   salesRevenue: z.number().min(0),
-
+ 
   loanPeriod: z
     .number()
     .int()
     .min(5, "Loan period must be at least 5")
     .max(10, "Loan period must be at most 10"),
-
+ 
   personalDetails: personalDetailsSchema,
   businessDetails: businessDetailsSchema,
-});
-export const LoanDetailsSchema = z.looseObject(
-  {
-    fixedCapitalInvested: z.number().nonnegative(),
-    workingCapitalInvested: z.number().nonnegative(),
-    totalProjectCost: z.number().nonnegative(),
-    termLoan: z.number().nonnegative(),
-    workingCapitalLoan: z.number().nonnegative(),
-    totalLoanAmountNeeded:z.number().nonnegative(),
-    averageDSCR: z.number(),
 
-  }
-)
+});
