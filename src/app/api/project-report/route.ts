@@ -18,6 +18,22 @@ export async function POST(request: Request) {
 
     const monthExp: Record<string, number | undefined> =
       data.monthlyExpenses ?? {};
+    const category = data.personalDetails?.category;
+    const gender = data.personalDetails?.gender;
+    let govtMarginPercent = 0.15; // default for General
+
+    if (gender === "female") {
+      govtMarginPercent = 0.25;
+    }
+    if (
+      category === "obc" ||
+      category === "sc" ||
+      category === "st"
+    ) {
+      govtMarginPercent = 0.25;
+    }
+
+
 
     // FIXED CAPITAL
     const fixedCapitalInvested = Object.values(businessReq)
@@ -29,7 +45,11 @@ export async function POST(request: Request) {
       .filter((value): value is number => typeof value === "number")
       .reduce((sum, value) => sum + value, 0);
 
-      const totalProjectCost = fixedCapitalInvested + workingCapitalInvested;
+    const totalProjectCost = fixedCapitalInvested + workingCapitalInvested;
+    const marginMoney = totalProjectCost * govtMarginPercent;
+    const termLoan = totalProjectCost - marginMoney;
+    const workingCapitalLoan = workingCapitalInvested * .9;
+    const totalLoanAmountNeeded = workingCapitalLoan + termLoan;
 
     const finalData = {
       ...data,
@@ -37,9 +57,9 @@ export async function POST(request: Request) {
         fixedCapitalInvested,
         workingCapitalInvested,
         totalProjectCost,
-        termLoan: 1200000,
-        workingCapitalLoan: 300000,
-        totalLoanAmountNeeded: 1500000,
+        termLoan,
+        workingCapitalLoan,
+        totalLoanAmountNeeded,
         averageDSCR: 1.65,
       },
     };
