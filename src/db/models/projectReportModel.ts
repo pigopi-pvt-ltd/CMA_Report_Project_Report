@@ -25,7 +25,7 @@ export type businessDetailsType = {
   employementPotential: "0to2" | "2to5" | "5to10" | "10+",
   businessStartDate: "notStarted" | "6monthsAgo" | "6to12monthsAgo" | "2to3yearsAgo"
 }
- 
+
 export type LoanDetails = {
   fixedCapitalInvested: number;
   workingCapitalInvested: number;
@@ -35,7 +35,7 @@ export type LoanDetails = {
   TotalLoanAmountNeeded: number;
   averageDSCR: number;
 }
- 
+
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -52,8 +52,8 @@ export interface ProjectData extends Document {
   businessDetails: businessDetailsType;
   loanDetails: LoanDetails
 }
- 
- 
+
+
 const ProjectReportSchema = new Schema<ProjectData>(
   {
     userId: {
@@ -212,14 +212,14 @@ const ProjectReportSchema = new Schema<ProjectData>(
         type: Number,
         require: true
       }
- 
+
     }
   },
   {
     timestamps: true,
   }
 );
- 
-const ProjectReport = models.ProjectReport || model<ProjectData>("ProjectReport", ProjectReportSchema);
- 
-export default ProjectReport;
+
+const ProjectReportModel = models.ProjectReport || model<ProjectData>("ProjectReport", ProjectReportSchema);
+
+export default ProjectReportModel;

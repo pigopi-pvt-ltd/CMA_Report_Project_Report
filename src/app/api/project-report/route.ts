@@ -1,6 +1,6 @@
 import dbConnect from "@/db/dbConnect";
 import { requireAuth } from "@/lib/requireAuth";
-import ProjectReport from "@/db/models/projectReportModel";
+import ProjectReportModel from "@/db/models/projectReportModel";
 import { projectReportZodSchema } from "@/Schemas/projectReportSchema";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
 
 
-    const project = await ProjectReport.create({
+    const project = await ProjectReportModel.create({
       ...finalData,
       userId: session.user.id
     });

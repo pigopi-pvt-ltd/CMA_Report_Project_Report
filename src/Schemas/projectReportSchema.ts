@@ -138,8 +138,8 @@ export const businessDetailsSchema = z.object({
 });
  
 
- 
-export const projectReportZodSchema = z.object({
+
+export const projectReportSchema = z.object({
   // step 1
   businessName: z.string().min(1, "Legal Business Name is required")
     .max(255, "Legal Business Name must be at most 255 characters"),
@@ -149,22 +149,24 @@ export const projectReportZodSchema = z.object({
   industryType: industryTypeEnum,
   // step 4
   loanType: loanTypeEnum,
- 
+  // step 5
   businessRequirements: businessRequirementsSchema.optional(),
+  // step 6
   monthlyExpenses: monthlyExpensesSchema.optional(),
- 
+  // step 7
   productName: z.string().min(1),
- 
   salesType: salesTypeEnum,
   salesRevenue: z.number().min(0),
- 
+  // step 8
   loanPeriod: z
     .number()
     .int()
     .min(5, "Loan period must be at least 5")
     .max(10, "Loan period must be at most 10"),
- 
+  // step 9
   personalDetails: personalDetailsSchema,
+  // step 10
   businessDetails: businessDetailsSchema,
-
 });
+
+export type projectReportType = z.infer<typeof projectReportSchema>;
