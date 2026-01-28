@@ -7,9 +7,14 @@ const Text = () => {
 
   const test = async () => {
     try {
-      const response = await axios.get("/api/download-report", {
-        responseType: "blob", // 👈 CRITICAL
-      })
+      const response = await axios.post("/api/download-report",
+        {
+          projectId: '6973701fa11a8201461d2ba6'
+        },
+        {
+          responseType: "blob", // 👈 CRITICAL
+          withCredentials: true
+        })
 
       const blob = new Blob([response.data], {
         type: "application/pdf",

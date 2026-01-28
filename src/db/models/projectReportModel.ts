@@ -26,6 +26,16 @@ export type businessDetailsType = {
   businessStartDate: "notStarted" | "6monthsAgo" | "6to12monthsAgo" | "2to3yearsAgo"
 }
 
+export type LoanDetails = {
+  fixedCapitalInvested: number;
+  workingCapitalInvested: number;
+  totalProjectCost: number;
+  termLoan: number;
+  workingCapitalLoan: number;
+  TotalLoanAmountNeeded: number;
+  averageDSCR: number;
+}
+
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -40,15 +50,17 @@ export interface ProjectData extends Document {
   loanPeriod: number;
   personalDetails: personalDetailsType;
   businessDetails: businessDetailsType;
+  loanDetails: LoanDetails
 }
+
 
 const ProjectReportSchema = new Schema<ProjectData>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User", // 👈 MUST match User model name
+      ref: "User",
       required: true,
-      index: true, // 👈 very important for performance
+      index: true,
     },
     businessName: {
       type: String,
@@ -171,12 +183,43 @@ const ProjectReportSchema = new Schema<ProjectData>(
         required: true,
       },
     },
+    loanDetails: {
+      fixedCapitalInvested: {
+        type: Number,
+        required: true
+      },
+      workingCapitalInvested: {
+        type: Number,
+        required: true
+      },
+      totalProjectCost: {
+        type: Number,
+        require: true
+      },
+      termLoan: {
+        type: Number,
+        require: true
+      },
+      workingCapitalLoan: {
+        type: Number,
+        require: true
+      },
+      TotalLoanAmountNeeded: {
+        type: Number,
+        require: true
+      },
+      averageDSCR: {
+        type: Number,
+        require: true
+      }
+
+    }
   },
   {
     timestamps: true,
   }
 );
 
-const ProjectReport = models.ProjectReport || model<ProjectData>("ProjectReport", ProjectReportSchema);
+const ProjectReportModel = models.ProjectReport || model<ProjectData>("ProjectReport", ProjectReportSchema);
 
-export default ProjectReport;
+export default ProjectReportModel;

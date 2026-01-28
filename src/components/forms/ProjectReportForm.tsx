@@ -1,6 +1,5 @@
 "use client";
 
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -20,6 +19,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Field } from '../ui/field';
+import { projectReportSchema, projectReportType } from "@/Schemas/projectReportSchema";
 import Step1 from "./form-steps/Step1";
 import Step2 from "./form-steps/Step2";
 import Step3 from "./form-steps/Step3";
@@ -30,30 +30,6 @@ import Step7 from "./form-steps/Step7";
 import Step8 from "./form-steps/Step8";
 import Step9 from "./form-steps/Step9";
 import Step10 from "./form-steps/Step10";
-import { step1Schema } from "./form-steps/Step1";
-import { step2Schema } from "./form-steps/Step2";
-import { step3Schema } from "./form-steps/Step3";
-import { step4Schema } from "./form-steps/Step4";
-import { step5Schema } from "./form-steps/Step5";
-import { step6Schema } from "./form-steps/Step6";
-import { step7Schema } from "./form-steps/Step7";
-import { step8Schema } from "./form-steps/Step8";
-import { step9Schema } from "./form-steps/Step9";
-import { step10Schema } from "./form-steps/Step10";
-
-
-export const formSchema = z.object({
-  ...step1Schema.shape,
-  ...step2Schema.shape,
-  ...step3Schema.shape,
-  ...step4Schema.shape,
-  ...step5Schema.shape,
-  ...step6Schema.shape,
-  ...step7Schema.shape,
-  ...step8Schema.shape,
-  ...step9Schema.shape,
-  ...step10Schema.shape,
-});
 
 const variants = {
   initial: (direction: number) => ({
@@ -78,104 +54,90 @@ const variants = {
   }),
 };
 
-export type FormSchema = z.infer<typeof formSchema>;
 
 export const ProjectReportForm = () => {
   const steps = [
     {
       title: "Step 1",
       description: "",
-      fields: ["legalBusinessName"],
+      fields: ["businessName"],
+      schema: projectReportSchema.pick({
+        businessName: true
+      })
     },
     {
       title: "Step 2",
       description: "",
       fields: ["businessType"],
+      schema: projectReportSchema.pick({
+        businessType: true
+      })
     },
     {
       title: "Step 3",
       description: "",
       fields: ["industryType"],
+      schema: projectReportSchema.pick({
+        industryType: true
+      })
     },
     {
       title: "Step 4",
       description: "",
       fields: ["loanType"],
+      schema: projectReportSchema.pick({
+        loanType: true
+      })
     },
     {
       title: "Step 5",
       description: "",
-      fields: [
-        "machinery",
-        "land",
-        "building",
-        "computersAccessories",
-        "furnitureFixtures",
-        "vehicle",
-        "softwareWebsiteApp",
-        "livestockFarmAnimalsEtc",
-        "otherFixedExpenses",
-        "consumablesStocks",
-        "rawMaterials",
-        "workingExpenses",
-      ],
+      fields: ["businessRequirements"],
+      schema: projectReportSchema.pick({
+        businessRequirements: true
+      })
     },
     {
       title: "Step 6",
       description: "",
-      fields: [
-        "salaryWages",
-        "purchaseOfEquipment",
-        "freight",
-        "powerFuel",
-        "printingStationery",
-        "advertisement",
-        "miscellaneousExpenses",
-        "postageCourier",
-        "transportConveyance",
-        "staffWelfare",
-        "repairMaintenance",
-        "rent",
-        "electricityExpenses",
-        "purchaseOfRawMaterials",
-        "otherExpanses",
-      ],
+      fields: ["monthlyExpenses"],
+      schema: projectReportSchema.pick({
+        monthlyExpenses: true
+      })
     },
     {
       title: "Step 7",
       description: "",
-      fields: ["nameOfTheProductServices", "salesType", "monthlySalesRevenue"],
+      fields: ["productName", "salesType", "salesRevenue"],
+      schema: projectReportSchema.pick({
+        productName: true,
+        salesType: true,
+        salesRevenue: true
+      })
     },
     {
       title: "Step 8",
       description: "",
-      fields: ["loanPeriodYears"],
+      fields: ["loanPeriod"],
+      schema: projectReportSchema.pick({
+        loanPeriod: true
+      })
     },
     {
       title: "Step 9",
       description: "",
-      fields: [
-        "fullName",
-        "emailAddress",
-        "mobileNumber",
-        "businessMobile",
-        "personalAddress",
-        "businessAddress",
-        "gender",
-        "category",
-        "educationQualification",
-        "workExperience",
-      ],
+      fields: ["personalDetails"],
+      schema: projectReportSchema.pick({
+        personalDetails: true
+      })
     },
     {
       title: "Step 10",
       description: "",
-      fields: [
-        "nameOfBusinessFirm",
-        "legalConstitution",
-        "employmentPotential",
-        "whenDidYouStartTheBusiness",
-      ],
+      fields: ["businessDetails"],
+      schema: projectReportSchema.pick({
+        businessDetails: true
+      })
     },
   ];
 
@@ -186,67 +148,89 @@ export const ProjectReportForm = () => {
   const isLastStep = currentStep === steps.length - 1;
   const progress = ((currentStep + 1) / steps.length) * 100;
 
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
-    // shouldUnregister: true,
-    defaultValues: {
-      // step 1
-      legalBusinessName: "",
-      // step 2
-      businessType: "",
-      // step 3
-      industryType: "manufacturing",
-      // step 4
-      loanType: "mudra",
-      otherLoanType: "",
-      // step 5
-      machinery: false,
-      land: false,
-      building: false,
-      computersAccessories: false,
-      furnitureFixtures: false,
-      vehicle: false,
-      softwareWebsiteApp: false,
-      livestockFarmAnimalsEtc: false,
-      otherFixedExpenses: false,
-      consumablesStocks: false,
-      rawMaterials: false,
-      workingExpenses: false,
-      salaryWages: false,
-      purchaseOfEquipment: false,
-      freight: false,
-      powerFuel: false,
-      printingStationery: false,
-      advertisement: false,
-      miscellaneousExpenses: false,
-      postageCourier: false,
-      transportConveyance: false,
-      staffWelfare: false,
-      repairMaintenance: false,
-      rent: false,
-      electricityExpenses: false,
-      purchaseOfRawMaterials: false,
-      otherExpanses: false,
-      nameOfTheProductServices: "",
-      salesType: "",
-      monthlySalesRevenue: "",
-      loanPeriodYears: "",
+  const defaultValues: projectReportType = {
+    // step 1
+    businessName: "",
+
+    // step 2
+    businessType: "",
+
+    // step 3 (enum → use undefined, validated only when triggered)
+    industryType: undefined as any,
+
+    // step 4
+    loanType: undefined as any,
+
+    // step 5 (optional record)
+    businessRequirements: {
+      machinery: undefined,
+      land: undefined,
+      building: undefined,
+      computersAndAccessories: undefined,
+      furnituresAndFixtures: undefined,
+      vehicle: undefined,
+      softwareWebsiteAndApp: undefined,
+      liveStockFarmAnimals: undefined,
+      otherFixedExpenses: undefined,
+      consumablesStocks: undefined,
+      rawMaterials: undefined,
+      workingExpenses: undefined,
+    },
+
+    // step 6 (optional record)
+    monthlyExpenses: {
+      salary: undefined,
+      purchaseOfEquipments: undefined,
+      freight: undefined,
+      powerAndFuel: undefined,
+      printingAndStationery: undefined,
+      advertisement: undefined,
+      miscellaneousExpenses: undefined,
+      postageAndCourier: undefined,
+      transportAndConveyance: undefined,
+      staffWelfare: undefined,
+      repairAndMaintenance: undefined,
+      rent: undefined,
+      electricityExpenses: undefined,
+      purchaseOfRawMaterials: undefined,
+      otherExpenses: undefined,
+    },
+
+    // step 7
+    productName: "",
+    salesType: undefined as any,
+    salesRevenue: 0,
+
+    // step 8
+    loanPeriod: 5,
+
+    // step 9
+    personalDetails: {
       fullName: "",
-      emailAddress: "",
-      mobileNumber: "",
+      email: "",
+      mobile: "",
       businessMobile: "",
       personalAddress: "",
       businessAddress: "",
-      gender: "",
-      category: "",
-      educationQualification: "",
-      workExperience: "",
-      nameOfBusinessFirm: "",
-      legalConstitution: "",
-      employmentPotential: "",
-      whenDidYouStartTheBusiness: "",
+      gender: undefined as any,
+      category: undefined as any,
+      educationQualification: undefined as any,
+      workExperience: undefined as any,
     },
+
+    // step 10
+    businessDetails: {
+      businessName: "",
+      legalConstitution: undefined as any,
+      employementPotential: undefined as any,
+      businessStartDate: undefined as any,
+    },
+  };
+
+  const form = useForm<projectReportType>({
+    resolver: zodResolver(projectReportSchema),
     mode: "onChange",
+    defaultValues
   });
 
   const handleNextButton = async () => {
@@ -265,7 +249,7 @@ export const ProjectReportForm = () => {
     }
   };
 
-  const onSubmit = async (values: FormSchema) => {
+  const onSubmit = async (values: projectReportType) => {
     try {
 
       const response = await axios.post("/api/download-report",

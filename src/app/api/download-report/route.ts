@@ -3,78 +3,131 @@ export const runtime = "nodejs"
 import { NextResponse } from "next/server"
 import PDFDocument from "pdfkit"
 import path from "path"
-import { businessRequirementsKeyEnum } from "@/Schemas/projectReportSchema"
+import { requireAuth } from "@/lib/requireAuth"
+import ProjectReportModel from "@/db/models/projectReportModel";
+import dbConnect from "@/db/dbConnect"
 
-// 🔹 MOCK DATA (replace later with real request data)
-const reportData = {
-  legalBusinessName: "ABC Enterprises",
-  businessType: "Manufacturing",
-  selectYourIndustry: "manufacturing",
-  loanType: "mudra",
-  machinery: true,
-  nameOfTheProductServices: "Industrial Machine Parts",
-  salesType: "salesBasedOnMonthlyBasis",
-  monthlySalesRevenue: "₹5,00,000",
-  loanPeriodYears: "5",
-  fullName: "Anik Rawat",
-  emailAddress: "anik@example.com",
-  mobileNumber: "9876543210",
-  businessMobile: "9876543211",
-  personalAddress: "Dehradun, Uttarakhand",
-  businessAddress: "Industrial Area, Dehradun",
-  gender: "male",
-  category: "general",
-  educationQualification: "graduate",
-  workExperience: "23Years",
-  nameOfBusinessFirm: "ABC Enterprises Pvt Ltd",
-  legalConstitution: "privateLtd",
-  employmentPotential: "5To10",
-  whenDidYouStartTheBusiness: "612MonthsAgo",
+function addPageTitle(doc: PDFKit.PDFDocument, title: string) {
+  doc.addPage();
+  doc.fontSize(20).fillColor("#000").text(title, {
+    align: "center",
+  });
+  doc.moveDown(1.5);
 }
 
-type FixedCapitalKey = typeof FIXED_CAPITAL_KEYS[number]
+function drawTableHeader(
+  doc: PDFKit.PDFDocument,
+  startX: number,
+  col1Width: number,
+  col2Width: number,
+  rowHeight: number
+) {
+  const tableWidth = col1Width + col2Width;
 
-function isFixedCapitalKey(key: string): key is FixedCapitalKey {
-  return FIXED_CAPITAL_KEYS.includes(key as FixedCapitalKey)
+  doc.fillColor("#eeeeee")
+    .rect(startX, doc.y, tableWidth, rowHeight)
+    .fill();
+
+  doc.fillColor("#000").fontSize(11);
+  doc.text("Field Description", startX + 10, doc.y + 7, { width: col1Width });
+  doc.text("Details", startX + col1Width + 10, doc.y - 12, {
+    width: col2Width,
+  });
+
+  doc
+    .strokeColor("#cccccc")
+    .moveTo(startX, doc.y + rowHeight)
+    .lineTo(startX + tableWidth, doc.y + rowHeight)
+    .stroke();
+
 }
 
+function ensureSpace(
+  doc: PDFKit.PDFDocument,
+  requiredHeight: number,
+  onNewPage: () => void
+) {
+  if (doc.y + requiredHeight > doc.page.height - 50) {
+    doc.addPage();
+    onNewPage();
+  }
+}
+
+function drawKeyValueTable(
+  doc: PDFKit.PDFDocument,
+  data: Record<string, any>,
+  options?: {
+    title?: string;
+  }
+) {
+  const startX = 50;
+  const col1Width = 220;
+  const col2Width = 270;
+  const rowHeight = 25;
+  const tableWidth = col1Width + col2Width;
+
+  if (options?.title) {
+    doc.fontSize(16).fillColor("#000").text(options.title);
+    doc.moveDown(0.5);
+  }
 
 
-const FIXED_CAPITAL_KEYS = [
-  "machinery",
-  "land",
-  "building",
-  "computersAndAccessories",
-  "furnituresAndFixtures",
-  "vehicle",
-  "softwareWebsiteAndApp",
-  "liveStockFarmAnimals",
-  "otherFixedExpenses",
-  "consumablesStocks",
-  "rawMaterials",
-  "workingExpenses",
-] as const
+
+  for (const [key, value] of Object.entries(data)) {
+
+    const label = key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase());
+
+    const displayValue =
+      typeof value === "boolean" ? (value ? "Yes" : "No") : String(value ?? "-");
+
+    const y = doc.y;
+
+    doc
+      .strokeColor("#000000")
+      .rect(startX, y, col1Width, rowHeight)
+      .stroke();
+
+    doc
+      .strokeColor("#000000")
+      .rect(startX + col1Width, y, col2Width, rowHeight)
+      .stroke();
+
+
+    doc.fillColor("#333").fontSize(10);
+    doc
+      .font("Helvetica-Bold")
+      .text(label, startX + 10, y + 7, {
+        width: col1Width - 20,
+      });
+    doc.text(displayValue, startX + col1Width + 10, y + 7, {
+      width: col2Width - 20,
+    });
+
+    doc.y = y + rowHeight;
+  }
+  doc.moveDown(1);
+}
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json()
-    const additionalDetails = {
-      fixedCapital: Object.entries(data.data).reduce(
-        (total, [key, value]) => {
-          if (
-            isFixedCapitalKey(key) &&
-            value === true
-          ) {
-            return total + 10_000
-          }
-          return total
-        },
-        0
-      )
+    const session = await requireAuth(request)
+    await dbConnect()
 
+    const { projectId } = await request.json()
+    console.log("project id: ", projectId)
+    console.log("user id: ", session.user.id)
+
+    if (!projectId) {
+      return NextResponse.json({
+        message: "Project Id is required"
+      }, { status: 402 })
     }
 
-    console.log(additionalDetails)
+    const projectData = await ProjectReportModel.findOne({ userId: session.user.id, _id: projectId })
+    console.log("project data: " + projectData)
+
     const fontPath = path.join(process.cwd(), "public/fonts/Roboto-Regular.ttf");
 
     const doc = new PDFDocument({
@@ -91,75 +144,16 @@ export async function POST(request: Request) {
       doc.on("error", reject);
     });
 
-    // --- TITLE ---
-    doc.fontSize(20).text("Business Loan Application Report", { align: "center" });
+    // First Page
+    doc.fontSize(20).text("Project At A Glance", { align: "center" });
     doc.moveDown(1.5);
 
-    // --- TABLE CONFIGURATION ---
-    const startX = 50;
-    const col1Width = 220;
-    const col2Width = 270;
-    const rowHeight = 25;
-    const tableWidth = col1Width + col2Width;
+    doc.fontSize(15).text("PROMOTER'S DETAILS", { align: "left" })
+    doc.moveDown(0.5);
 
-    // Helper for Table Headers
-    const drawTableHeader = () => {
-      doc.fillColor("#eeeeee")
-        .rect(startX, doc.y, tableWidth, rowHeight)
-        .fill();
-
-      doc.fillColor("#000000").fontSize(11);
-      doc.text("Field Description", startX + 10, doc.y + 7, { width: col1Width });
-      doc.text("Details", startX + col1Width + 10, doc.y - 12, { width: col2Width });
-
-      doc.moveTo(startX, doc.y + 13).lineTo(startX + tableWidth, doc.y + 13).stroke();
-    };
-
-    drawTableHeader();
-
-    // Iterate through data
-    Object.entries(data.data).forEach(([key, value], index) => {
-      // Check for page overflow
-      if (doc.y + rowHeight > 750) {
-        doc.addPage();
-        drawTableHeader();
-      }
-
-      const label = key
-        .replace(/([A-Z])/g, " $1")
-        .replace(/^./, (s) => s.toUpperCase());
-
-      const displayValue = typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
-
-      const currentY = doc.y;
-
-      // Draw Zebra Stripes
-      if (index % 2 === 0) {
-        doc.fillColor("#f9f9f9").rect(startX, currentY, tableWidth, rowHeight).fill();
-      }
-
-      // Draw Cell Text
-      doc.fillColor("#333333").fontSize(10);
-      doc.text(label, startX + 10, currentY + 7, { width: col1Width - 20 });
-      doc.text(displayValue, startX + col1Width + 10, currentY + 7, { width: col2Width - 20 });
-
-      // Draw Horizontal Line
-      doc.strokeColor("#dddddd")
-        .moveTo(startX, currentY + rowHeight)
-        .lineTo(startX + tableWidth, currentY + rowHeight)
-        .stroke();
-
-      doc.y = currentY + rowHeight;
-    });
-
-    // Draw Vertical Borders
-    const tableBottom = doc.y;
-    doc.strokeColor("#000000")
-      .rect(startX, 110, tableWidth, tableBottom - 110) // Adjustment for header start
-      .stroke();
+    drawKeyValueTable(doc, projectData.personalDetails)
 
     doc.end();
-
     const pdfBuffer = await pdfDone;
 
     return new Response(new Uint8Array(pdfBuffer), {
@@ -170,6 +164,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("PDF generation failed:", error);
-    return NextResponse.json({ error: "Failed to generate PDF" }, { status: 500 });
+    return NextResponse.json({ message: "Failed to generate PDF: " + error }, { status: 500 });
   }
 }
