@@ -8,7 +8,7 @@ import InputFormField from "@/components/form-fields/InputFormField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { socialSignIn } from "@/helpers/social-sign-in";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -39,10 +39,16 @@ export default function SignInForm() {
       const response = await axios.post(url, {
         ...values,
       });
+      console.log(response);
       router.push("/dashboard")
       toast.success("Signed in successfully");
     } catch (error: any) {
-      console.error(error);
+      const err = error as AxiosError;
+
+      if (error.response) {
+        toast.error('Error data:', error.response.data.message);
+      }
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

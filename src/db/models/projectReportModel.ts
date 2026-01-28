@@ -1,11 +1,11 @@
 import { Schema, model, models, Document, Types } from "mongoose";
-
+ 
 export type businessRequirementsType = "machinery" | "land" | "building" | "computersAndAccessories" | "furnituresAndFixtures" | "vehicle" | "softwareWebsiteAndApp" | "liveStockFarmAnimals" | "otherFixedExpenses" | "consumablesStocks" | "rawMaterials" | "workingExpenses";
 export type monthlyExpensesType = "salary" | "purchaseOfEquipments" | "freight" | "powerAndFuel" | "printingAndStationery" | "advertisement" | "miscellaneousExpenses" | "postageAndCourier" | "transportAndConveyance" | "staffWelfare" | "repairAndMaintenance" | "rent" | "electricityExpenses" | "purchaseOfRawMaterials" | "otherExpenses"
-
+ 
 export type businessRequirementsMap = Partial<Record<businessRequirementsType, number>>;
 export type monthlyExpensesMap = Partial<Record<monthlyExpensesType, number>>;
-
+ 
 export type personalDetailsType = {
   fullName: string,
   email: string,
@@ -18,7 +18,7 @@ export type personalDetailsType = {
   educationQualification: "8fail" | "8pass" | "10pass" | "12pass" | "graduate" | "postGraduate" | "phd",
   workExperience: "0to2" | "2to3" | "3to5" | "5+"
 }
-
+ 
 export type businessDetailsType = {
   businessName: string,
   legalConstitution: "proprietorship" | "partnership" | "privateltd" | "llp" | "others",
@@ -67,62 +67,62 @@ const ProjectReportSchema = new Schema<ProjectData>(
       required: true,
       trim: true,
     },
-
+ 
     businessType: {
       type: String,
       required: true,
       trim: true,
     },
-
+ 
     industryType: {
       type: String,
       enum: ["manufacturing", "service", "trading", "agriculture"],
       required: true,
     },
-
+ 
     loanType: {
       type: String,
       enum: ["mudra", "pmegp", "msme", "others"],
       required: true,
     },
-
+ 
     businessRequirements: {
       type: Map,
       of: Number,
       default: {},
     },
-
+ 
     monthlyExpenses: {
       type: Map,
       of: Number,
       default: {},
     },
-
+ 
     productName: {
       type: String,
       required: true,
       trim: true,
     },
-
+ 
     salesType: {
       type: String,
       enum: ["monthly", "unit"],
       required: true,
     },
-
+ 
     salesRevenue: {
       type: Number,
       required: true,
       min: 0,
     },
-
+ 
     loanPeriod: {
       type: Number,
       required: true,
       min: 5,
       max: 10
     },
-
+ 
     personalDetails: {
       fullName: { type: String, required: true },
       email: { type: String, required: true },
@@ -159,7 +159,7 @@ const ProjectReportSchema = new Schema<ProjectData>(
         required: true,
       },
     },
-
+ 
     businessDetails: {
       businessName: { type: String, required: true },
       legalConstitution: {
