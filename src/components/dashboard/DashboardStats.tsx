@@ -14,7 +14,7 @@ import {
 
 export default function DashboardStats() {
   const totalReports = reportsData.projectReports.length + reportsData.cmaReports.length;
-  
+
   // Calculate today's reports (mocking for now based on '2024-01-20' as today if we want, or just generic)
   const today = new Date().toISOString().split('T')[0];
   const todayReportsCount = [...reportsData.projectReports, ...reportsData.cmaReports].filter(
@@ -28,7 +28,7 @@ export default function DashboardStats() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="rounded-2xl bg-card border-border border text-foreground">
           <CardContent style={{
-            padding: "1rem",         
+            padding: "1rem",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -46,7 +46,7 @@ export default function DashboardStats() {
         <Card className="rounded-2xl bg-card border border">
           <CardContent
             style={{
-              padding: "1rem",          
+              padding: "1rem",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -64,15 +64,15 @@ export default function DashboardStats() {
 
       {/* Tabs Section */}
       <div className="mt-1 p-1 bg-card">
-        <Tabs defaultValue="project"  className="w-full pt-1">
+        <Tabs defaultValue="project" className="w-full pt-1">
 
           <TabsList
             style={{
               width: "fit-content",
-              marginLeft: "auto",  
+              marginLeft: "auto",
               marginRight: "0",
               marginBottom: "1rem",
-              background:"primary",
+              background: "primary",
             }} className="bg-card"
           >
             <TabsTrigger value="project">
@@ -83,13 +83,13 @@ export default function DashboardStats() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="project" >
-            <ReportsPage />
-          </TabsContent>
-
-          <TabsContent value="cma">
-            <CMAReports />
-          </TabsContent>
+          {/* <TabsContent value="project" > */}
+          {/*   <ReportsPage /> */}
+          {/* </TabsContent> */}
+          {/**/}
+          {/* <TabsContent value="cma"> */}
+          {/*   <CMAReports /> */}
+          {/* </TabsContent> */}
 
         </Tabs>
       </div>

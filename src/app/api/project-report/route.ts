@@ -18,20 +18,20 @@ export async function POST(request: Request) {
 
     const monthExp: Record<string, number | undefined> =
       data.monthlyExpenses ?? {};
-    const category = data.personalDetails?.category;
-    const gender = data.personalDetails?.gender;
-    let govtMarginPercent = 0.15; // default for General
+    // const category = data.personalDetails?.category;
+    // const gender = data.personalDetails?.gender;
+    let govtMarginPercent = 0.54; // default for General
 
-    if (gender === "female") {
-      govtMarginPercent = 0.25;
-    }
-    if (
-      category === "obc" ||
-      category === "sc" ||
-      category === "st"
-    ) {
-      govtMarginPercent = 0.25;
-    }
+    // if (gender === "female") {
+    //   govtMarginPercent = 0.25;
+    // }
+    // if (
+    //   category === "obc" ||
+    //   category === "sc" ||
+    //   category === "st"
+    // ) {
+    //   govtMarginPercent = 0.25;
+    // }
 
 
 
@@ -48,11 +48,12 @@ export async function POST(request: Request) {
     const totalProjectCost = fixedCapitalInvested + workingCapitalInvested;
     const marginMoney = totalProjectCost * govtMarginPercent;
     const termLoan = totalProjectCost - marginMoney;
-    const workingCapitalLoan = workingCapitalInvested * .9;
+    const workingCapitalLoan = totalProjectCost * 0.36;
     const totalLoanAmountNeeded = workingCapitalLoan + termLoan;
 
     const finalData = {
       ...data,
+      userId: session.user.id,
       loanDetails: {
         fixedCapitalInvested,
         workingCapitalInvested,
@@ -64,12 +65,10 @@ export async function POST(request: Request) {
       },
     };
 
-
-
+    console.log(finalData)
 
     const project = await ProjectReportModel.create({
       ...finalData,
-      userId: session.user.id
     });
 
     return NextResponse.json({
