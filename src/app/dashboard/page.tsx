@@ -73,12 +73,12 @@ export default function DashboardPage() {
           />
 
           {/* Graph */}
-          {activeTab === "project" && (
-            <ProjectReportsGraph graphData={data.projectGraph} />
-          )}
-          {activeTab === "cma" && (
-            <CMAReportsGraph graphData={data.cmaGraph} />
-          )}
+          {/* {activeTab === "project" && ( */}
+          {/*   <ProjectReportsGraph graphData={data.projectGraph} /> */}
+          {/* )} */}
+          {/* {activeTab === "cma" && ( */}
+          {/*   <CMAReportsGraph graphData={data.cmaGraph} /> */}
+          {/* )} */}
 
           {/* KPI */}
           <ReportsKPI kpi={data.kpi} />
@@ -99,7 +99,7 @@ export default function DashboardPage() {
             <CMAReports reports={data.cmaReports} />
           )}
         </div>
-             
+
       </div>
     </div>
   );
