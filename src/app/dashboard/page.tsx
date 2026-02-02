@@ -7,11 +7,8 @@ import { AppSidebar } from "@/components/sidebar/AppSidebar";
 
 // Dashboard UI
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
-import DashboardSearch from "@/components/dashboard/DashboardSearch";
-import DashboardCreateReportButton from "@/components/dashboard/DashboardCreateReportButton";
 import ReportsKPI from "@/components/dashboard/ReportsKPI";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import DashboardStats from "@/components/dashboard/DashboardStats";
+
 
 // Tables
 import ProjectReports from "@/components/dashboard/ProjectReports";
@@ -29,9 +26,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"project" | "cma">("project");
   const [data, setData] = useState<DashboardData | null>(null);
 
-  // 🔒 IMPORTANT:
-  // Data fetch ko delay kiya gaya hai
-  // taaki login redirect / auth flow disturb na ho
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       getDashboardData()
@@ -73,24 +68,18 @@ export default function DashboardPage() {
           />
 
           {/* Graph */}
-          {activeTab === "project" && (
-            <ProjectReportsGraph graphData={data.projectGraph} />
-          )}
-          {activeTab === "cma" && (
-            <CMAReportsGraph graphData={data.cmaGraph} />
-          )}
+           {activeTab === "project" && ( 
+            <ProjectReportsGraph graphData={data.projectGraph} /> 
+           )} 
+           {activeTab === "cma" && ( 
+            <CMAReportsGraph graphData={data.cmaGraph} /> 
+           )} 
 
           {/* KPI */}
           <ReportsKPI kpi={data.kpi} />
         </div>
 
-        {/* Search + Create */}
-        {/* <div className="flex items-center justify-between px-4 mt-4">
-          <DashboardSearch />
-          <DashboardCreateReportButton />
-        </div> */}
-
-        {/* Tables */}
+      {/* Tables */}
         <div className="mt-0 px-4">
           {activeTab === "project" && (
             <ProjectReports reports={data.projectReports} />
@@ -99,7 +88,7 @@ export default function DashboardPage() {
             <CMAReports reports={data.cmaReports} />
           )}
         </div>
-             
+
       </div>
     </div>
   );

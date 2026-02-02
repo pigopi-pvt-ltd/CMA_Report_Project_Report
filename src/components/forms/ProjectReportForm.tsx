@@ -15,7 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Field } from '../ui/field';
@@ -56,6 +56,8 @@ const variants = {
 
 
 export const ProjectReportForm = () => {
+
+
   const steps = [
     {
       title: "Step 1",
@@ -108,11 +110,9 @@ export const ProjectReportForm = () => {
     {
       title: "Step 7",
       description: "",
-      fields: ["productName", "salesType", "salesRevenue"],
+      fields: ["revenueDetails"],
       schema: projectReportSchema.pick({
-        productName: true,
-        salesType: true,
-        salesRevenue: true
+        revenueDetails: true
       })
     },
     {
@@ -197,10 +197,11 @@ export const ProjectReportForm = () => {
     },
 
     // step 7
-    productName: "",
-    salesType: undefined as any,
-    salesRevenue: 0,
-
+    revenueDetails: {
+      productName: "",
+      salesType: undefined as any,
+      salesRevenue: 0,
+    },
     // step 8
     loanPeriod: 5,
 
@@ -252,9 +253,14 @@ export const ProjectReportForm = () => {
   const onSubmit = async (values: projectReportType) => {
     try {
 
+      const report = await axios.post("/api/project-report", values)
+
+
+      console.log(report)
+
       const response = await axios.post("/api/download-report",
         {
-          data: values
+          projectId: report.data.data._id
         },
         {
           responseType: "blob", // 👈 CRITICAL
@@ -274,8 +280,8 @@ export const ProjectReportForm = () => {
       a.remove()
       window.URL.revokeObjectURL(url)
       toast.success(response.data.data.message);
-    } catch (error) {
-      toast.error("Error submitting form.")
+    } catch (error: any) {
+      toast.error("Error Creating Report")
     }
 
   };

@@ -9,7 +9,7 @@ const Text = () => {
     try {
       const response = await axios.post("/api/download-report",
         {
-          projectId: '6973701fa11a8201461d2ba6'
+          projectId: '6979f8edd24557c353410d8a'
         },
         {
           responseType: "blob", // 👈 CRITICAL

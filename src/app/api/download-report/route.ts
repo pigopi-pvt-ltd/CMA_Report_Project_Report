@@ -60,11 +60,14 @@ function drawKeyValueTable(
     title?: string;
   }
 ) {
-  const startX = 50;
-  const col1Width = 220;
-  const col2Width = 270;
+  const startX = 20;
+  const col1Width = 250;
+  const col2Width = 300;
   const rowHeight = 25;
   const tableWidth = col1Width + col2Width;
+
+  doc.strokeColor("#d1d5db").lineWidth(1);
+  doc.fillColor("#333");
 
   if (options?.title) {
     doc.fontSize(16).fillColor("#000").text(options.title);
@@ -96,11 +99,8 @@ function drawKeyValueTable(
 
 
     doc.fillColor("#333").fontSize(10);
-    doc
-      .font("Helvetica-Bold")
-      .text(label, startX + 10, y + 7, {
-        width: col1Width - 20,
-      });
+    doc.text(label, startX + 10, y + 7, { width: col1Width - 20 });
+
     doc.text(displayValue, startX + col1Width + 10, y + 7, {
       width: col2Width - 20,
     });
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
 
     const doc = new PDFDocument({
       size: "A4",
-      margin: 50,
+      margin: 20,
       font: fontPath,
     });
 
@@ -145,13 +145,102 @@ export async function POST(request: Request) {
     });
 
     // First Page
-    doc.fontSize(20).text("Project At A Glance", { align: "center" });
-    doc.moveDown(1.5);
+    doc.fontSize(20).fillColor("#4154F1").text("PROJECT AT A GLANCE", { align: "center" });
+    const y = doc.y + 5;
+
+    // draw line
+    const leftX = doc.page.margins.left;
+    const rightX = doc.page.width - doc.page.margins.right;
+
+    doc
+      .strokeColor("#4154F1")
+      .lineWidth(2)
+      .moveTo(leftX, y)
+      .lineTo(rightX, y)
+      .stroke();
+    doc.fillColor("#000000").moveDown(1.5);
 
     doc.fontSize(15).text("PROMOTER'S DETAILS", { align: "left" })
     doc.moveDown(0.5);
 
-    drawKeyValueTable(doc, projectData.personalDetails)
+    const {
+      personalAddress,
+      businessAddress,
+      __v,
+      ...cleanPersonalDetails
+    } = projectData.personalDetails;
+
+
+    drawKeyValueTable(doc, cleanPersonalDetails)
+
+    doc.y = doc.y + 20;
+
+    doc.x = doc.page.margins.left;
+
+    doc.fontSize(15).fillColor("#000000").text("BUSINESS DETAILS", { align: "left" })
+    doc.moveDown(0.5);
+
+
+
+
+    const fullBusinessDetails = {
+      ...projectData.businessDetails,
+      BusinessIndustry: projectData.industryType,
+      Address: projectData.personalDetails.businessAddress,
+      ContactNumber: projectData.personalDetails.mobile,
+      BusinessType: projectData.businessType
+    }
+
+
+    drawKeyValueTable(doc, fullBusinessDetails)
+
+    doc.addPage()
+    doc.fontSize(15).fillColor("#000000").text("LOAN DETAILS", { align: "left" })
+    doc.moveDown(0.5);
+
+    const formatRupees = (value: number) =>
+      `₹ ${value.toLocaleString("en-IN")}`;
+
+    const formattedLoanDetails = Object.fromEntries(
+      Object.entries(projectData.loanDetails).map(([key, value]) => {
+        if (typeof value === "number" && key !== "averageDSCR") {
+          return [key, formatRupees(value)];
+        }
+        return [key, value];
+      })
+    );
+
+    const finalLoanDetails = {
+      ...formattedLoanDetails,
+      loanPeriod: projectData.loanPeriod
+    }
+
+    doc.fillColor("#000000")
+
+    drawKeyValueTable(doc, finalLoanDetails)
+    
+
+
+ //   ---------------salesRevenueDetails----------------
+    doc.addPage()
+    doc.fontSize(15).fillColor("#000000").text("SALES REVENUE DETAILS", { align: "left" })
+    doc.moveDown(0.5);
+    const salesRevenueDetails = Object.fromEntries(
+      Object.entries(projectData.salesRevenueDetails).map(([key, value]) => {
+        if (typeof value === "number") {
+          return [key, formatRupees(value)];
+        }
+        return [key, value];
+      })
+    );
+
+    const finalSalesRevenueDetails = {
+      ...salesRevenueDetails,
+      salesRevenue: formatRupees(projectData.salesRevenueDetails.salesRevenue)
+    }
+    drawKeyValueTable(doc, finalSalesRevenueDetails)
+    //   ---------------salesRevenueDetails----------------
+
 
     doc.end();
     const pdfBuffer = await pdfDone;
