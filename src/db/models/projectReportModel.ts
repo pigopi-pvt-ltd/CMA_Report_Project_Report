@@ -26,6 +26,13 @@ export type businessDetailsType = {
   businessStartDate: "notStarted" | "6monthsAgo" | "6to12monthsAgo" | "2to3yearsAgo"
 }
 
+export type salesRevenueDetails = {
+  nameOfProduct: string;
+  salesType: "monthly" | "unit",
+  salesRevenue: number;
+  totalSalesRevenueAnually: number;
+}
+
 export type LoanDetails = {
   fixedCapitalInvested: number;
   workingCapitalInvested: number;
@@ -50,7 +57,8 @@ export interface ProjectData extends Document {
   loanPeriod: number;
   personalDetails: personalDetailsType;
   businessDetails: businessDetailsType;
-  loanDetails: LoanDetails
+  loanDetails: LoanDetails;
+  promotersContribution: number;
 }
 
 
@@ -211,7 +219,12 @@ const ProjectReportSchema = new Schema<ProjectData>(
       averageDSCR: {
         type: Number,
         required: true
-      }
+      },
+      promotersContribution: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
 
     }
   },
