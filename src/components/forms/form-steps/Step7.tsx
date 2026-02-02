@@ -14,7 +14,7 @@ const Step7 = ({ currentStep, form }: Props) => {
   return (
     <FieldGroup className={`${currentStep === 6 ? "flex! flex-col gap-4" : "hidden!"}`}>
       <Controller
-        name="productName"
+        name="revenueDetails.productName"
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
@@ -38,7 +38,7 @@ const Step7 = ({ currentStep, form }: Props) => {
       />
 
       <Controller
-        name="salesType"
+        name="revenueDetails.salesType"
         control={form.control}
         render={({ field, fieldState }) => {
           const options = [
@@ -88,7 +88,7 @@ const Step7 = ({ currentStep, form }: Props) => {
       />
 
       <Controller
-        name="salesRevenue"
+        name="revenueDetails.salesRevenue"
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>

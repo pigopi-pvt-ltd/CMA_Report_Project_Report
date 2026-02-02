@@ -110,11 +110,9 @@ export const ProjectReportForm = () => {
     {
       title: "Step 7",
       description: "",
-      fields: ["productName", "salesType", "salesRevenue"],
+      fields: ["revenueDetails"],
       schema: projectReportSchema.pick({
-        productName: true,
-        salesType: true,
-        salesRevenue: true
+        revenueDetails: true
       })
     },
     {
@@ -199,10 +197,11 @@ export const ProjectReportForm = () => {
     },
 
     // step 7
-    productName: "",
-    salesType: undefined as any,
-    salesRevenue: 0,
-
+    revenueDetails: {
+      productName: "",
+      salesType: undefined as any,
+      salesRevenue: 0,
+    },
     // step 8
     loanPeriod: 5,
 

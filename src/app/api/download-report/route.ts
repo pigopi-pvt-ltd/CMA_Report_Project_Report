@@ -218,6 +218,29 @@ export async function POST(request: Request) {
     doc.fillColor("#000000")
 
     drawKeyValueTable(doc, finalLoanDetails)
+    
+
+
+ //   ---------------salesRevenueDetails----------------
+    doc.addPage()
+    doc.fontSize(15).fillColor("#000000").text("SALES REVENUE DETAILS", { align: "left" })
+    doc.moveDown(0.5);
+    const salesRevenueDetails = Object.fromEntries(
+      Object.entries(projectData.salesRevenueDetails).map(([key, value]) => {
+        if (typeof value === "number") {
+          return [key, formatRupees(value)];
+        }
+        return [key, value];
+      })
+    );
+
+    const finalSalesRevenueDetails = {
+      ...salesRevenueDetails,
+      salesRevenue: formatRupees(projectData.salesRevenueDetails.salesRevenue)
+    }
+    drawKeyValueTable(doc, finalSalesRevenueDetails)
+    //   ---------------salesRevenueDetails----------------
+
 
     doc.end();
     const pdfBuffer = await pdfDone;

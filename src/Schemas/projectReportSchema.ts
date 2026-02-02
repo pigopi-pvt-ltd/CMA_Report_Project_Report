@@ -136,6 +136,14 @@ export const businessDetailsSchema = z.object({
   employementPotential: employementPotentialEnum,
   businessStartDate: businessStartDateEnum,
 });
+
+export const salesRevenueDetailsSchema = z.object({
+  productName: z.string().min(1),
+  salesType: salesTypeEnum,
+  salesRevenue: z.number().min(0),
+  // totalSalesRevenueAnually: z.number().min(0),
+});
+
  
 
 
@@ -154,9 +162,10 @@ export const projectReportSchema = z.object({
   // step 6
   monthlyExpenses: monthlyExpensesSchema.optional(),
   // step 7
-  productName: z.string().min(1),
-  salesType: salesTypeEnum,
-  salesRevenue: z.number().min(0),
+  // productName: z.string().min(1),
+  // salesType: salesTypeEnum,
+  // salesRevenue: z.number().min(0),
+  revenueDetails: salesRevenueDetailsSchema,
   // step 8
   loanPeriod: z
     .number()

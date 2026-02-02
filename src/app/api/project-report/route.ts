@@ -62,7 +62,16 @@ export async function POST(request: Request) {
         workingCapitalLoan,
         totalLoanAmountNeeded,
         averageDSCR: 1.65,
+        
+
       },
+      revenueDetails: {
+        productName: data.revenueDetails.productName,
+        salesType: data.revenueDetails.salesType,
+        salesRevenue: data.revenueDetails.salesRevenue,
+        totalSalesRevenueAnually: data.revenueDetails.salesType === "monthly" ? data.revenueDetails.salesRevenue * 12 : data.revenueDetails.salesRevenue
+      },
+      promotersContribution: totalProjectCost * 0.10
     };
 
     console.log(finalData)
