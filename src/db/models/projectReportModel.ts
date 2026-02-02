@@ -6,6 +6,17 @@ export type monthlyExpensesType = "salary" | "purchaseOfEquipments" | "freight" 
 export type businessRequirementsMap = Partial<Record<businessRequirementsType, number>>;
 export type monthlyExpensesMap = Partial<Record<monthlyExpensesType, number>>;
 
+export type costStatementType = {
+  year?: number;
+  domesticSales?: number | string;
+  exportSales?: number | string;
+  subTotal?: number | string;
+  gst?: number | string;
+  netSales?: number | string;
+  totalOtherIncome?: number | string;
+  totalGrossIncome?: number | string;
+}
+
 export type personalDetailsType = {
   fullName: string,
   email: string,
@@ -27,7 +38,7 @@ export type businessDetailsType = {
 }
 
 export type salesRevenueDetails = {
-  nameOfProduct: string;
+  productName: string;
   salesType: "monthly" | "unit",
   salesRevenue: number;
   totalSalesRevenueAnually: number;
@@ -40,6 +51,7 @@ export type LoanDetails = {
   termLoan: number;
   workingCapitalLoan: number;
   totalLoanAmountNeeded: number;
+  promotersContribution: number;
   averageDSCR: number;
 }
 
@@ -51,14 +63,12 @@ export interface ProjectData extends Document {
   loanType: "mudra" | "pmegp" | "msme" | "others";
   businessRequirements: businessRequirementsMap;
   monthlyExpenses: monthlyExpensesMap;
-  productName: string;
-  salesType: "monthly" | "unit";
-  salesRevenue: number;
+  revenueDetails: salesRevenueDetails;
   loanPeriod: number;
   personalDetails: personalDetailsType;
   businessDetails: businessDetailsType;
   loanDetails: LoanDetails;
-  promotersContribution: number;
+  costStatement: costStatementType[];
 }
 
 
@@ -106,22 +116,43 @@ const ProjectReportSchema = new Schema<ProjectData>(
       default: {},
     },
 
-    productName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    // productName: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    // },
+    //
+    // salesType: {
+    //   type: String,
+    //   enum: ["monthly", "unit"],
+    //   required: true,
+    // },
+    //
+    // salesRevenue: {
+    //   type: Number,
+    //   required: true,
+    //   min: 0,
+    // },
 
-    salesType: {
-      type: String,
-      enum: ["monthly", "unit"],
-      required: true,
-    },
+    revenueDetails: {
+      productName: {
+        type: String,
+        required: true,
+        trim: true,
+      },
 
-    salesRevenue: {
-      type: Number,
-      required: true,
-      min: 0,
+      salesType: {
+        type: String,
+        enum: ["monthly", "unit"],
+        required: true,
+      },
+
+      salesRevenue: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+
     },
 
     loanPeriod: {
@@ -226,7 +257,36 @@ const ProjectReportSchema = new Schema<ProjectData>(
         min: 0,
       },
 
-    }
+    },
+    costStatement: [
+      {
+        year: {
+          type: Number,
+          required: true
+        },
+        domesticSales: {
+          type: Number,
+        },
+        exportSales: {
+          type: Number,
+        },
+        subTotal: {
+          type: Number,
+        },
+        gst: {
+          type: Number,
+        },
+        netSales: {
+          type: Number,
+        },
+        totalOtherIncome: {
+          type: Number,
+        },
+        totalGrossIncome: {
+          type: Number,
+        }
+      }
+    ]
   },
   {
     timestamps: true,

@@ -4,12 +4,11 @@ import ProjectReportModel from "@/db/models/projectReportModel";
 import { projectReportSchema } from "@/Schemas/projectReportSchema";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { Value } from "@radix-ui/react-select";
+
 
 export async function POST(request: Request) {
   try {
     const session = await requireAuth(request)
-    console.log(session)
     await dbConnect();
     const body = await request.json()
     const data = projectReportSchema.parse(body)
@@ -20,7 +19,7 @@ export async function POST(request: Request) {
       data.monthlyExpenses ?? {};
     // const category = data.personalDetails?.category;
     // const gender = data.personalDetails?.gender;
-    let govtMarginPercent = 0.54; // default for General
+    const govtMarginPercent = 0.54; // default for General
 
     // if (gender === "female") {
     //   govtMarginPercent = 0.25;
@@ -46,10 +45,26 @@ export async function POST(request: Request) {
       .reduce((sum, value) => sum + value, 0);
 
     const totalProjectCost = fixedCapitalInvested + workingCapitalInvested;
-    const marginMoney = totalProjectCost * govtMarginPercent;
-    const termLoan = totalProjectCost - marginMoney;
+    const termLoan = totalProjectCost * govtMarginPercent;
     const workingCapitalLoan = totalProjectCost * 0.36;
     const totalLoanAmountNeeded = workingCapitalLoan + termLoan;
+    const annualSales = data.revenueDetails.salesType === "monthly" ? data.revenueDetails.salesRevenue * 12 : data.revenueDetails.salesRevenue
+    let sales = annualSales
+    const costStatement = []
+    let currentYearLabel = new Date().getFullYear();
+
+    for (let index = 0; index < data.loanPeriod; index++) {
+      costStatement.push({
+        year: currentYearLabel,
+        domesticSales: sales,
+        subTotal: sales,
+        netSales: sales,
+        totalGrossIncome: sales,
+      })
+      currentYearLabel++;
+      const costEstimate = sales + (sales * 0.24);
+      sales = costEstimate
+    }
 
     const finalData = {
       ...data,
@@ -61,24 +76,22 @@ export async function POST(request: Request) {
         termLoan,
         workingCapitalLoan,
         totalLoanAmountNeeded,
+        promotersContribution: totalProjectCost * 0.10,
         averageDSCR: 1.65,
-        
-
       },
+
       revenueDetails: {
         productName: data.revenueDetails.productName,
         salesType: data.revenueDetails.salesType,
         salesRevenue: data.revenueDetails.salesRevenue,
         totalSalesRevenueAnually: data.revenueDetails.salesType === "monthly" ? data.revenueDetails.salesRevenue * 12 : data.revenueDetails.salesRevenue
       },
-      promotersContribution: totalProjectCost * 0.10
+
+      costStatement
+
     };
 
-    console.log(finalData)
-
-    const project = await ProjectReportModel.create({
-      ...finalData,
-    });
+    const project = await ProjectReportModel.create(finalData);
 
     return NextResponse.json({
       message: "Project Created Successfully",

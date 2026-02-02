@@ -166,6 +166,7 @@ export async function POST(request: Request) {
     const {
       personalAddress,
       businessAddress,
+      promotersContribution,
       __v,
       ...cleanPersonalDetails
     } = projectData.personalDetails;
@@ -218,15 +219,22 @@ export async function POST(request: Request) {
     doc.fillColor("#000000")
 
     drawKeyValueTable(doc, finalLoanDetails)
-    
 
 
- //   ---------------salesRevenueDetails----------------
+
+    //   ---------------salesRevenueDetails----------------
     doc.addPage()
-    doc.fontSize(15).fillColor("#000000").text("SALES REVENUE DETAILS", { align: "left" })
+    doc.fontSize(20).fillColor("#4154F1").text("Sales & Revenue", { align: "center" });
     doc.moveDown(0.5);
-    const salesRevenueDetails = Object.fromEntries(
-      Object.entries(projectData.salesRevenueDetails).map(([key, value]) => {
+    doc
+      .strokeColor("#4154F1")
+      .lineWidth(2)
+      .moveTo(leftX, y)
+      .lineTo(rightX, y)
+      .stroke();
+    doc.fillColor("#000000").moveDown(1.5);
+    const revenueDetails = Object.fromEntries(
+      Object.entries(projectData.revenueDetails).map(([key, value]) => {
         if (typeof value === "number") {
           return [key, formatRupees(value)];
         }
@@ -235,10 +243,19 @@ export async function POST(request: Request) {
     );
 
     const finalSalesRevenueDetails = {
-      ...salesRevenueDetails,
-      salesRevenue: formatRupees(projectData.salesRevenueDetails.salesRevenue)
+      ...revenueDetails,
+      salesRevenue: formatRupees(projectData.revenueDetails.salesRevenue)
     }
-    drawKeyValueTable(doc, finalSalesRevenueDetails)
+    drawKeyValueTable(doc, { "NameOfTheProduct/Services": projectData.revenueDetails.productName })
+    doc.y = 0.3
+    drawKeyValueTable(doc, {
+      "Sales Based on Mothly Basis": null,
+      MonthlySales: formatRupees(projectData.revenueDetails.salesRevenue),
+      currency: "₹"
+    })
+    doc.y = 0.3
+    drawKeyValueTable(doc, { Total: formatRupees(projectData.revenueDetails.totalSalesRevenueAnually) })
+    doc.y = 0.3
     //   ---------------salesRevenueDetails----------------
 
 
