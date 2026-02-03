@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+
+
 import {
   FolderOpen,
   ArrowDown,
@@ -13,6 +17,7 @@ import {
 } from "lucide-react";
 import DashboardSearch from "./DashboardSearch";
 import DashboardCreateReportButton from "./DashboardCreateReportButton";
+import axios from "axios";
 
 /* ================= TYPES ================= */
 
@@ -43,6 +48,61 @@ export default function ProjectReports({
   const totalPages = Math.ceil(totalReports / rowsPerPage);
   const hasPrev = page > 0;
   const hasNext = page < totalPages - 1;
+  const { toast } = require("sonner");
+
+
+
+
+  const handleDelete = async (reportId: string) => {
+    const ok = confirm("Kya aap is report ko delete karna chahte ho?");
+    if (!ok) return;
+
+    try {
+      const res = await axios.delete(
+        `/api/delete-report?id=${reportId}`
+      );
+
+      if (res.data.success) {
+        toast.success("Report deleted successfully");
+        window.location.reload(); // abhi simple check
+      } else {
+        toast.error(res.data.message || "Delete failed");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Server error");
+    }
+  };
+
+
+
+  const handleEdit = async (
+    reportId: string,
+    currentBusinessName: string
+  ) => {
+    const newName = prompt(
+      "Edit Business Name",
+      currentBusinessName
+    );
+
+    if (!newName || newName.trim() === currentBusinessName) return;
+
+    const res = await axios.put(
+      `/api/edit-report?id=${reportId}`,
+      {
+        businessName: newName.trim(), // DB field name
+      }
+    );
+
+    if (res.data.success) {
+      toast.success("Business name updated successfully");
+      window.location.reload();
+    }
+  };
+
+
+
+
 
   // reset page when reports / rows change
   useEffect(() => {
@@ -157,12 +217,26 @@ export default function ProjectReports({
                       </td>
 
                       <td className="px-4 py-3 flex justify-end gap-2">
-                        <Button size="sm" variant="secondary">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() =>
+                            handleEdit(report.id, report.name)
+                          }
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="destructive">
+
+
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(report.id)}
+                        >
                           <Trash className="h-4 w-4" />
                         </Button>
+
+
                       </td>
                     </tr>
                   ))
