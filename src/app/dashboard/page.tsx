@@ -9,7 +9,6 @@ import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
 import ReportsKPI from "@/components/dashboard/ReportsKPI";
 
-
 // Tables
 import ProjectReports from "@/components/dashboard/ProjectReports";
 import CMAReports from "@/components/dashboard/CMAReports";
@@ -26,17 +25,13 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"project" | "cma">("project");
   const [data, setData] = useState<DashboardData | null>(null);
 
-  
   useEffect(() => {
-    const timer = setTimeout(() => {
-      getDashboardData()
-        .then(setData)
-        .catch((err) => console.error("Dashboard data error:", err));
-    }, 0);
-
-    return () => clearTimeout(timer);
+    getDashboardData()
+      .then((res) => setData(res))
+      .catch((err) => console.error("Dashboard data error:", err));
   }, []);
 
+  // Loading state
   if (!data) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -68,27 +63,28 @@ export default function DashboardPage() {
           />
 
           {/* Graph */}
-           {activeTab === "project" && ( 
-            <ProjectReportsGraph graphData={data.projectGraph} /> 
-           )} 
-           {activeTab === "cma" && ( 
-            <CMAReportsGraph graphData={data.cmaGraph} /> 
-           )} 
+          {activeTab === "project" && (
+            <ProjectReportsGraph graphData={data.projectGraph} />
+          )}
+
+          {activeTab === "cma" && (
+            <CMAReportsGraph graphData={data.cmaGraph} />
+          )}
 
           {/* KPI */}
           <ReportsKPI kpi={data.kpi} />
         </div>
 
-      {/* Tables */}
+        {/* Tables */}
         <div className="mt-0 px-4">
           {activeTab === "project" && (
             <ProjectReports reports={data.projectReports} />
           )}
+
           {activeTab === "cma" && (
             <CMAReports reports={data.cmaReports} />
           )}
         </div>
-
       </div>
     </div>
   );
