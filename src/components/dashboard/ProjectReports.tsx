@@ -101,6 +101,43 @@ export default function ProjectReports({
   };
 
 
+  const handleDownload = async (reportId: string) => {
+    try {
+
+      
+
+
+     
+
+      const response = await axios.post("/api/download-report",
+        {
+          projectId: reportId
+        },
+        {
+          responseType: "blob", // 👈 CRITICAL
+        })
+
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      })
+      const url = window.URL.createObjectURL(blob)
+
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "random-table-pdfkit.pdf"
+      document.body.appendChild(a)
+      a.click()
+
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(response.data.data.message);
+    } catch (error: any) {
+      toast.error("Error Creating Report")
+    }
+  }
+
+
+
 
 
 
@@ -200,6 +237,7 @@ export default function ProjectReports({
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700 p-2"
+                          onClick={() => handleDownload(report.id)}
                         >
                           <ArrowDown
                             className="h-5 w-5 text-white"
