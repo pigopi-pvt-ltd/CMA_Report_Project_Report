@@ -1,7 +1,7 @@
 import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from '../../ui/field';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { Input } from '../../ui/input';
-import { projectReportType } from '@/Schemas/projectReportSchema';
+import { cmaReportType } from '@/Schemas/cmaReportSchema';
 import { z } from 'zod';
 import { EmailInput } from '../../ui/email-input';
 import { PhoneInput } from '../../ui/phone-input';
@@ -10,7 +10,7 @@ import StepHeaderSection from '../sections/StepHeaderSection';
 
 type Props = {
   currentStep: number;
-  form: UseFormReturn<projectReportType>;
+  form: UseFormReturn<cmaReportType>;
 }
 
 

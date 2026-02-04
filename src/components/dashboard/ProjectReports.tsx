@@ -1,11 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import axios from "axios";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import {
   FolderOpen,
@@ -15,9 +35,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
 import DashboardSearch from "./DashboardSearch";
 import DashboardCreateReportButton from "./DashboardCreateReportButton";
-import axios from "axios";
 
 /* ================= TYPES ================= */
 
@@ -34,141 +54,93 @@ export default function ProjectReports({
 }: {
   reports: ProjectReport[];
 }) {
-  /* ================= PAGINATION STATE ================= */
+  /* ================= PAGINATION ================= */
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const totalReports = reports.length;
-
   const startIndex = page * rowsPerPage;
   const endIndex = Math.min(startIndex + rowsPerPage, totalReports);
-
   const visibleReports = reports.slice(startIndex, endIndex);
 
   const totalPages = Math.ceil(totalReports / rowsPerPage);
   const hasPrev = page > 0;
   const hasNext = page < totalPages - 1;
-  const { toast } = require("sonner");
 
+  /* ================= DELETE STATE ================= */
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  /* ================= EDIT STATE ================= */
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
+  /* ================= HANDLERS ================= */
 
-  const handleDelete = async (reportId: string) => {
-    const ok = confirm("Kya aap is report ko delete karna chahte ho?");
-    if (!ok) return;
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-    try {
-      const res = await axios.delete(
-        `/api/delete-report?id=${reportId}`
-      );
-
-      if (res.data.success) {
-        toast.success("Report deleted successfully");
-        window.location.reload(); // abhi simple check
-      } else {
-        toast.error(res.data.message || "Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      toast.error("Server error");
-    }
+    await axios.delete(`/api/delete-report?id=${deleteId}`);
+    setDeleteId(null);
+    window.location.reload(); // simple for now
   };
 
+  const saveEdit = async () => {
+    if (!editId || !editName.trim()) return;
 
+    await axios.put(`/api/edit-report?id=${editId}`, {
+      businessName: editName,
+    });
 
-  const handleEdit = async (
-    reportId: string,
-    currentBusinessName: string
-  ) => {
-    const newName = prompt(
-      "Edit Business Name",
-      currentBusinessName
-    );
-
-    if (!newName || newName.trim() === currentBusinessName) return;
-
-    const res = await axios.put(
-      `/api/edit-report?id=${reportId}`,
-      {
-        businessName: newName.trim(), // DB field name
-      }
-    );
-
-    if (res.data.success) {
-      toast.success("Business name updated successfully");
-      window.location.reload();
-    }
+    setEditId(null);
+    window.location.reload();
   };
-
 
   const handleDownload = async (reportId: string) => {
-    try {
+    const response = await axios.post(
+      "/api/download-report",
+      { projectId: reportId },
+      { responseType: "blob" }
+    );
 
-      
+    const blob = new Blob([response.data], {
+      type: "application/pdf",
+    });
 
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "project-report.pdf";
+    document.body.appendChild(a);
+    a.click();
 
-     
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
-      const response = await axios.post("/api/download-report",
-        {
-          projectId: reportId
-        },
-        {
-          responseType: "blob", // 👈 CRITICAL
-        })
-
-      const blob = new Blob([response.data], {
-        type: "application/pdf",
-      })
-      const url = window.URL.createObjectURL(blob)
-
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "random-table-pdfkit.pdf"
-      document.body.appendChild(a)
-      a.click()
-
-      a.remove()
-      window.URL.revokeObjectURL(url)
-      toast.success(response.data.data.message);
-    } catch (error: any) {
-      toast.error("Error Creating Report")
-    }
-  }
-
-
-
-
-
-
-  // reset page when reports / rows change
+  /* ================= EFFECT ================= */
   useEffect(() => {
     setPage(0);
   }, [reports, rowsPerPage]);
 
+  /* ================= JSX ================= */
+
   return (
     <div className="p-1 w-full">
       <Card className="w-full bg-card">
-        {/* ================= HEADER ================= */}
+        {/* HEADER */}
         <CardHeader className="pt-2 pb-2 -mt-5">
           <CardTitle className="grid grid-cols-[20%_45%_35%] items-center w-full text-md">
-
-            {/* LEFT — 20% */}
             <div className="flex items-center gap-2">
               <FolderOpen className="h-5 w-5 text-muted-foreground" />
               <span className="font-semibold">PROJECT REPORTS</span>
             </div>
 
-            {/* CENTER — 50% */}
             <div className="flex justify-center items-center gap-3">
               <DashboardSearch />
               <DashboardCreateReportButton href="/create-project-report" />
             </div>
 
-            {/* RIGHT — 30% */}
             <div className="flex items-center justify-end gap-4 px-4 text-sm text-muted-foreground">
-
-              {/* Rows per page */}
               <div className="flex items-center gap-2">
                 <span>Rows per page:</span>
                 <select
@@ -183,14 +155,12 @@ export default function ProjectReports({
                 </select>
               </div>
 
-              {/* Range */}
               <div>
                 {totalReports === 0
                   ? "0 of 0"
                   : `${startIndex + 1}–${endIndex} of ${totalReports}`}
               </div>
 
-              {/* Pagination arrows */}
               <div className="flex items-center gap-1">
                 <Button
                   size="icon"
@@ -211,18 +181,16 @@ export default function ProjectReports({
                 </Button>
               </div>
             </div>
-
           </CardTitle>
         </CardHeader>
 
-
-        {/* ================= TABLE ================= */}
+        {/* TABLE */}
         <CardContent className="pt-2">
           <div className="overflow-x-auto -mt-10">
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/40">
                 <tr>
-                  <th className="px-4 py-3 text-left"></th>
+                  <th className="px-4 py-3"></th>
                   <th className="px-4 py-3 text-left">REPORT NAME</th>
                   <th className="px-4 py-3 text-left">CREATED DATE</th>
                   <th className="px-4 py-3 text-right">ACTIONS</th>
@@ -239,10 +207,7 @@ export default function ProjectReports({
                           className="bg-green-600 hover:bg-green-700 p-2"
                           onClick={() => handleDownload(report.id)}
                         >
-                          <ArrowDown
-                            className="h-5 w-5 text-white"
-                            strokeWidth={3}
-                          />
+                          <ArrowDown className="h-5 w-5 text-white" />
                         </Button>
                       </td>
 
@@ -258,34 +223,28 @@ export default function ProjectReports({
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() =>
-                            handleEdit(report.id, report.name)
-                          }
+                          onClick={() => {
+                            setEditId(report.id);
+                            setEditName(report.name);
+                          }}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
 
-
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleDelete(report.id)}
+                          onClick={() => setDeleteId(report.id)}
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
-
-
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="py-10 text-center text-muted-foreground"
-                    >
-                      No Project reports found. Click{" "}
-                      <b>Create Project Report</b> to get started.
+                    <td colSpan={4} className="py-10 text-center">
+                      No Project reports found.
                     </td>
                   </tr>
                 )}
@@ -294,6 +253,47 @@ export default function ProjectReports({
           </div>
         </CardContent>
       </Card>
+
+      {/* DELETE DIALOG */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this report?
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* EDIT DIALOG */}
+      <Dialog open={!!editId} onOpenChange={() => setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Business Name</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label>Business Name</Label>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setEditId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEdit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
