@@ -65,7 +65,7 @@ export default function CMAReports({
             {/* CENTER — 50% */}
             <div className="flex justify-center items-center gap-3">
               <DashboardSearch />
-              <DashboardCreateReportButton href="" />
+              <DashboardCreateReportButton href="/create-cma-report" />
             </div>
 
             {/* RIGHT — 30% */}

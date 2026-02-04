@@ -1,40 +1,128 @@
 import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from '../../ui/field';
 import { Controller, UseFormReturn } from 'react-hook-form';
+import { z } from 'zod';
 import { Checkbox } from '../../ui/checkbox';
-import { projectReportType } from '@/Schemas/projectReportSchema';
 import { FieldContent } from '../../ui/field';
-import { Input } from '@/components/ui/input';
+import { cmaReportType } from '@/Schemas/cmaReportSchema';
 import CheckboxInput from '@/components/CheckboxInput';
 import StepHeaderSection from '../sections/StepHeaderSection';
 
 type Props = {
   currentStep: number;
-  form: UseFormReturn<projectReportType>;
+  form: UseFormReturn<cmaReportType>;
 }
 
 
-const Step5 = ({ currentStep, form }: Props) => {
-
+const Step6 = ({ currentStep, form }: Props) => {
   return (
-    <FieldGroup className={`${currentStep === 4 ? "flex! flex-col gap-4" : "hidden!"}`}>
-      
-      <StepHeaderSection title="Business Requirements" description="Select the business requirements that are applicable to your project" />
+    <FieldGroup className={`${currentStep === 5 ? "flex! flex-col gap-4" : "hidden!"}`}>
+      <StepHeaderSection title="Monthly Expenses" description="Select the monthly expenses that are applicable to your project" />
+      <CheckboxInput
+        label="Salary & Wages"
+        map="monthlyExpenses"
+        name="salary"
+        form={form}
+      />
 
+      <CheckboxInput
+        label="Purchase of Equipment"
+        map="monthlyExpenses"
+        name="purchaseOfEquipments"
+        form={form}
+      />
 
-      <CheckboxInput label="Machinery" name="machinery" map="businessRequirements" form={form} />
-      <CheckboxInput label="Land" name="land" form={form} map="businessRequirements" />
-      <CheckboxInput label="Building" name="building" form={form} map="businessRequirements" />
-      <CheckboxInput label="Computers & Accessories" name="computersAndAccessories" form={form} map="businessRequirements" />
-      <CheckboxInput label="Furniture & Fixtures" name="furnituresAndFixtures" form={form} map="businessRequirements" />
-      <CheckboxInput label="Vehicle" name="vehicle" form={form} map="businessRequirements" />
-      <CheckboxInput label="Software, Website & App" name="softwareWebsiteAndApp" form={form} map="businessRequirements" />
-      <CheckboxInput label="Livestock / Farm Animals" name="liveStockFarmAnimals" form={form} map="businessRequirements" />
-      <CheckboxInput label="Other Fixed Expenses" name="otherFixedExpenses" form={form} map="businessRequirements" />
-      <CheckboxInput label="Consumables / Stocks" name="consumablesStocks" form={form} map="businessRequirements" />
-      <CheckboxInput label="Raw Materials" name="rawMaterials" form={form} map="businessRequirements" />
-      <CheckboxInput label="Working Expenses" name="workingExpenses" form={form} map="businessRequirements" />
+      <CheckboxInput
+        label="Freight"
+        map="monthlyExpenses"
+        name="freight"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Power & Fuel"
+        map="monthlyExpenses"
+        name="powerAndFuel"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Printing & Stationery"
+        map="monthlyExpenses"
+        name="printingAndStationery"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Advertisement"
+        map="monthlyExpenses"
+        name="advertisement"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Miscellaneous Expenses"
+        map="monthlyExpenses"
+        name="miscellaneousExpenses"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Postage & Courier"
+        map="monthlyExpenses"
+        name="postageAndCourier"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Transport & Conveyance"
+        map="monthlyExpenses"
+        name="transportAndConveyance"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Staff Welfare"
+        map="monthlyExpenses"
+        name="staffWelfare"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Repair & Maintenance"
+        map="monthlyExpenses"
+        name="repairAndMaintenance"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Rent"
+        map="monthlyExpenses"
+        name="rent"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Electricity Expenses"
+        map="monthlyExpenses"
+        name="electricityExpenses"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Purchase of Raw Materials"
+        map="monthlyExpenses"
+        name="purchaseOfRawMaterials"
+        form={form}
+      />
+
+      <CheckboxInput
+        label="Other Expenses"
+        map="monthlyExpenses"
+        name="otherExpenses"
+        form={form}
+      />
       {/* <Controller */}
-      {/*   name="businessRequirements.machinery" */}
+      {/*   name="salaryWages" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -42,110 +130,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="machinery" */}
-      {/*         checked={!!field.value} */}
-      {/*         onCheckedChange={field.onChange} */}
-      {/*       /> */}
-      {/*       {machineryChecked && ( */}
-      {/*         <Controller */}
-      {/*           name="businessRequirements.machinery" */}
-      {/*           control={form.control} */}
-      {/*           rules={{ required: "Amount is required" }} */}
-      {/*           render={({ field, fieldState }) => ( */}
-      {/*             <> */}
-      {/*               <Input */}
-      {/*                 type="number" */}
-      {/*                 placeholder="Enter amount" */}
-      {/*                 {...field} */}
-      {/*               /> */}
-      {/*               {fieldState.error && ( */}
-      {/*                 <FieldError errors={[fieldState.error]} /> */}
-      {/*               )} */}
-      {/*             </> */}
-      {/*           )} */}
-      {/*         /> */}
-      {/*       )} */}
-      {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="machinery">Machinery</FieldLabel> */}
-      {/*         <FieldDescription></FieldDescription> */}
-      {/*         {fieldState.invalid && ( */}
-      {/*           <FieldError errors={[fieldState.error]} /> */}
-      {/*         )} */}
-      {/*       </FieldContent> */}
-      {/*     </Field> */}
-      {/*   )} */}
-      {/* /> */}
-      {/**/}
-      {/* <Controller */}
-      {/*   name="businessRequirements.land" */}
-      {/*   control={form.control} */}
-      {/*   render={({ field, fieldState }) => ( */}
-      {/*     <Field */}
-      {/*       data-invalid={fieldState.invalid} */}
-      {/*       orientation="horizontal" */}
-      {/*     > */}
-      {/*       <Checkbox */}
-      {/*         id="land" */}
+      {/*         id="salaryWages" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="land">Land</FieldLabel> */}
-      {/*         <FieldDescription></FieldDescription> */}
-      {/*         {fieldState.invalid && ( */}
-      {/*           <FieldError errors={[fieldState.error]} /> */}
-      {/*         )} */}
-      {/*       </FieldContent> */}
-      {/*     </Field> */}
-      {/*   )} */}
-      {/* /> */}
-      {/**/}
-      {/* <Controller */}
-      {/*   name="businessRequirements.building" */}
-      {/*   control={form.control} */}
-      {/*   render={({ field, fieldState }) => ( */}
-      {/*     <Field */}
-      {/*       data-invalid={fieldState.invalid} */}
-      {/*       orientation="horizontal" */}
-      {/*     > */}
-      {/*       <Checkbox */}
-      {/*         id="building" */}
-      {/*         name={field.name} */}
-      {/*         disabled={false} */}
-      {/*         checked={field.value} */}
-      {/*         onCheckedChange={field.onChange} */}
-      {/*       /> */}
-      {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="building">Building</FieldLabel> */}
-      {/*         <FieldDescription></FieldDescription> */}
-      {/*         {fieldState.invalid && ( */}
-      {/*           <FieldError errors={[fieldState.error]} /> */}
-      {/*         )} */}
-      {/*       </FieldContent> */}
-      {/*     </Field> */}
-      {/*   )} */}
-      {/* /> */}
-      {/**/}
-      {/* <Controller */}
-      {/*   name="businessRequirements.computersAndAccessories" */}
-      {/*   control={form.control} */}
-      {/*   render={({ field, fieldState }) => ( */}
-      {/*     <Field */}
-      {/*       data-invalid={fieldState.invalid} */}
-      {/*       orientation="horizontal" */}
-      {/*     > */}
-      {/*       <Checkbox */}
-      {/*         id="computersAccessories" */}
-      {/*         name={field.name} */}
-      {/*         disabled={false} */}
-      {/*         checked={field.value} */}
-      {/*         onCheckedChange={field.onChange} */}
-      {/*       /> */}
-      {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="computersAccessories"> */}
-      {/*           Computers & Accessories */}
+      {/*         <FieldLabel htmlFor="salaryWages"> */}
+      {/*           Salary & Wages */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -157,7 +150,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.furnituresAndFixtures" */}
+      {/*   name="purchaseOfEquipment" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -165,15 +158,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="furnitureFixtures" */}
+      {/*         id="purchaseOfEquipment" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="furnitureFixtures"> */}
-      {/*           Furniture & Fixtures */}
+      {/*         <FieldLabel htmlFor="purchaseOfEquipment"> */}
+      {/*           Purchase of Equipment */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -185,7 +178,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.vehicle" */}
+      {/*   name="freight" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -193,14 +186,14 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="vehicle" */}
+      {/*         id="freight" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="vehicle">Vehicle</FieldLabel> */}
+      {/*         <FieldLabel htmlFor="freight">Freight</FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
       {/*           <FieldError errors={[fieldState.error]} /> */}
@@ -211,7 +204,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.softwareWebsiteAndApp" */}
+      {/*   name="powerFuel" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -219,15 +212,41 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="softwareWebsiteApp" */}
+      {/*         id="powerFuel" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="softwareWebsiteApp"> */}
-      {/*           Software, Website & App */}
+      {/*         <FieldLabel htmlFor="powerFuel">Power & Fuel</FieldLabel> */}
+      {/*         <FieldDescription></FieldDescription> */}
+      {/*         {fieldState.invalid && ( */}
+      {/*           <FieldError errors={[fieldState.error]} /> */}
+      {/*         )} */}
+      {/*       </FieldContent> */}
+      {/*     </Field> */}
+      {/*   )} */}
+      {/* /> */}
+      {/**/}
+      {/* <Controller */}
+      {/*   name="printingStationery" */}
+      {/*   control={form.control} */}
+      {/*   render={({ field, fieldState }) => ( */}
+      {/*     <Field */}
+      {/*       data-invalid={fieldState.invalid} */}
+      {/*       orientation="horizontal" */}
+      {/*     > */}
+      {/*       <Checkbox */}
+      {/*         id="printingStationery" */}
+      {/*         name={field.name} */}
+      {/*         disabled={false} */}
+      {/*         checked={field.value} */}
+      {/*         onCheckedChange={field.onChange} */}
+      {/*       /> */}
+      {/*       <FieldContent> */}
+      {/*         <FieldLabel htmlFor="printingStationery"> */}
+      {/*           Printing & Stationery */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -239,7 +258,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.liveStockFarmAnimals" */}
+      {/*   name="advertisement" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -247,15 +266,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="livestockFarmAnimalsEtc" */}
+      {/*         id="advertisement" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="livestockFarmAnimalsEtc"> */}
-      {/*           Livestock, Farm Animals, ETC */}
+      {/*         <FieldLabel htmlFor="advertisement"> */}
+      {/*           Advertisement */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -267,7 +286,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.otherFixedExpenses" */}
+      {/*   name="miscellaneousExpenses" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -275,15 +294,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="otherFixedExpenses" */}
+      {/*         id="miscellaneousExpenses" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="otherFixedExpenses"> */}
-      {/*           Other Fixed Expenses */}
+      {/*         <FieldLabel htmlFor="miscellaneousExpenses"> */}
+      {/*           Miscellaneous Expenses */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -295,7 +314,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.consumablesStocks" */}
+      {/*   name="postageCourier" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -303,15 +322,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="consumablesStocks" */}
+      {/*         id="postageCourier" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="consumablesStocks"> */}
-      {/*           Consumables/Stocks */}
+      {/*         <FieldLabel htmlFor="postageCourier"> */}
+      {/*           Postage & Courier */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -323,7 +342,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.rawMaterials" */}
+      {/*   name="transportConveyance" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -331,15 +350,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="rawMaterials" */}
+      {/*         id="transportConveyance" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="rawMaterials"> */}
-      {/*           Raw Materials */}
+      {/*         <FieldLabel htmlFor="transportConveyance"> */}
+      {/*           Transport & Conveyance */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -351,7 +370,7 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/* /> */}
       {/**/}
       {/* <Controller */}
-      {/*   name="businessRequirements.workingExpenses" */}
+      {/*   name="staffWelfare" */}
       {/*   control={form.control} */}
       {/*   render={({ field, fieldState }) => ( */}
       {/*     <Field */}
@@ -359,15 +378,15 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*       orientation="horizontal" */}
       {/*     > */}
       {/*       <Checkbox */}
-      {/*         id="workingExpenses" */}
+      {/*         id="staffWelfare" */}
       {/*         name={field.name} */}
       {/*         disabled={false} */}
       {/*         checked={field.value} */}
       {/*         onCheckedChange={field.onChange} */}
       {/*       /> */}
       {/*       <FieldContent> */}
-      {/*         <FieldLabel htmlFor="workingExpenses"> */}
-      {/*           Working Expenses */}
+      {/*         <FieldLabel htmlFor="staffWelfare"> */}
+      {/*           Staff Welfare */}
       {/*         </FieldLabel> */}
       {/*         <FieldDescription></FieldDescription> */}
       {/*         {fieldState.invalid && ( */}
@@ -377,9 +396,146 @@ const Step5 = ({ currentStep, form }: Props) => {
       {/*     </Field> */}
       {/*   )} */}
       {/* /> */}
-     
+      {/**/}
+      {/* <Controller */}
+      {/*   name="repairMaintenance" */}
+      {/*   control={form.control} */}
+      {/*   render={({ field, fieldState }) => ( */}
+      {/*     <Field */}
+      {/*       data-invalid={fieldState.invalid} */}
+      {/*       orientation="horizontal" */}
+      {/*     > */}
+      {/*       <Checkbox */}
+      {/*         id="repairMaintenance" */}
+      {/*         name={field.name} */}
+      {/*         disabled={false} */}
+      {/*         checked={field.value} */}
+      {/*         onCheckedChange={field.onChange} */}
+      {/*       /> */}
+      {/*       <FieldContent> */}
+      {/*         <FieldLabel htmlFor="repairMaintenance"> */}
+      {/*           Repair & Maintenance */}
+      {/*         </FieldLabel> */}
+      {/*         <FieldDescription></FieldDescription> */}
+      {/*         {fieldState.invalid && ( */}
+      {/*           <FieldError errors={[fieldState.error]} /> */}
+      {/*         )} */}
+      {/*       </FieldContent> */}
+      {/*     </Field> */}
+      {/*   )} */}
+      {/* /> */}
+      {/**/}
+      {/* <Controller */}
+      {/*   name="rent" */}
+      {/*   control={form.control} */}
+      {/*   render={({ field, fieldState }) => ( */}
+      {/*     <Field */}
+      {/*       data-invalid={fieldState.invalid} */}
+      {/*       orientation="horizontal" */}
+      {/*     > */}
+      {/*       <Checkbox */}
+      {/*         id="rent" */}
+      {/*         name={field.name} */}
+      {/*         disabled={false} */}
+      {/*         checked={field.value} */}
+      {/*         onCheckedChange={field.onChange} */}
+      {/*       /> */}
+      {/*       <FieldContent> */}
+      {/*         <FieldLabel htmlFor="rent">Rent</FieldLabel> */}
+      {/*         <FieldDescription></FieldDescription> */}
+      {/*         {fieldState.invalid && ( */}
+      {/*           <FieldError errors={[fieldState.error]} /> */}
+      {/*         )} */}
+      {/*       </FieldContent> */}
+      {/*     </Field> */}
+      {/*   )} */}
+      {/* /> */}
+      {/**/}
+      {/* <Controller */}
+      {/*   name="electricityExpenses" */}
+      {/*   control={form.control} */}
+      {/*   render={({ field, fieldState }) => ( */}
+      {/*     <Field */}
+      {/*       data-invalid={fieldState.invalid} */}
+      {/*       orientation="horizontal" */}
+      {/*     > */}
+      {/*       <Checkbox */}
+      {/*         id="electricityExpenses" */}
+      {/*         name={field.name} */}
+      {/*         disabled={false} */}
+      {/*         checked={field.value} */}
+      {/*         onCheckedChange={field.onChange} */}
+      {/*       /> */}
+      {/*       <FieldContent> */}
+      {/*         <FieldLabel htmlFor="electricityExpenses"> */}
+      {/*           Electricity Expenses */}
+      {/*         </FieldLabel> */}
+      {/*         <FieldDescription></FieldDescription> */}
+      {/*         {fieldState.invalid && ( */}
+      {/*           <FieldError errors={[fieldState.error]} /> */}
+      {/*         )} */}
+      {/*       </FieldContent> */}
+      {/*     </Field> */}
+      {/*   )} */}
+      {/* /> */}
+      {/**/}
+      {/* <Controller */}
+      {/*   name="purchaseOfRawMaterials" */}
+      {/*   control={form.control} */}
+      {/*   render={({ field, fieldState }) => ( */}
+      {/*     <Field */}
+      {/*       data-invalid={fieldState.invalid} */}
+      {/*       orientation="horizontal" */}
+      {/*     > */}
+      {/*       <Checkbox */}
+      {/*         id="purchaseOfRawMaterials" */}
+      {/*         name={field.name} */}
+      {/*         disabled={false} */}
+      {/*         checked={field.value} */}
+      {/*         onCheckedChange={field.onChange} */}
+      {/*       /> */}
+      {/*       <FieldContent> */}
+      {/*         <FieldLabel htmlFor="purchaseOfRawMaterials"> */}
+      {/*           Purchase of Raw Materials */}
+      {/*         </FieldLabel> */}
+      {/*         <FieldDescription></FieldDescription> */}
+      {/*         {fieldState.invalid && ( */}
+      {/*           <FieldError errors={[fieldState.error]} /> */}
+      {/*         )} */}
+      {/*       </FieldContent> */}
+      {/*     </Field> */}
+      {/*   )} */}
+      {/* /> */}
+      {/**/}
+      {/* <Controller */}
+      {/*   name="otherExpanses" */}
+      {/*   control={form.control} */}
+      {/*   render={({ field, fieldState }) => ( */}
+      {/*     <Field */}
+      {/*       data-invalid={fieldState.invalid} */}
+      {/*       orientation="horizontal" */}
+      {/*     > */}
+      {/*       <Checkbox */}
+      {/*         id="otherExpanses" */}
+      {/*         name={field.name} */}
+      {/*         disabled={false} */}
+      {/*         checked={field.value} */}
+      {/*         onCheckedChange={field.onChange} */}
+      {/*       /> */}
+      {/*       <FieldContent> */}
+      {/*         <FieldLabel htmlFor="otherExpanses"> */}
+      {/*           Other Expanses */}
+      {/*         </FieldLabel> */}
+      {/*         <FieldDescription></FieldDescription> */}
+      {/*         {fieldState.invalid && ( */}
+      {/*           <FieldError errors={[fieldState.error]} /> */}
+      {/*         )} */}
+      {/*       </FieldContent> */}
+      {/*     </Field> */}
+      {/*   )} */}
+      {/* /> */}
     </FieldGroup>
   )
 }
 
-export default Step5
+export default Step6
