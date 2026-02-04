@@ -30,7 +30,7 @@ export const sidebarMenu = [
   },
   {
     label: "Plans",
-    href: "/plans",
+    href: "/pricing",
     icon: FileText,
   },
   {

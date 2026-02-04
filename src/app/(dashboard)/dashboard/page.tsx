@@ -43,7 +43,7 @@ export default function DashboardPage() {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <AppSidebar />
+      {/* <AppSidebar /> */}
 
       {/* Main Content */}
       <div className="flex-1 p-1">
