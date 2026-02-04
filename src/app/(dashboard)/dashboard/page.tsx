@@ -7,11 +7,7 @@ import { AppSidebar } from "@/components/sidebar/AppSidebar";
 
 // Dashboard UI
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
-import DashboardSearch from "@/components/dashboard/DashboardSearch";
-import DashboardCreateReportButton from "@/components/dashboard/DashboardCreateReportButton";
 import ReportsKPI from "@/components/dashboard/ReportsKPI";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import DashboardStats from "@/components/dashboard/DashboardStats";
 
 // Tables
 import ProjectReports from "@/components/dashboard/ProjectReports";
@@ -29,19 +25,13 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"project" | "cma">("project");
   const [data, setData] = useState<DashboardData | null>(null);
 
-  // 🔒 IMPORTANT:
-  // Data fetch ko delay kiya gaya hai
-  // taaki login redirect / auth flow disturb na ho
   useEffect(() => {
-    const timer = setTimeout(() => {
-      getDashboardData()
-        .then(setData)
-        .catch((err) => console.error("Dashboard data error:", err));
-    }, 0);
-
-    return () => clearTimeout(timer);
+    getDashboardData()
+      .then((res) => setData(res))
+      .catch((err) => console.error("Dashboard data error:", err));
   }, []);
 
+  // Loading state
   if (!data) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -53,7 +43,7 @@ export default function DashboardPage() {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <AppSidebar />
+      {/* <AppSidebar /> */}
 
       {/* Main Content */}
       <div className="flex-1 p-1">
@@ -76,6 +66,7 @@ export default function DashboardPage() {
           {activeTab === "project" && (
             <ProjectReportsGraph graphData={data.projectGraph} />
           )}
+
           {activeTab === "cma" && (
             <CMAReportsGraph graphData={data.cmaGraph} />
           )}
@@ -84,22 +75,16 @@ export default function DashboardPage() {
           <ReportsKPI kpi={data.kpi} />
         </div>
 
-        {/* Search + Create */}
-        {/* <div className="flex items-center justify-between px-4 mt-4">
-          <DashboardSearch />
-          <DashboardCreateReportButton />
-        </div> */}
-
         {/* Tables */}
         <div className="mt-0 px-4">
           {activeTab === "project" && (
             <ProjectReports reports={data.projectReports} />
           )}
+
           {activeTab === "cma" && (
             <CMAReports reports={data.cmaReports} />
           )}
         </div>
-             
       </div>
     </div>
   );

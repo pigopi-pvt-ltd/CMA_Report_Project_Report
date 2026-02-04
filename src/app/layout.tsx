@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import './globals.css'
 import { Toaster } from "@/components/ui/sonner"
+import ThemeProvider from "@/components/providers/ThemeProvider"
+import { AppSidebar } from "@/components/sidebar/AppSidebar";
+
 
 export const metadata: Metadata = {
   title: "CMA PLATFORM",
@@ -13,9 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        {children}
+    <html lang="en" className="dark" suppressHydrationWarning={true}>
+      <body className="flex" suppressHydrationWarning={true}>
+        <ThemeProvider>
+          <AppSidebar />
+          {children}
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

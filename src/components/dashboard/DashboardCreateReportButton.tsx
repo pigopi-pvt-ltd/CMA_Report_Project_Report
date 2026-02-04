@@ -1,15 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function CreateReportButton({
-  onClick,
+  href,
 }: {
-  onClick?: () => void;
+  href: string;
 }) {
+  const router = useRouter();
+
   return (
     <Button
-    //   onClick={onClick}
+      onClick={() => router.push(href)}
       className="
         h-12
         px-8
@@ -25,7 +28,6 @@ export default function CreateReportButton({
         gap-2
       "
     >
-      {/* <Plus className="h-4 w-4" /> */}
       CREATE NEW REPORT
     </Button>
   );

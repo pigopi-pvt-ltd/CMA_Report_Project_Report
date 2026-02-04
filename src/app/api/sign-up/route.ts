@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         callbackURL,
       },
     });
-
+console.log(data)
     return NextResponse.json({
       message: "Signed-Up Successfully",
       data

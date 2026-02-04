@@ -1,19 +1,19 @@
 import { z } from "zod";
 
-
+// Enums
 export const industryTypeEnum = z.enum([
   "manufacturing",
   "service",
   "trading",
   "agriculture",
-]);
+], "Industry Type must be a valid option");
 
 export const loanTypeEnum = z.enum([
   "mudra",
   "pmegp",
   "msme",
   "others",
-]);
+], "Loan Type must be a valid option");
 
 export const salesTypeEnum = z.enum([
   "monthly",
@@ -105,7 +105,7 @@ export const monthlyExpensesKeyEnum = z.enum([
   "otherExpenses",
 ]);
 
-
+// Schemas
 export const businessRequirementsSchema = z.record(
   businessRequirementsKeyEnum,
   z.number().nonnegative().optional()
@@ -137,27 +137,41 @@ export const businessDetailsSchema = z.object({
   businessStartDate: businessStartDateEnum,
 });
 
-export const projectReportZodSchema = z.object({
-  businessName: z.string().min(1),
-  businessType: z.string().min(1),
-
-  industryType: industryTypeEnum,
-  loanType: loanTypeEnum,
-
-  businessRequirements: businessRequirementsSchema.optional(),
-  monthlyExpenses: monthlyExpensesSchema.optional(),
-
+export const salesRevenueDetailsSchema = z.object({
   productName: z.string().min(1),
-
   salesType: salesTypeEnum,
   salesRevenue: z.number().min(0),
+});
 
+
+
+
+export const projectReportSchema = z.object({
+  // step 1
+  businessName: z.string().min(1, "Legal Business Name is required")
+    .max(255, "Legal Business Name must be at most 255 characters"),
+  // step 2
+  businessType: z.string().min(1, "Legal Business Type is required").max(255, "Legal business type must be at most 255 characters"),
+  // step 3
+  industryType: industryTypeEnum,
+  // step 4
+  loanType: loanTypeEnum,
+  // step 5
+  businessRequirements: businessRequirementsSchema.optional(),
+  // step 6
+  monthlyExpenses: monthlyExpensesSchema.optional(),
+  // step 7
+  revenueDetails: salesRevenueDetailsSchema,
+  // step 8
   loanPeriod: z
     .number()
     .int()
     .min(5, "Loan period must be at least 5")
     .max(10, "Loan period must be at most 10"),
-
+  // step 9
   personalDetails: personalDetailsSchema,
+  // step 10
   businessDetails: businessDetailsSchema,
 });
+
+export type projectReportType = z.infer<typeof projectReportSchema>;

@@ -1,5 +1,6 @@
 import reportsData from "@/data/reports.json";
 import { DashboardData } from "@/types/dashboard";
+import axios from "axios";
 
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -22,23 +23,36 @@ function getMonthWiseCount(reports: { createdAt: string }[]) {
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
-  const totalReports =
-    reportsData.projectReports.length +
-    reportsData.cmaReports.length;
+  let projectReports: { id: string; name: string; createdAt: string }[] = [];
 
+  try {
+    const res = await axios.get("/api/get-report", {
+      withCredentials: true,
+    });
+    projectReports = res.data.data;
+  } catch (err) {
+    console.warn(
+      "Failed to fetch project reports from API, using local data.",
+      err
+    );
+    projectReports = reportsData.projectReports;
+  }
+
+  const cmaReports = reportsData.cmaReports;
+
+  const totalReports = projectReports.length + cmaReports.length;
   const today = new Date().toISOString().split("T")[0];
 
-  const todayReports =
-    [...reportsData.projectReports, ...reportsData.cmaReports]
-      .filter(r => r.createdAt === today).length;
+  const todayReports = [...projectReports, ...cmaReports].filter(
+    (r) => r.createdAt === today
+  ).length;
 
-  return {
-    projectReports: reportsData.projectReports,
-    cmaReports: reportsData.cmaReports,
+    return {
+    projectReports,
+    cmaReports,
 
-    // ✅ DYNAMIC GRAPH DATA
-    projectGraph: getMonthWiseCount(reportsData.projectReports),
-    cmaGraph: getMonthWiseCount(reportsData.cmaReports),
+    projectGraph: getMonthWiseCount(projectReports),
+    cmaGraph: getMonthWiseCount(cmaReports),
 
     kpi: {
       totalReports,
