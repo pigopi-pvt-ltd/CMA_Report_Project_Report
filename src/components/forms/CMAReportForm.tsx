@@ -15,21 +15,21 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Field } from '../ui/field';
-import { projectReportSchema, projectReportType } from "@/Schemas/projectReportSchema";
-import Step1 from "./form-steps/Step1";
-import Step2 from "./form-steps/Step2";
-import Step3 from "./form-steps/Step3";
-import Step4 from "./form-steps/Step4";
-import Step5 from "./form-steps/Step5";
-import Step6 from "./form-steps/Step6";
-import Step7 from "./form-steps/Step7";
-import Step8 from "./form-steps/Step8";
-import Step9 from "./form-steps/Step9";
-import Step10 from "./form-steps/Step10";
+import {cmaReportSchema, cmaReportType } from "@/Schemas/cmaReportSchema";
+import Step1 from "./cma-form-steps/Step1";
+import Step2 from "./cma-form-steps/Step2";
+import Step3 from "./cma-form-steps/Step3";
+import Step4 from "./cma-form-steps/Step4";
+import Step5 from "./cma-form-steps/Step5";
+import Step6 from "./cma-form-steps/Step6";
+import Step7 from "./cma-form-steps/Step7";
+import Step8 from "./cma-form-steps/Step8";
+import Step9 from "./cma-form-steps/Step9";
+import Step10 from "./cma-form-steps/Step10";
 
 const variants = {
   initial: (direction: number) => ({
@@ -55,7 +55,7 @@ const variants = {
 };
 
 
-export const ProjectReportForm = () => {
+export const CMAReportForm = () => {
 
 
   const steps = [
@@ -63,7 +63,7 @@ export const ProjectReportForm = () => {
       title: "Step 1",
       description: "",
       fields: ["businessName"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         businessName: true
       })
     },
@@ -71,7 +71,7 @@ export const ProjectReportForm = () => {
       title: "Step 2",
       description: "",
       fields: ["businessType"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         businessType: true
       })
     },
@@ -79,7 +79,7 @@ export const ProjectReportForm = () => {
       title: "Step 3",
       description: "",
       fields: ["industryType"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         industryType: true
       })
     },
@@ -87,7 +87,7 @@ export const ProjectReportForm = () => {
       title: "Step 4",
       description: "",
       fields: ["loanType"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         loanType: true
       })
     },
@@ -95,7 +95,7 @@ export const ProjectReportForm = () => {
       title: "Step 5",
       description: "",
       fields: ["businessRequirements"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         businessRequirements: true
       })
     },
@@ -103,7 +103,7 @@ export const ProjectReportForm = () => {
       title: "Step 6",
       description: "",
       fields: ["monthlyExpenses"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         monthlyExpenses: true
       })
     },
@@ -111,7 +111,7 @@ export const ProjectReportForm = () => {
       title: "Step 7",
       description: "",
       fields: ["revenueDetails"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         revenueDetails: true
       })
     },
@@ -119,7 +119,7 @@ export const ProjectReportForm = () => {
       title: "Step 8",
       description: "",
       fields: ["loanPeriod"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         loanPeriod: true
       })
     },
@@ -127,7 +127,7 @@ export const ProjectReportForm = () => {
       title: "Step 9",
       description: "",
       fields: ["personalDetails"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         personalDetails: true
       })
     },
@@ -135,7 +135,7 @@ export const ProjectReportForm = () => {
       title: "Step 10",
       description: "",
       fields: ["businessDetails"],
-      schema: projectReportSchema.pick({
+      schema: cmaReportSchema.pick({
         businessDetails: true
       })
     },
@@ -148,7 +148,7 @@ export const ProjectReportForm = () => {
   const isLastStep = currentStep === steps.length - 1;
   const progress = ((currentStep + 1) / steps.length) * 100;
 
-  const defaultValues: projectReportType = {
+  const defaultValues: cmaReportType = {
     // step 1
     businessName: "",
 
@@ -228,8 +228,8 @@ export const ProjectReportForm = () => {
     },
   };
 
-  const form = useForm<projectReportType>({
-    resolver: zodResolver(projectReportSchema),
+  const form = useForm<cmaReportType>({
+    resolver: zodResolver(cmaReportSchema),
     mode: "onChange",
     defaultValues
   });
@@ -250,36 +250,35 @@ export const ProjectReportForm = () => {
     }
   };
 
-  const onSubmit = async (values: projectReportType) => {
+  const onSubmit = async (values: cmaReportType) => {
     try {
 
-      const report = await axios.post("/api/project-report", values)
+      const report = await axios.post("/api/cma-report", values)
 
+      //  console.log(report)
 
-      console.log(report)
+      // const response = await axios.post("/api/download-report",
+      //   {
+      //     projectId: report.data.data._id
+      //   },
+      //   {
+      //     responseType: "blob", // 👈 CRITICAL
+      //   })
 
-      const response = await axios.post("/api/download-report",
-        {
-          projectId: report.data.data._id
-        },
-        {
-          responseType: "blob", // 👈 CRITICAL
-        })
+      // const blob = new Blob([response.data], {
+      //   type: "application/pdf",
+      // })
+      // const url = window.URL.createObjectURL(blob)
 
-      const blob = new Blob([response.data], {
-        type: "application/pdf",
-      })
-      const url = window.URL.createObjectURL(blob)
+      // const a = document.createElement("a")
+      // a.href = url
+      // a.download = "cma-report.pdf"
+      // document.body.appendChild(a)
+      // a.click()
 
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "random-table-pdfkit.pdf"
-      document.body.appendChild(a)
-      a.click()
-
-      a.remove()
-      window.URL.revokeObjectURL(url)
-      toast.success(response.data.data.message);
+      // a.remove()
+      // window.URL.revokeObjectURL(url)
+      // toast.success(response.data.data.message);
     } catch (error: any) {
       toast.error("Error Creating Report")
     }
@@ -324,11 +323,12 @@ export const ProjectReportForm = () => {
 
   return (
     <>
-    <div className=" w-full  max-w-2xl">
-     <div className="p-4 "><h1 className="text-2xl font-bold "> Create Project Report</h1></div>
+   <div className=" w-full  max-w-2xl">
+     <div className="p-4 "><h1 className="text-2xl font-bold "> Create CMA Report</h1></div>
     <Card className="w-full max-w-2xl">
       <CardHeader className="space-y-4">
         <div className="space-y-2">
+            
           <div className="flex items-center justify-between">
             <CardTitle>{currentForm.title}</CardTitle>
             <p className="text-muted-foreground text-xs">
@@ -387,7 +387,7 @@ export const ProjectReportForm = () => {
         </Field>
       </CardFooter>
     </Card>
-    </div>
+   </div>
     </>
   );
 };

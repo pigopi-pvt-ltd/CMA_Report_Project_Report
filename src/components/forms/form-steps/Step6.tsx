@@ -5,6 +5,7 @@ import { Checkbox } from '../../ui/checkbox';
 import { FieldContent } from '../../ui/field';
 import { projectReportType } from '@/Schemas/projectReportSchema';
 import CheckboxInput from '@/components/CheckboxInput';
+import StepHeaderSection from '../sections/StepHeaderSection';
 
 type Props = {
   currentStep: number;
@@ -15,6 +16,7 @@ type Props = {
 const Step6 = ({ currentStep, form }: Props) => {
   return (
     <FieldGroup className={`${currentStep === 5 ? "flex! flex-col gap-4" : "hidden!"}`}>
+      <StepHeaderSection title="Monthly Expenses" description="Select the monthly expenses that are applicable to your project" />
       <CheckboxInput
         label="Salary & Wages"
         map="monthlyExpenses"
