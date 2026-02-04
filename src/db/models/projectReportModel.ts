@@ -6,17 +6,6 @@ export type monthlyExpensesType = "salary" | "purchaseOfEquipments" | "freight" 
 export type businessRequirementsMap = Partial<Record<businessRequirementsType, number>>;
 export type monthlyExpensesMap = Partial<Record<monthlyExpensesType, number>>;
 
-export type costStatementType = {
-  year?: number;
-  domesticSales?: number | string;
-  exportSales?: number | string;
-  subTotal?: number | string;
-  gst?: number | string;
-  netSales?: number | string;
-  totalOtherIncome?: number | string;
-  totalGrossIncome?: number | string;
-}
-
 export type personalDetailsType = {
   fullName: string,
   email: string,
@@ -55,6 +44,33 @@ export type LoanDetails = {
   averageDSCR: number;
 }
 
+export type costStatementType = {
+  year?: number;
+  domesticSales?: number | string;
+  exportSales?: number | string;
+  subTotal?: number | string;
+  gst?: number | string;
+  netSales?: number | string;
+  totalOtherIncome?: number | string;
+  totalGrossIncome?: number | string;
+}
+
+export type DepreciationAsset = {
+  assetName: string;
+  openingBalance: number;
+  addition: number;
+  total: number;
+  rate: number;
+  depreciationAmount: number;
+  closingBalance: number;
+}
+
+export type DepreciationYear = {
+  year: number;
+  assets: DepreciationAsset[];
+  totalDepreciationForYear: number;
+}
+
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -69,6 +85,7 @@ export interface ProjectData extends Document {
   businessDetails: businessDetailsType;
   loanDetails: LoanDetails;
   costStatement: costStatementType[];
+  depreciationSchedule: DepreciationYear[];
 }
 
 
@@ -285,6 +302,23 @@ const ProjectReportSchema = new Schema<ProjectData>(
         totalGrossIncome: {
           type: Number,
         }
+      }
+    ],
+    depreciationSchedule: [
+      {
+        year: Number,
+        totalDepreciationForYear: Number,
+        assets: [
+          {
+            assetName: String,
+            openingBalance: Number,
+            addition: Number,
+            total: Number,
+            rate: Number,
+            depreciationAmount: Number,
+            closingBalance: Number,
+          }
+        ]
       }
     ]
   },

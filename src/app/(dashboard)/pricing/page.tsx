@@ -1,7 +1,5 @@
-import { AppSidebar } from '@/components/sidebar/AppSidebar'
 import { Pricing } from '@/components/ui/pricing-cards'
 import pricingDetails from '@/data/pricing-details'
-import React from 'react'
 
 const PlansPage = () => {
   return (
