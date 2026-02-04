@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       [
         { text: "Sr No", width: srWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
         { text: "Particulars", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-        ...years.map(y => {
+        ...years.map((y: any) => {
           const startYear = y.year || 0;
           const endYearShort = (startYear + 1) % 100;
           const endYearFormatted = String(endYearShort).padStart(2, '0');
@@ -211,43 +211,43 @@ export async function POST(request: Request) {
       [
         { text: "1", width: srWidth, fontSize: dynamicFontSize, bold: true },
         { text: "Domestic Sales", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-        ...years.map(y => ({ text: formatInMillions(y.domesticSales), width: dataWidth / loanPeriod, bold: true, align: "center" as const, fontSize: dynamicFontSize }))
+        ...years.map((y: any) => ({ text: formatInMillions(y.domesticSales), width: dataWidth / loanPeriod, bold: true, align: "center" as const, fontSize: dynamicFontSize }))
       ],
       // Row 5: Export Sales
       [
         { text: "2", width: srWidth, fontSize: dynamicFontSize },
         { text: "Export Sales", width: particularsWidth, fontSize: dynamicFontSize },
-        ...years.map(y => ({ text: y.exportSales ? formatInMillions(y.exportSales) : "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
+        ...years.map((y: any) => ({ text: y.exportSales ? formatInMillions(y.exportSales) : "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
       ],
       // Row 6: Sub-Total
       [
         { text: "3", width: srWidth, fontSize: dynamicFontSize, bold: true },
         { text: "Sub-Total", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-        ...years.map(y => ({ text: formatInMillions(y.subTotal), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
+        ...years.map((y: any) => ({ text: formatInMillions(y.subTotal), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
       ],
       // Row 7: GST
       [
         { text: "4", width: srWidth, fontSize: dynamicFontSize },
         { text: "Less:GST", width: particularsWidth, fontSize: dynamicFontSize },
-        ...years.map(y => ({ text: formatInMillions(y.gst), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
+        ...years.map((y: any) => ({ text: formatInMillions(y.gst), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
       ],
       // Row 8: Net Sales
       [
         { text: "5", width: srWidth, fontSize: dynamicFontSize, bold: true },
         { text: "Net Sales", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-        ...years.map(y => ({ text: formatInMillions(y.netSales), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
+        ...years.map((y: any) => ({ text: formatInMillions(y.netSales), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
       ],
       // Row 9: Other Income
       [
         { text: "6", width: srWidth, fontSize: dynamicFontSize },
         { text: "Total Other Income", width: particularsWidth, fontSize: dynamicFontSize },
-        ...years.map(y => ({ text: formatInMillions(y.totalOtherIncome), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
+        ...years.map((y: any) => ({ text: formatInMillions(y.totalOtherIncome), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
       ],
       // Row 10: Total Gross Income
       [
         { text: "7", width: srWidth, fontSize: dynamicFontSize, bold: true },
         { text: "Total Gross Income", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-        ...years.map(y => ({ text: formatInMillions(y.totalGrossIncome), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
+        ...years.map((y: any) => ({ text: formatInMillions(y.totalGrossIncome), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
       ],
       // Section Divider: Cost of Production
       [
@@ -260,19 +260,19 @@ export async function POST(request: Request) {
       [
         { text: "1", width: srWidth, fontSize: dynamicFontSize },
         { text: "Imported", width: particularsWidth, fontSize: dynamicFontSize },
-        ...years.map(y => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
+        ...years.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
       ],
       // Row 12: Indigenous
       [
         { text: "2", width: srWidth, fontSize: dynamicFontSize },
         { text: "Indigenous", width: particularsWidth, fontSize: dynamicFontSize },
-        ...years.map(y => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
+        ...years.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
       ],
       // Row 13: Sub-Total (Cost)
       [
         { text: "3", width: srWidth, fontSize: dynamicFontSize, bold: true },
         { text: "Sub-Total", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-        ...years.map(y => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
+        ...years.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
       ],
     ];
 
