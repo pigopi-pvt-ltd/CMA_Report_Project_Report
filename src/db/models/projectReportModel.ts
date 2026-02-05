@@ -133,23 +133,6 @@ const ProjectReportSchema = new Schema<ProjectData>(
       default: {},
     },
 
-    // productName: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
-    //
-    // salesType: {
-    //   type: String,
-    //   enum: ["monthly", "unit"],
-    //   required: true,
-    // },
-    //
-    // salesRevenue: {
-    //   type: Number,
-    //   required: true,
-    //   min: 0,
-    // },
 
     revenueDetails: {
       productName: {
@@ -165,6 +148,11 @@ const ProjectReportSchema = new Schema<ProjectData>(
       },
 
       salesRevenue: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+      totalSalesRevenueAnually: {
         type: Number,
         required: true,
         min: 0,

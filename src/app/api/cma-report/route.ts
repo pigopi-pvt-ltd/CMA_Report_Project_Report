@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import dbConnect from "@/db/dbConnect";
 import { requireAuth } from "@/lib/requireAuth";
 import CmaReportModel from "@/db/models/cmaReportModel";
