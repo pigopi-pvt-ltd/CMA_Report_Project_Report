@@ -31,9 +31,7 @@ export async function POST(request: Request) {
     const totalLoanAmountNeeded = workingCapitalLoan + termLoan;
 
     // --- 2. GENERATE COST STATEMENT ---
-    const annualSales = data.revenueDetails.salesType === "monthly"
-      ? data.revenueDetails.salesRevenue * 12
-      : data.revenueDetails.salesRevenue;
+    const annualSales = data.revenueDetails.salesRevenue * 12
 
     let sales = annualSales;
     const costStatement = [];
@@ -48,7 +46,7 @@ export async function POST(request: Request) {
         totalGrossIncome: sales,
       });
       currentYearLabel++;
-      sales = sales + (sales * 0.35); // 35% growth rate found earlier
+      sales = sales + (sales * 0.25); // 35% growth rate found earlier
     }
 
     // --- 3. GENERATE DEPRECIATION SCHEDULE ---
@@ -114,7 +112,7 @@ export async function POST(request: Request) {
         productName: data.revenueDetails.productName,
         salesType: data.revenueDetails.salesType,
         salesRevenue: data.revenueDetails.salesRevenue,
-        totalSalesRevenueAnually: annualSales
+        totalSalesRevenueAnually: data.revenueDetails.salesRevenue * 12
       },
       costStatement,
       depreciationSchedule // Added the new schedule here
