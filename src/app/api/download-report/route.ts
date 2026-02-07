@@ -4,7 +4,7 @@ import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable } from "@/helpers/pdfSections";
+import { drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket ,drawBreakEvenSales } from "@/helpers/pdfSections";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
   doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
@@ -97,11 +97,61 @@ export async function POST(request: Request) {
 
     // 5. cost statement Table
     doc.addPage();
-
+    drawHeader(doc, "COST STATEMENT", fontBoldPath)
     drawCostStatement(doc, projectData, formatInMillions, fonts);
+    //  Purchase Cost Statement
+    doc.addPage();
+    drawPurchaseCostStatement(doc, projectData, formatInMillions, fonts);
+
+    //General, Administrative & Selling Expenses
+    doc.addPage();
+    drawHeader(doc, "GENERAL, ADMINISTRATIVE & SELLING EXPENSES", fontBoldPath)
+    drawGeneralExpensesTable(doc, projectData, formatInMillions, fonts);
+
 
     // 6. Depreciation
     drawDepreciationSchedules(doc, projectData.depreciationSchedule, formatRupees, fonts, leftX);
+
+    // 7. Profitability Statement
+    doc.addPage();
+    drawHeader(doc, " PROJECT PROFITABILITY STATEMENT", fontBoldPath)
+    drawProfitabilityStatement(doc, projectData, formatInMillions, fonts);
+
+    //Calculation Of DSCR
+    doc.addPage();
+    drawHeader(doc, "CALCULATION OF DEBT SERVICE COVERAGE RATIO (DSCR)", fontBoldPath)
+    drawCalculationOfDSCR(doc, projectData, formatInMillions, fonts);
+
+    //SWOT Analysis
+    doc.addPage();
+    drawHeader(doc, "SWOT ANALYSIS", fontBoldPath)
+    drawSWOTAnalysisPage(doc, projectData, fonts);
+
+
+    //Action Plan
+      doc.addPage();
+      drawHeader(doc, "ACTION PLAN", fontBoldPath);
+      drawActionPlan(doc, projectData, fonts);
+
+    // Market Targate
+    doc.addPage();
+    drawHeader(doc, "Market Targate", fontBoldPath);
+    drawTargateMarket(doc,projectData,fonts)
+    
+    // EBIDTA Analysis Page
+    doc.addPage();
+    drawHeader(doc, "EBIDTA ANALYSIS", fontBoldPath);
+    drawEBIDTAAnalysis(doc, projectData, formatInMillions, fonts);
+
+    //Return on Investment (ROI) Analysis
+    doc.addPage();
+      drawHeader(doc, "RETURN ON INVESTMENT (ROI) ANALYSIS", fontBoldPath);
+      drawReturnOnInvestment(doc, projectData, formatInMillions, fonts);
+
+    //--------- breakEvenAnalysis--------------
+    doc.addPage();
+    drawHeader(doc,"Break Even Analysis", fontBoldPath)
+    drawBreakEvenSales(doc, projectData, formatInMillions, fonts)
 
     doc.end();
     const pdfBuffer = await pdfDone;

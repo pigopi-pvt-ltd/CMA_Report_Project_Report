@@ -53,6 +53,42 @@ export type costStatementType = {
   netSales?: number | string;
   totalOtherIncome?: number | string;
   totalGrossIncome?: number | string;
+  principalRepayment: number;
+
+}
+export type purchaseCostStatementType = {
+  year: number;
+  indigenous: number;
+  freightAndOtherExpenses: number;
+  totalDirectExpenses: number;
+  subTotal: number;
+  openingStockOfWIP: number;
+  subTotalAfterOpeningStock: number;
+  closingStockOfWIP: number;
+  totalCostOfProduction: number;
+  openingStockOfFinishedGoods: number;
+  subTotalAfterOpeningStockFinishedGoods: number;
+  closingStockOfFinishedGoods: number;
+  totalCostOfSales: number;
+  grossProfit: number;
+}
+export type generalExpensesStatementType = {
+  year: number;
+  salary: number;
+  powerAndFuel: number;
+  printingAndStationery: number;
+  advertisement: number;
+  miscellaneousExpenses: number;
+  otherExpenses: number;
+  postageAndCourier: number;
+  transportAndConveyance: number;
+  staffWelfare: number;
+  repairAndMaintenance: number;
+  depreciation: number;
+  rent: number;
+  electricityExpenses: number;
+  totalGeneralExpenses: number; // Total (Expenses + Depreciation)
+  operatingProfit: number       // Gross Profit - Total Expenses
 }
 
 export type DepreciationAsset = {
@@ -71,6 +107,83 @@ export type DepreciationYear = {
   totalDepreciationForYear: number;
 }
 
+export type profitabilityStatementType = {
+  year: number;
+  totalA: number;
+  totalB: number;
+  netCredit: number;
+  profitBeforeTax: number;
+  provisionForTaxation: number;
+  profitAfterTax: number;
+  interestOnTermLoan: number;
+  interestOnWorkingCapital: number;
+  balanceCarriedOverToBalanceSheet: number;
+}
+export type dscrStatementType = {
+  year: number;
+  netProfit: number;
+  depreciation: number;
+  interestOnTermLoan: number;
+  interestOnCC: number;
+  totalCashAccrual: number; // [X]
+  loanRepayment: number;
+  totalDebtService: number; // [Y]
+  dscrRatio: number; // X / Y
+}
+export type SWOTAnalysisType = {
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+}
+export type ActionPlanType = {
+  leverageStrengths: string[];
+  improveWeaknesses: string[];
+  capitalizeOpportunities: string[];
+  mitigateThreats: string[];
+}
+
+export type ebidtaAnalysisType = {
+  year: number;
+  netIncome: number;
+  taxExpense: number;
+  interestOnTermLoan: number;
+  interestOnCC: number;
+  depreciation: number;
+  ebit: number;
+  ebidta: number;
+}
+export type ReturnOnInvestmentType = {
+  year: number;
+  profitBeforeTax: number;
+  depreciation: number;
+  interestOnTermLoan: number;
+  interestOnCC: number;
+  totalInvestment: number;
+  AverageReturn: number;
+  CapitalEmployed: number;
+  ReturnOnInvestment: number;
+}
+export type targetMarketType = {
+  srNo: number;
+  targetCustomer: string;
+  expectedShare: string;
+}
+
+export type breakEvenAnalysisType = {
+  year: number;
+  sales: number;
+  variableCosts: number;
+  grossProfit: number;
+  depreciation: number;
+  interestOnTermLoan: number;
+  interestOnCC: number;
+  fixedCosts: number;
+  breakEvenSales: number;
+};
+
+
+
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -86,7 +199,19 @@ export interface ProjectData extends Document {
   loanDetails: LoanDetails;
   costStatement: costStatementType[];
   depreciationSchedule: DepreciationYear[];
+  purchaseCostStatement: purchaseCostStatementType[];
+  generalExpensesStatement: generalExpensesStatementType[];
+  profitabilityStatement: profitabilityStatementType[];
+  dscrStatement: dscrStatementType[];
+  averageDSCR: number;
+  swotAnalysis: SWOTAnalysisType;
+  actionPlan: ActionPlanType;
+  ebidtaAnalysis: ebidtaAnalysisType[];
+  returnOnInvestmentAnalysis: ReturnOnInvestmentType[];
+  targetMarket: targetMarketType[];
+  breakEvenAnalysis: breakEvenAnalysisType[];
 }
+
 
 
 const ProjectReportSchema = new Schema<ProjectData>(
@@ -289,7 +414,13 @@ const ProjectReportSchema = new Schema<ProjectData>(
         },
         totalGrossIncome: {
           type: Number,
+        },
+        principalRepayment: {
+          type: Number,
+          required: true,
+          min: 0,
         }
+
       }
     ],
     depreciationSchedule: [
@@ -308,13 +439,148 @@ const ProjectReportSchema = new Schema<ProjectData>(
           }
         ]
       }
+    ],
+
+    purchaseCostStatement: [
+      {
+        year: Number,
+        particulars: String,
+        imported: Number,
+        indigenous: Number,
+        freightAndOtherExpenses: Number,
+        totalDirectExpenses: Number,
+        subTotal: Number,
+        openingStockOfWIP: Number,
+        subTotalAfterOpeningStock: Number,
+        closingStockOfWIP: Number,
+        totalCostOfProduction: Number,
+        openingStockOfFinishedGoods: Number,
+        subTotalAfterOpeningStockFinishedGoods: Number,
+        closingStockOfFinishedGoods: Number,
+        totalCostOfSales: Number,
+        grossProfit: Number,
+      }
+    ],
+    // projectReportModel.ts mein add karein
+    generalExpensesStatement: [
+      {
+        year: Number,
+        salary: Number,
+        powerAndFuel: Number,
+        printingAndStationery: Number,
+        advertisement: Number,
+        miscellaneousExpenses: Number,
+        otherExpenses: Number,
+        postageAndCourier: Number,
+        transportAndConveyance: Number,
+        staffWelfare: Number,
+        repairAndMaintenance: Number,
+        depreciation: Number,
+        rent: Number,
+        electricityExpenses: Number,
+        totalGeneralExpenses: Number, // Total (Expenses + Depreciation)
+        operatingProfit: Number       // Gross Profit - Total Expenses
+      }
+    ],
+    profitabilityStatement: [
+      {
+        year: Number,
+        totalA: Number,
+        totalB: Number,
+        netCredit: Number,
+        profitBeforeTax: Number,
+        provisionForTaxation: Number,
+        profitAfterTax: Number,
+        balanceCarriedOverToBalanceSheet: Number,
+        interestOnTermLoan: Number,
+        interestOnWorkingCapital: Number,
+      }
+    ],
+    dscrStatement: [
+      {
+        year: Number,
+        netProfit: Number,
+        depreciation: Number,
+        interestOnTermLoan: Number,
+        interestOnCC: Number,
+        totalCashAccrual: Number, // [X]
+        loanRepayment: Number,
+        totalDebtService: Number, // [Y]
+        dscrRatio: Number, // X / Y
+      }
+    ],
+    averageDSCR: {
+      type: Number,
+      default: 0
+    },
+    swotAnalysis: {
+      strengths: [String],
+      weaknesses: [String],
+      opportunities: [String],
+      threats: [String]
+    },
+    actionPlan: {
+      leverageStrengths: [String],
+      improveWeaknesses: [String],
+      capitalizeOpportunities: [String],
+      mitigateThreats: [String]
+    },
+    targetMarket: [
+      {
+        srNo: Number,
+        targetCustomer: String,
+        expectedShare: String
+      }
+    ],
+    ebidtaAnalysis: [
+      {
+        year: Number,
+        netIncome: Number,
+        taxExpense: Number,
+        interestOnTermLoan: Number,
+        interestOnCC: Number,
+        depreciation: Number,
+        ebit: Number,
+        ebidta: Number
+      }
+    ],
+
+    returnOnInvestmentAnalysis: [
+      {
+        year: Number,
+        profitBeforeTax: Number,
+        depreciation: Number,
+        interestOnTermLoan: Number,
+        interestOnCC: Number,
+        totalInvestment: Number,
+        AverageReturn: Number,
+        CapitalEmployed: Number,
+        ReturnOnInvestment: Number
+      }
+    ],
+    breakEvenAnalysis: [
+      {
+        year: { type: Number, required: true },
+        sales: { type: Number, default: 0 },
+        variableCosts: { type: Number, default: 0 },
+        grossProfit: { type: Number, default: 0 },
+        depreciation: { type: Number, default: 0 },
+        interestOnTermLoan: { type: Number, default: 0 },
+        interestOnCC: { type: Number, default: 0 },
+        fixedCosts: { type: Number, default: 0 },
+        breakEvenSales: { type: Number, default: 0 }
+      }
     ]
+
+
+
   },
   {
     timestamps: true,
   }
 );
 
+delete models.ProjectReport;
 const ProjectReportModel = models.ProjectReport || model<ProjectData>("ProjectReport", ProjectReportSchema);
 
 export default ProjectReportModel;
