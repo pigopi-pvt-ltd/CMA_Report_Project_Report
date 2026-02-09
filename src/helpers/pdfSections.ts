@@ -815,7 +815,6 @@ export const drawSWOTAnalysisPage = (doc: any, projectData: any, fonts: any) => 
 };
 //--Action Plan Page ---
 export const drawActionPlan = (doc: any, projectData: any, fonts: any) => {
-  console.log("Drawing Action Plan with data:", projectData);
   const businessName = projectData.businessDetails?.businessName || "Business";
   const plan = projectData.actionPlan;
 
@@ -1037,7 +1036,7 @@ export const drawBreakEvenSales = (doc: any, projectData: any, formatInMillions:
     [{ text: "5", width: srWidth }, { text: "Depreciation", width: particularsWidth, color: "#b91c1c", bold: true }, ...beData.map((d: any) => ({ text: formatInMillions(d.depreciation), width: cellWidth, align: "center" }))],
     [{ text: "6", width: srWidth }, { text: "Interest on Term Loan", width: particularsWidth, color: "#b91c1c", bold: true }, ...beData.map((d: any) => ({ text: formatInMillions(d.interestOnTermLoan), width: cellWidth, align: "center" }))],
     [{ text: "7", width: srWidth }, { text: "Interest on CC Loan", width: particularsWidth, color: "#b91c1c", bold: true }, ...beData.map((d: any) => ({ text: formatInMillions(d.interestOnCC || 0), width: cellWidth, align: "center" }))],
-    
+
     [
       { text: "Total", width: srWidth, bold: true },
       { text: "Total Fixed Cost (C)", width: particularsWidth, bold: true, color: "#b91c1c" },
@@ -1131,4 +1130,260 @@ export const drawCalculationOfInterestOnTermLoan = (doc: any, projectData: any, 
   ];
 
   drawFlexibleTable(doc, table2Rows, { ...fonts, fontSize });
+};
+
+export const drawLoanCalculation = (doc: any, projectData: any, formatrupee: Function, fonts: any) => {
+  const loanScheduleArray = projectData.loanCalculation || [];
+  if (loanScheduleArray.length === 0) return;
+
+  const boldFontFamily = fonts?.bold;
+  const regularFontFamily = fonts?.regular;
+
+
+
+  const startXCoordinate = 30;
+  let currentYCoordinate = 50;
+  const summaryBoxWidth = 250;
+  const standardRowHeight = 20;
+
+  // --- 1. TERM LOAN VALUE (FROM LOAN DETAILS) ---
+
+  const termLoanFromDetails = projectData.termLoan || (loanScheduleArray[0]?.openingBalance) || 0;
+  currentYCoordinate += 30;
+
+  // --- 2. SUMMARY BOXES ---
+  const drawSummaryBox = (x: number, y: number, title: string, rows: [string, string][]) => {
+    doc.rect(x, y, summaryBoxWidth, standardRowHeight).fill("#0f172a");
+    if (boldFontFamily) doc.font(boldFontFamily);
+    doc.fillColor("#ffffff").fontSize(9).text(title, x, y + 6, { width: summaryBoxWidth, align: "center" });
+
+    let rowY = y + standardRowHeight;
+    rows.forEach(([label, value]) => {
+      doc.rect(x, rowY, summaryBoxWidth, standardRowHeight).strokeColor("#e5e7eb").lineWidth(0.5).stroke();
+      if (regularFontFamily) doc.font(regularFontFamily);
+      doc.fillColor("#374151").fontSize(8).text(label, x + 8, rowY + 6);
+      doc.text(value, x + 120, rowY + 6, { width: 120, align: "right" });
+      rowY += standardRowHeight;
+    });
+    return rowY;
+  };
+
+  const totalInterest = loanScheduleArray.reduce((s: number, e: any) => s + (e.interest || 0), 0);
+
+  const inputRows: [string, string][] = [
+    ["Term Loan Amount", `${formatrupee(termLoanFromDetails)}`],
+    ["Interest Rate", `${projectData.interestRate || '11.1'}%`],
+    ["Loan Tenure", `${projectData.loanPeriod || '5 Years'}`],
+    ["Repayment Start", loanScheduleArray[0]?.date || 'N/A']
+  ];
+
+  const summaryRows: [string, string][] = [
+    ["Monthly EMI", `${formatrupee(Math.round(loanScheduleArray[0]?.emi || 0))}`],
+    ["Total EMIs", `${loanScheduleArray.length}`],
+    ["Total Interest", `${formatrupee(Math.round(totalInterest))}`],
+    ["Total Payable", `${formatrupee(Math.round(Number(termLoanFromDetails) + totalInterest))}`]
+  ];
+
+  const boxBottomY = drawSummaryBox(startXCoordinate, currentYCoordinate, "LOAN DETAILS", inputRows);
+  drawSummaryBox(startXCoordinate + 265, currentYCoordinate, "REPAYMENT OVERVIEW", summaryRows);
+
+  currentYCoordinate = boxBottomY + 40;
+
+  // --- 3. TABLE SECTION (DATA PRINTING) ---
+  if (boldFontFamily) doc.font(boldFontFamily);
+  doc.fontSize(11).fillColor("#b91c1c").text("ANNEXURE: MONTHLY REPAYMENT SCHEDULE", startXCoordinate, currentYCoordinate);
+  currentYCoordinate += 20;
+
+  const colWidths = [35, 65, 85, 75, 75, 75, 95];
+
+  const drawHeader = (yPos: number) => {
+    doc.rect(startXCoordinate, yPos, 505, 18).fill("#f3f4f6").stroke("#e5e7eb");
+    doc.fillColor("#b91c1c").fontSize(7);
+    let xPos = startXCoordinate;
+    const headers = ["MONTH", "DATE", "OPENING BAL", "EMI", "PRINCIPAL", "INTEREST", "CLOSING BAL"];
+    headers.forEach((h, i) => {
+      doc.text(h, xPos, yPos + 5, { width: colWidths[i], align: "center" });
+      xPos += colWidths[i];
+    });
+    return yPos + 18;
+  };
+
+  currentYCoordinate = drawHeader(currentYCoordinate);
+
+  // --- 4. LOOP FOR TABLE DATA ---
+  loanScheduleArray.forEach((row: any) => {
+    // Page break logic
+    if (currentYCoordinate + 20 > doc.page.height - 50) {
+      doc.addPage();
+      currentYCoordinate = 50;
+      currentYCoordinate = drawHeader(currentYCoordinate);
+    }
+
+    if (regularFontFamily) doc.font(regularFontFamily);
+    doc.fillColor("#374151").fontSize(7);
+
+    let xData = startXCoordinate;
+    const values = [
+      row.month.toString(),
+      row.date || "-",
+      formatrupee(row.openingBalance || 0),
+      formatrupee(row.emi || 0),
+      formatrupee(row.principal || 0),
+      formatrupee(row.interest || 0),
+      formatrupee(row.closingBalance || 0)
+    ];
+
+    values.forEach((val, i) => {
+      doc.text(val, xData, currentYCoordinate + 5, {
+        width: colWidths[i],
+        align: i < 2 ? "center" : "right"
+      });
+      xData += colWidths[i];
+    });
+
+    // Row Line
+    doc.moveTo(startXCoordinate, currentYCoordinate + 18)
+      .lineTo(startXCoordinate + 505, currentYCoordinate + 18)
+      .strokeColor("#eeeeee").lineWidth(0.5).stroke();
+
+    currentYCoordinate += 18;
+  });
+
+  doc.y = currentYCoordinate;
+};
+
+
+export const drawAssumptionsTable = (doc: any, projectData: any, fonts: any) => {
+  const assumptions = projectData.assumptions?.particulars || {};
+  const industryList = projectData.assumptions?.industryJustifications || [];
+  const fontSize = 8;
+
+  // --- TABLE 1: PARTICULARS (Top Table) ---
+  const colWidth1 = 540 / 4; // 4 Columns equal width
+  const table1Rows: any[] = [
+    [
+      { text: "Particulars", width: 540, color: "#b91c1c", bold: true, fontSize, colSpan: 4 }
+    ],
+    [
+      { text: "Projected Increment in Gross receipts", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
+      { text: "Projected Increment in Expenditure", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
+      { text: "Interest rate for Term loan (in %)", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
+      { text: "Interest Rate for Cash Credit (in %)", width: colWidth1, color: "#b91c1c", bold: true, fontSize }
+    ],
+    [
+      { text: assumptions.projectedIncrementReceipts || "135%", width: colWidth1, fontSize },
+      { text: assumptions.projectedIncrementExpenditure || "112%", width: colWidth1, fontSize },
+      { text: (assumptions.interestRateTermLoan || 11.1).toString(), width: colWidth1, fontSize },
+      { text: (assumptions.interestRateCashCredit || 11.1).toString(), width: colWidth1, fontSize }
+    ]
+  ];
+
+  drawFlexibleTable(doc, table1Rows, { ...fonts, fontSize });
+
+  doc.moveDown(2); // Thoda gap dono tables ke beech mein
+
+  // --- TABLE 2: INDUSTRY JUSTIFICATION (Bottom Table) ---
+  const industryColWidths = [100, 130, 130, 180];
+  const table2Rows: any[] = [
+    [
+      { text: "Industry", width: industryColWidths[0], color: "#b91c1c", bold: true, fontSize },
+      { text: "Projected Increment in Gross Receipts", width: industryColWidths[1], color: "#b91c1c", bold: true, fontSize },
+      { text: "Projected Increment in Expenditure", width: industryColWidths[2], color: "#b91c1c", bold: true, fontSize },
+      { text: "Justification", width: industryColWidths[3], color: "#b91c1c", bold: true, fontSize }
+    ],
+    ...industryList.map((item: any) => [
+      { text: item.industry, width: industryColWidths[0], color: "#b91c1c", bold: true, fontSize },
+      { text: item.receiptsIncrement, width: industryColWidths[1], fontSize },
+      { text: item.expenditureIncrement, width: industryColWidths[2], fontSize },
+      { text: item.justification, width: industryColWidths[3], fontSize }
+    ])
+  ];
+
+  drawFlexibleTable(doc, table2Rows, { ...fonts, fontSize });
+};
+
+
+export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: Function , fonts: any) => {
+  const loanData = projectData.loanCalculation || [];
+  const fontSize = 8;
+  const colWidth = 540 / 6;
+
+  // --- 1. PREPARE YEARLY DATA ---
+  const yearlyRows = [];
+  for (let i = 0; i < loanData.length; i += 12) {
+    const chunk = loanData.slice(i, i + 12);
+    const yearLabel = chunk[0].date.split('/')[2]; 
+
+    const yearPrincipal = chunk.reduce((s: number, m: any) => s + m.principal, 0);
+    const yearInterest = chunk.reduce((s: number, m: any) => s + m.interest, 0);
+
+    yearlyRows.push([
+      { text: yearLabel, width: colWidth, fontSize },
+      { text: `₹${chunk[0].openingBalance.toLocaleString()}`, width: colWidth, fontSize },
+      { text: `₹${(chunk[0].emi * 12).toLocaleString()}`, width: colWidth, fontSize },
+      { text: `₹${yearPrincipal.toLocaleString()}`, width: colWidth, fontSize },
+      { text: `₹${yearInterest.toLocaleString()}`, width: colWidth, fontSize },
+      { text: `₹${chunk[chunk.length - 1].closingBalance.toLocaleString()}`, width: colWidth, fontSize }
+    ]);
+  }
+
+  // --- 2. RENDER TABLE 1 (REPAYMENT) ---
+  const table1Header = [
+    [
+      { text: "YEAR", width: colWidth, color: "#b91c1c", bold: true, fontSize },
+      { text: "OPENING BALANCE", width: colWidth, color: "#b91c1c", bold: true, fontSize },
+      { text: "EMI", width: colWidth, color: "#b91c1c", bold: true, fontSize },
+      { text: "PRINCIPAL", width: colWidth, color: "#b91c1c", bold: true, fontSize },
+      { text: "INTEREST", width: colWidth, color: "#b91c1c", bold: true, fontSize },
+      { text: "CLOSING BALANCE", width: colWidth, color: "#b91c1c", bold: true, fontSize }
+    ],
+    ...yearlyRows
+  ];
+
+  drawFlexibleTable(doc, table1Header, { ...fonts, fontSize });
+  doc.moveDown(2);
+
+  // --- 3. RENDER TABLE 2 (INTEREST SUMMARY) ---
+  const summaryWidth = 540 / (yearlyRows.length + 1);
+  
+  // Logic for CC Interest (Fixed based on Working Capital Loan)
+  const ccInterestYearly = (projectData.loanDetails.workingCapitalLoan * (projectData.assumptions?.particulars?.interestRateCashCredit / 100));
+
+  const summaryRows = [
+    [
+      { text: "PARTICULARS", width: summaryWidth, color: "#b91c1c", bold: true, fontSize },
+      ...yearlyRows.map(r => ({ text: `FY ${r[0].text}`, width: summaryWidth, color: "#b91c1c", bold: true, fontSize }))
+    ],
+    [
+      { text: "TERM LOAN INTEREST", width: summaryWidth, fontSize, bold: true, color: "#b91c1c" },
+      ...yearlyRows.map(r => ({ text: `₹${(parseFloat(r[4].text.replace(/[^0-9.-]+/g, "")) / 1000).toFixed(1)}K`, width: summaryWidth, fontSize }))
+    ],
+    [
+      { text: "CASH CREDIT INTEREST", width: summaryWidth, fontSize, bold: true, color: "#b91c1c" },
+      ...yearlyRows.map(() => ({ text: `₹${(ccInterestYearly / 1000).toFixed(1)}K`, width: summaryWidth, fontSize }))
+    ],
+    [
+      { text: "TOTAL INTEREST", width: summaryWidth, fontSize, bold: true, color: "#b91c1c" },
+      ...yearlyRows.map(r => {
+        const tlInt = parseFloat(r[4].text.replace(/[^0-9.-]+/g, ""));
+        return { text: `₹${((tlInt + ccInterestYearly) / 1000).toFixed(1)}K`, width: summaryWidth, fontSize, bold: true };
+      })
+    ]
+  ];
+
+  drawFlexibleTable(doc, summaryRows, { ...fonts, fontSize });
+
+  // --- 4. RENDER NOTES SECTION (Now safely at the bottom) ---
+  doc.x = 72; 
+  // doc.moveDown(2); 
+
+  doc.fontSize(8).fillColor("#000000");
+ const notesOptions = { align: 'left', width: 500 };
+  doc.fontSize(8).fillColor("#000000");
+  doc.text(`1. Repayment term has been considered to be in equally monthly installment starting from ${loanData[0]?.date }`,notesOptions);
+  doc.text(`2. Term Loan Interest has been considered @ ${projectData.assumptions?.particulars?.interestRateTermLoan } % p.a.`,notesOptions);
+  doc.text(`3. Cash Credit Interest has been considered @ ${projectData.assumptions?.particulars?.interestRateCashCredit } % p.a.`,notesOptions);
+  doc.moveDown(1);
+
+ 
 };

@@ -4,7 +4,7 @@ import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket ,drawBreakEvenSales } from "@/helpers/pdfSections";
+import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawAssumptionsTable ,drawLoanInterestTables } from "@/helpers/pdfSections";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
   doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
@@ -129,30 +129,43 @@ export async function POST(request: Request) {
 
 
     //Action Plan
-      doc.addPage();
-      drawHeader(doc, "ACTION PLAN", fontBoldPath);
-      drawActionPlan(doc, projectData, fonts);
+    doc.addPage();
+    drawHeader(doc, "ACTION PLAN", fontBoldPath);
+    drawActionPlan(doc, projectData, fonts);
 
     // Market Targate
     doc.addPage();
     drawHeader(doc, "Market Targate", fontBoldPath);
-    drawTargateMarket(doc,projectData,fonts)
-    
+    drawTargateMarket(doc, projectData, fonts)
+
     // EBIDTA Analysis Page
     doc.addPage();
     drawHeader(doc, "EBIDTA ANALYSIS", fontBoldPath);
-    drawEBIDTAAnalysis(doc, projectData, formatInMillions, fonts);
+    drawEBIDTAAnalysis(doc, projectData, formatRupees, fonts);
 
     //Return on Investment (ROI) Analysis
     doc.addPage();
-      drawHeader(doc, "RETURN ON INVESTMENT (ROI) ANALYSIS", fontBoldPath);
-      drawReturnOnInvestment(doc, projectData, formatInMillions, fonts);
+    drawHeader(doc, "RETURN ON INVESTMENT (ROI) ANALYSIS", fontBoldPath);
+    drawReturnOnInvestment(doc, projectData, formatRupees, fonts);
 
     //--------- breakEvenAnalysis--------------
     doc.addPage();
-    drawHeader(doc,"Break Even Analysis", fontBoldPath)
-    drawBreakEvenSales(doc, projectData, formatInMillions, fonts)
+    drawHeader(doc, "Break Even Analysis", fontBoldPath)
+    drawBreakEvenSales(doc, projectData, formatRupees, fonts)
+    //-----------Assumption-----------
+    doc.addPage();
+    drawHeader(doc, "ASSSUMPTION", fontBoldPath)
+    drawAssumptionsTable(doc, projectData, fonts)
 
+    //-------------LoanCalculation-------------
+    doc.addPage();
+    drawHeader(doc, "Loan Calculation", fontBoldPath)
+    drawLoanCalculation(doc, projectData, formatRupees, fonts)
+  
+    //---------Loan Interest Table Detail-------
+    doc.addPage();
+    drawHeader(doc,"Loan Interest Table Detail", fontBoldPath)
+    drawLoanInterestTables(doc,projectData,formatRupees, fonts)
     doc.end();
     const pdfBuffer = await pdfDone;
 

@@ -44,35 +44,83 @@ export async function POST(request: Request) {
     const workingCapitalLoan = totalProjectCost * 0.36;
     const totalLoanAmountNeeded = workingCapitalLoan + termLoan;
 
+    const industryList = (data.assumptions?.industryJustifications && data.assumptions.industryJustifications.length > 0)
+      ? data.assumptions.industryJustifications
+      : [
+        { industry: "Manufacturing", receiptsIncrement: "115%", expenditureIncrement: "120%", justification: "Govt. incentives like PLI, Make in India, rising raw material costs." },
+        { industry: "Service", receiptsIncrement: "135%", expenditureIncrement: "112%", justification: "IT, fintech, outsourcing boom, automation reducing costs." },
+        { industry: "Trading", receiptsIncrement: "128%", expenditureIncrement: "115%", justification: "E-commerce growth, supply chain efficiency, rising logistics costs." },
+        { industry: "Agriculture", receiptsIncrement: "118%", expenditureIncrement: "122%", justification: "MSP hikes, agri-tech adoption, high fertilizer & labor costs." }
+      ];
 
 
+    const assumptions = data.assumptions || {
+      particulars: {
+        projectedIncrementReceipts: "135%",
+        projectedIncrementExpenditure: "112%",
+        interestRateTermLoan: 11.10,
+        interestRateCashCredit: 11.10
+      }
+    };
+
+
+    // // Multipliers nikalna loop mein use karne ke liye
+    // const receiptsMultiplier = parseFloat(assumptions.particulars.projectedIncrementReceipts) / 100;
+    // const expenditureMultiplier = parseFloat(assumptions.particulars.projectedIncrementExpenditure) / 100;
+
+    // Annual Rate ko dynamic banana (Static 11.10 hata kar)
     // --- LOAN & EMI CALCULATION (STEP 1) ---
-    const annualRate = 11.10;
+    const annualRate = assumptions.particulars.interestRateTermLoan;
     const totalMonths = data.loanPeriod * 12;
     const monthlyRate = annualRate / 12 / 100;
 
     const emi = (termLoan * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) /
       (Math.pow(1 + monthlyRate, totalMonths) - 1);
 
-    let monthlySchedule = [];
+    // 1. Array for Database/PDF
+    const loanCalculation = [];
+    // 2. Array for Internal Calculations (Yearly Interest/Principal)
+    let monthlySchedule: { interest: number; principal: number }[] = [];
+
     let tempBalance = termLoan;
+    const reportDate = new Date(); // Aaj ki date
 
     for (let i = 1; i <= totalMonths; i++) {
       const interestM = tempBalance * monthlyRate;
       const principalM = emi - interestM;
-      monthlySchedule.push({ interest: interestM, principal: principalM });
+
+      // Date Logic: Next month starting
+      const paymentDate = new Date(reportDate.getFullYear(), reportDate.getMonth() + i + 1, 0);
+
+      // Push for Internal logic (getYearly functions)
+      monthlySchedule.push({
+        interest: interestM,
+        principal: principalM
+      });
+
+      // Push for Master Table (Database/PDF)
+      loanCalculation.push({
+        month: i,
+        date: paymentDate.toLocaleDateString('en-GB'),
+        openingBalance: Math.round(tempBalance),
+        emi: Math.round(emi * 100) / 100,
+        principal: Math.round(principalM * 100) / 100,
+        interest: Math.round(interestM * 100) / 100,
+        closingBalance: Math.round((tempBalance - principalM) * 100) / 100
+      });
+
+      // Balance update for next iteration
       tempBalance -= principalM;
     }
 
+    // Ab ye functions error nahi denge
     const getYearlyInterest = (yr: number) =>
       monthlySchedule.slice((yr - 1) * 12, yr * 12).reduce((sum, m) => sum + m.interest, 0);
 
     const getYearlyPrincipal = (yr: number) =>
       monthlySchedule.slice((yr - 1) * 12, yr * 12).reduce((sum, m) => sum + m.principal, 0);
-
-    // --- 2. GENERATE COST STATEMENT ---
+    // --- 3. GENERATE COST STATEMENT ---
     const annualSales = data.revenueDetails.salesRevenue * 12
-
     let sales = annualSales;
     const costStatement = [];
     let currentYearLabel = new Date().getFullYear();
@@ -88,7 +136,7 @@ export async function POST(request: Request) {
         principalRepayment: repaymentAmount > 0 ? repaymentAmount : 0
       });
       currentYearLabel++;
-      sales = sales + (sales * 0.25); // 35% growth rate found earlier
+      sales = sales * 1.25;
     }
 
 
@@ -504,6 +552,32 @@ export async function POST(request: Request) {
     }
 
 
+    const loanInterestTablesDetail = [];
+
+    for (let i = 0; i < loanCalculation.length; i += 12) {
+      const yearChunk = loanCalculation.slice(i, i + 12);
+
+      // 12 mahino ka total nikalna
+      const yearPrincipal = yearChunk.reduce((sum, m) => sum + m.principal, 0);
+      const yearInterest = yearChunk.reduce((sum, m) => sum + m.interest, 0);
+      const totalEMI = yearChunk.reduce((sum, m) => sum + m.emi, 0);
+
+      // Cash Credit Interest (Fixed calculation)
+      const ccInterest = Math.round(workingCapitalLoan * (assumptions.particulars.interestRateCashCredit / 100));
+
+      loanInterestTablesDetail.push({
+        year: yearChunk[0].date.split('/')[2], // Year extract karna
+        openingBalance: Math.round(yearChunk[0].openingBalance),
+        emi: Math.round(totalEMI),
+        principal: Math.round(yearPrincipal),
+        interest: Math.round(yearInterest),
+        closingBalance: Math.round(yearChunk[yearChunk.length - 1].closingBalance),
+        ccInterest: ccInterest,
+        totalInterest: Math.round(yearInterest + ccInterest)
+      });
+    }
+
+
 
 
     // --- 4. PREPARE FINAL DATA ---
@@ -539,7 +613,12 @@ export async function POST(request: Request) {
       targetMarket,
       ebidtaAnalysis,
       returnOnInvestmentAnalysis,
-      breakEvenAnalysis
+      breakEvenAnalysis,
+      loanCalculation,
+      loanInterestTablesDetail,
+      assumptions: assumptions,
+      industryJustifications: industryList
+
 
 
 

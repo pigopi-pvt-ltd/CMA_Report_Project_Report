@@ -182,7 +182,36 @@ export type breakEvenAnalysisType = {
   breakEvenSales: number;
 };
 
+export type LoanCalculationEntry = {
+  month: number;
+  date: string;
+  openingBalance: number;
+  emi: number;
+  principal: number;
+  interest: number;
+  closingBalance: number;
+}
 
+
+export type IndustryJustificationEntry = {
+  industry: string;           // Manufacturing, Service, etc.
+  receiptsIncrement: string;   // e.g., "115%"
+  expenditureIncrement: string; // e.g., "120%"
+  justification: string;       // Detail explanation
+};
+
+
+export type ParticularsAssumption = {
+  projectedIncrementReceipts: string;    // "135%"
+  projectedIncrementExpenditure: string; // "112%"
+  interestRateTermLoan: number;          // Abhi ke liye 11.1
+  interestRateCashCredit: number;        // Abhi ke liye 11.1
+};
+
+export type ProjectAssumptionsType = {
+  particulars: ParticularsAssumption;
+  industryJustifications: IndustryJustificationEntry[];
+};
 
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
@@ -210,6 +239,11 @@ export interface ProjectData extends Document {
   returnOnInvestmentAnalysis: ReturnOnInvestmentType[];
   targetMarket: targetMarketType[];
   breakEvenAnalysis: breakEvenAnalysisType[];
+  loanCalculation: LoanCalculationEntry[];
+  loanInterestTablesDetail: any[];
+  assumptions: ProjectAssumptionsType;
+
+
 }
 
 
@@ -570,7 +604,57 @@ const ProjectReportSchema = new Schema<ProjectData>(
         fixedCosts: { type: Number, default: 0 },
         breakEvenSales: { type: Number, default: 0 }
       }
-    ]
+    ],
+     loanInterestTablesDetail: [
+      {
+        year: String,
+        openingBalance: Number,
+        emi: Number,
+        principal: Number,
+        interest: Number,
+        closingBalance: Number,
+        ccInterest: Number, // Extra fields for Table 2
+        totalInterest: Number
+      }
+    ],
+
+
+    // ProjectReportSchema ke andar add karein
+    assumptions: {
+      particulars: {
+        projectedIncrementReceipts: { type: String, default: "135%" },
+        projectedIncrementExpenditure: { type: String, default: "112%" },
+        interestRateTermLoan: { type: Number, default: 11.1 },
+        interestRateCashCredit: { type: Number, default: 11.1 }
+      },
+      industryJustifications: {
+        type: [
+          {
+            industry: String,
+            receiptsIncrement: String,
+            expenditureIncrement: String,
+            justification: String
+          }
+        ],
+        default: [
+          { industry: "Manufacturing", receiptsIncrement: "115%", expenditureIncrement: "120%", justification: "Govt. incentives like PLI, Make in India, rising raw material costs." },
+          { industry: "Service", receiptsIncrement: "135%", expenditureIncrement: "112%", justification: "IT, fintech, outsourcing boom, automation reducing costs." },
+          { industry: "Trading", receiptsIncrement: "128%", expenditureIncrement: "115%", justification: "E-commerce growth, supply chain efficiency, rising logistics costs." },
+          { industry: "Agriculture", receiptsIncrement: "118%", expenditureIncrement: "122%", justification: "MSP hikes, agri-tech adoption, high fertilizer & labor costs." }
+        ]
+      }
+    },
+    loanCalculation: [
+      {
+        month: { type: Number },
+        date: { type: String },
+        openingBalance: { type: Number },
+        emi: { type: Number },
+        principal: { type: Number },
+        interest: { type: Number },
+        closingBalance: { type: Number },
+      }
+    ],
 
 
 
