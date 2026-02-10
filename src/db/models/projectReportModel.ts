@@ -193,6 +193,85 @@ export type LoanCalculationEntry = {
 }
 
 
+export type mpbfAnalysisType = {
+  year: number;
+  totalCurrentAssets: number; // (a)
+  totalCurrentLiabilities: number; // (b)
+  bankBorrowing: number; // (c)
+  otherCurrentLiabilities: number; // (b)-(c)
+  mpbfMethod1: number; // Method-1
+  mpbfMethod2: number; // Method-2
+};
+
+
+export type ratioAnalysisType = {
+  year: number;
+  netProfit: number;
+  interestOnTermLoan: number;
+  interestOnCC: number;
+  provisionForTaxation: number;
+  totalPbit: number;
+  interestOnTermLoanY: number;
+  interestOnCCY: number;
+  totalInterestY: number;
+  iscr: number;
+  netProfitXY: number;
+  revenueIncome: number;
+  netProfitToSales: number;
+  pbit: number;
+  depreciation: number;
+  pbdit: number;
+  totalAssets: number;
+  profitToTotalAssetsRatio: number;
+  netSales: number;
+  termLoanBalance: number;
+  cashCredit: number;
+  totalBankBorrowing: number;
+  netSalesToBankBorrowing: number;
+  currentAssets: number;
+  currentLiabilities: number;
+  currentAssetRatio: number;
+  netCapitalWorth: number;
+  currentRatio: number;
+  tnw: number;
+  tol: number;
+  tolToTnw: number;
+  termLiabilities: number;
+  termLiabilityToTnw: number;
+};
+
+export type SensitivityScenarioEntry = {
+  financialYear: number;
+  totalRevenueIncome: number;
+  ebitdaValue: number;
+  ebitValue: number;
+  profitBeforeTaxValue: number;
+}
+
+export type projectedBalanceSheetType = {
+  year: string; // Sample mein "FY 2025-26" ya number dono chalenge
+
+  // --- LIABILITIES (Senior Sample Rows) ---
+  capital: number;                        // Opening Capital
+  addProfitDuringYear: number;            // Net Profit after tax (PAT)
+  lessDrawings: number;                   // Personal withdrawals
+  termLoan: number;                       // Long Term Borrowings
+  cashCredit: number;                     // Short Term Borrowings (WC)
+  currentLiabilitiesAndProvision: number; // Creditors & Provisions
+  provisionForTax: number;                // Tax liability
+  totalLiabilities: number;               // Grand Total (Liabilities)
+
+  // --- ASSETS (Senior Sample Rows) ---
+  netFixedAssetsWDV: number;              // Fixed Assets after Depreciation
+  stockOfWIP: number;                     // Stock of W.I.P. & Finished Product
+  sundryDebtors: number;                  // Outstanding from customers
+  depositAndAdvance: number;              // Security deposits etc.
+  cashAndBankBalance: number;             // Closing Balance
+  totalAssets: number;                    // Grand Total (Assets)
+};
+
+
+
 export type IndustryJustificationEntry = {
   industry: string;           // Manufacturing, Service, etc.
   receiptsIncrement: string;   // e.g., "115%"
@@ -240,13 +319,27 @@ export interface ProjectData extends Document {
   targetMarket: targetMarketType[];
   breakEvenAnalysis: breakEvenAnalysisType[];
   loanCalculation: LoanCalculationEntry[];
+  mpbfAnalysis: mpbfAnalysisType[];
+  ratioAnalysis: ratioAnalysisType[];
+  sensitivityAnalysis: {
+    scenarioSalesDecrease: SensitivityScenarioEntry[];
+    scenarioVariableCostIncrease: SensitivityScenarioEntry[];
+    scenarioFixedCostIncrease: SensitivityScenarioEntry[];
+  };
+  projectedBalanceSheet: projectedBalanceSheetType[];
   loanInterestTablesDetail: any[];
   assumptions: ProjectAssumptionsType;
 
 
 }
 
-
+const SensitivityScenarioSchema = {
+  financialYear: Number,
+  totalRevenueIncome: Number,
+  ebitdaValue: Number,
+  ebitValue: Number,
+  profitBeforeTaxValue: Number
+};
 
 const ProjectReportSchema = new Schema<ProjectData>(
   {
@@ -605,7 +698,7 @@ const ProjectReportSchema = new Schema<ProjectData>(
         breakEvenSales: { type: Number, default: 0 }
       }
     ],
-     loanInterestTablesDetail: [
+    loanInterestTablesDetail: [
       {
         year: String,
         openingBalance: Number,
@@ -617,7 +710,78 @@ const ProjectReportSchema = new Schema<ProjectData>(
         totalInterest: Number
       }
     ],
+    mpbfAnalysis: [
+      {
+        year: Number,
+        totalCurrentAssets: Number,      // (a)
+        totalCurrentLiabilities: Number, // (b)
+        bankBorrowing: Number,           // (c)
+        otherCurrentLiabilities: Number, // (b)-(c)
+        mpbfMethod1: Number,             // 75% of (a - (b-c))
+        mpbfMethod2: Number              // (75% of a) - (b-c)
+      }
+    ],
+    ratioAnalysis: [{
+      year: Number,
+      netProfit: Number,                // 1
+      interestOnTermLoan: Number,       // 2
+      interestOnCC: Number,             // 3
+      provisionForTaxation: Number,      // 4
+      totalPbit: Number,                // 5
+      interestOnTermLoanY: Number,      // 6
+      interestOnCCY: Number,            // 7
+      totalInterestY: Number,           // 8
+      iscr: Number,                     // 9
+      netProfitXY: Number,              // 10
+      revenueIncome: Number,            // 11
+      netProfitToSales: Number,         // 12
+      pbit: Number,                     // 13
+      depreciation: Number,             // 14
+      pbdit: Number,                    // 15
+      totalAssets: Number,              // 16
+      profitToTotalAssetsRatio: Number, // 17
+      netSales: Number,                 // 18
+      termLoanBalance: Number,          // 19
+      cashCredit: Number,               // 20
+      totalBankBorrowing: Number,       // 21
+      netSalesToBankBorrowing: Number,  // 22
+      currentAssets: Number,            // 23
+      currentLiabilities: Number,       // 24
+      currentAssetRatio: Number,        // 25
+      netCapitalWorth: Number,          // 26
+      currentRatio: Number,             // 27
+      tnw: Number,                      // 28
+      tol: Number,                      // 29
+      tolToTnw: Number,                 // 30
+      termLiabilities: Number,          // 31
+      termLiabilityToTnw: Number        // 32
+    }],
 
+    sensitivityAnalysis: {
+      scenarioSalesDecrease: [SensitivityScenarioSchema],
+      scenarioVariableCostIncrease: [SensitivityScenarioSchema],
+      scenarioFixedCostIncrease: [SensitivityScenarioSchema]
+    },
+
+    projectedBalanceSheet: [
+      {
+        year: String,
+        capital: Number,
+        addProfitDuringYear: Number,
+        lessDrawings: Number,
+        termLoan: Number,
+        cashCredit: Number,
+        currentLiabilitiesAndProvision: Number,
+        provisionForTax: Number,
+        totalLiabilities: Number,
+        netFixedAssetsWDV: Number,
+        stockOfWIP: Number,
+        sundryDebtors: Number,
+        depositAndAdvance: Number,
+        cashAndBankBalance: Number,
+        totalAssets: Number,
+      }
+    ],
 
     // ProjectReportSchema ke andar add karein
     assumptions: {

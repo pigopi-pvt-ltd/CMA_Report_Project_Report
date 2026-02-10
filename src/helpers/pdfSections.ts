@@ -1253,6 +1253,237 @@ export const drawLoanCalculation = (doc: any, projectData: any, formatrupee: Fun
 };
 
 
+export const drawComputationOfMPBF = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
+  const mpbfData = projectData.mpbfAnalysis || [];
+  const loanPeriod = projectData.loanPeriod || 5;
+
+  const particularsWidth = 180;
+  const dataWidth = 540 - particularsWidth;
+  const cellWidth = dataWidth / loanPeriod;
+  const fontSize = 8;
+
+  const rows: any[] = [
+    // Header Row: Estimated/Projected
+    [
+      { text: "", width: particularsWidth },
+      ...mpbfData.map((d: any, i: number) => ({
+        text: i === 0 ? 'ESTIMATED' : 'PROJECTED',
+        width: cellWidth, color: "#b91c1c", bold: true, align: "center", fontSize
+      }))
+    ],
+    // Year Header: FY 2024-25 style
+    [
+      { text: "PARTICULARS", width: particularsWidth, color: "#b91c1c", bold: true, fontSize },
+      ...mpbfData.map((d: any) => ({
+        text: `FY ${d.year}-${(d.year + 1) % 100}`,
+        width: cellWidth, color: "#b91c1c", bold: true, align: "center", fontSize
+      }))
+    ],
+
+    // Data Rows
+    [{ text: "TOTAL CURRENT ASSETS (a)", width: particularsWidth, color: "#b91c1c", bold: true }, ...mpbfData.map((d: any) => ({ text: formatInMillions(d.totalCurrentAssets), width: cellWidth, align: "center" }))],
+    [{ text: "TOTAL CURRENT LIABILITIES (b)", width: particularsWidth, color: "#b91c1c", bold: true }, ...mpbfData.map((d: any) => ({ text: formatInMillions(d.totalCurrentLiabilities), width: cellWidth, align: "center" }))],
+    [{ text: "BANK BORROWING (c)", width: particularsWidth, color: "#b91c1c", bold: true }, ...mpbfData.map((d: any) => ({ text: formatInMillions(d.bankBorrowing), width: cellWidth, align: "center" }))],
+    [{ text: "TOTAL CURRENT LIABILITIES (OTHER THAN BANK BORROWINGS) (b)-(c)", width: particularsWidth, color: "#b91c1c", bold: true }, ...mpbfData.map((d: any) => ({ text: formatInMillions(d.otherCurrentLiabilities), width: cellWidth, align: "center" }))],
+
+    // Method 1 Section
+    [{ text: "MPBF METHOD-1", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: 9, fill: "#f3f4f6" }, ...mpbfData.map(() => ({ text: "", width: cellWidth, fill: "#f3f4f6" }))],
+    [{ text: "MAXIMUM PERMISSIBLE BANK FINANCE (METHOD-1)", width: particularsWidth, color: "#b91c1c", bold: true }, ...mpbfData.map((d: any) => ({ text: formatInMillions(d.mpbfMethod1), width: cellWidth, align: "center", bold: true }))],
+
+    // Method 2 Section
+    [{ text: "MPBF METHOD-2", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: 9, fill: "#f3f4f6" }, ...mpbfData.map(() => ({ text: "", width: cellWidth, fill: "#f3f4f6" }))],
+    [{ text: "MAXIMUM PERMISSIBLE BANK FINANCE (METHOD-2)", width: particularsWidth, color: "#b91c1c", bold: true }, ...mpbfData.map((d: any) => ({ text: formatInMillions(d.mpbfMethod2), width: cellWidth, align: "center", bold: true }))]
+  ];
+
+  drawFlexibleTable(doc, rows, { ...fonts, fontSize });
+};
+
+export const drawImportantRatios = (doc: any, projectData: any, formatrupee: Function, fonts: any) => {
+  const ratioData = projectData.ratioAnalysis || [];
+  const loanPeriod = projectData.loanPeriod || 5;
+
+  const particularsWidth = 190;
+  const dataWidth = 540 - particularsWidth;
+  const cellWidth = dataWidth / loanPeriod;
+  const fontSize = 8; // Aapki requirement ke hisaab se fixed
+
+  // Formatter for ratios
+  const f = (val: any) => (val != null && !isNaN(val)) ? Number(val).toFixed(2) : "0.00";
+
+  // Sabse pehle header define kar lete hain jo har page par repeat hoga
+  const tableHeader = [
+    { text: "PARTICULARS", width: particularsWidth, color: "#b91c1c", bold: true, fontSize },
+    ...ratioData.map((d: any) => ({
+      text: `FY ${d.year}-${(d.year + 1) % 100}`,
+      width: cellWidth, color: "#b91c1c", bold: true, align: "center", fontSize
+    }))
+  ];
+
+  // Saari 32 Rows ka data
+  const allRows: any[] = [
+    // --- Section 1: Profitability ---
+    [{ text: "Net Profit", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.netProfit), width: cellWidth, align: "center" }))],
+    [{ text: "INTEREST ON TERM LOAN", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.interestOnTermLoan), width: cellWidth, align: "center" }))],
+    [{ text: "INTEREST ON CASH CREDIT", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.interestOnCC), width: cellWidth, align: "center" }))],
+    [{ text: "PROVISION OF TAXATION", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.provisionForTaxation), width: cellWidth, align: "center" }))],
+    [{ text: "TOTAL (X) (PBIT)", width: particularsWidth, bold: true }, ...ratioData.map((d: any) => ({ text: formatrupee(d.totalPbit), width: cellWidth, align: "center", bold: true }))],
+
+    // --- Section 2: Interest Coverage ---
+    [{ text: "INTREST ON TERM LOAN Y", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.interestOnTermLoanY), width: cellWidth, align: "center" }))],
+    [{ text: "INTEREST ON CASH CREDIT Y", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.interestOnCCY), width: cellWidth, align: "center" }))],
+    [{ text: "TOTAL (Y)", width: particularsWidth, bold: true }, ...ratioData.map((d: any) => ({ text: formatrupee(d.totalInterestY), width: cellWidth, align: "center", bold: true }))],
+    [{ text: "ISCR (X/Y)", width: particularsWidth, bold: true, fill: "#f3f4f6" }, ...ratioData.map((d: any) => ({ text: f(d.iscr), width: cellWidth, align: "center", bold: true, fill: "#f3f4f6" }))],
+    [{ text: "Net Profit X/Y", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: f(d.netProfitXY), width: cellWidth, align: "center" }))],
+
+    // --- Section 3: Sales & Operating ---
+    [{ text: "REVENUE INCOME / GROSS SALES", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.revenueIncome), width: cellWidth, align: "center" }))],
+    [{ text: "NET PROFIT/ SALES %", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: f(d.netProfitToSales), width: cellWidth, align: "center" }))],
+    [{ text: "PBIT", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.pbit), width: cellWidth, align: "center" }))],
+    [{ text: "DEPRECIATION", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.depreciation), width: cellWidth, align: "center" }))],
+    [{ text: "PBDIT", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.pbdit), width: cellWidth, align: "center" }))],
+
+    // --- Section 4: Assets ---
+    [{ text: "Total Assets", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.totalAssets), width: cellWidth, align: "center" }))],
+    [{ text: "Profit to Total Assets Ratio", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: f(d.profitToTotalAssetsRatio), width: cellWidth, align: "center" }))],
+    [{ text: "NET SALES (O)", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.netSales), width: cellWidth, align: "center" }))],
+
+    // --- Section 5: Borrowings ---
+    [{ text: "TERM LOAN", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.termLoanBalance), width: cellWidth, align: "center" }))],
+    [{ text: "CASH CREDIT", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.cashCredit), width: cellWidth, align: "center" }))],
+    [{ text: "TOTAL BANK BORROWING (P)", width: particularsWidth, bold: true }, ...ratioData.map((d: any) => ({ text: formatrupee(d.totalBankBorrowing), width: cellWidth, align: "center", bold: true }))],
+    [{ text: "NET SALES/ BANK BORROWING", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: f(d.netSalesToBankBorrowing), width: cellWidth, align: "center" }))],
+
+    // --- Section 6: Liquidity ---
+    [{ text: "CURRENT ASSETS", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.currentAssets), width: cellWidth, align: "center" }))],
+    [{ text: "CURRENT LIABILITIES", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.currentLiabilities), width: cellWidth, align: "center" }))],
+    [{ text: "CURRENT ASSET RATIO", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: f(d.currentAssetRatio), width: cellWidth, align: "center" }))],
+    [{ text: "Net Capital Worth", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.netCapitalWorth), width: cellWidth, align: "center" }))],
+    [{ text: "Current Ratio", width: particularsWidth, bold: true, fill: "#f3f4f6" }, ...ratioData.map((d: any) => ({ text: f(d.currentRatio), width: cellWidth, align: "center", bold: true, fill: "#f3f4f6" }))],
+
+    // --- Section 7: Solvency ---
+    [{ text: "TNW", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.tnw), width: cellWidth, align: "center" }))],
+    [{ text: "TOL", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.tol), width: cellWidth, align: "center" }))],
+    [{ text: "TOL/TNW", width: particularsWidth, bold: true }, ...ratioData.map((d: any) => ({ text: f(d.tolToTnw), width: cellWidth, align: "center", bold: true }))],
+    [{ text: "Term Liabilities", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: formatrupee(d.termLiabilities), width: cellWidth, align: "center" }))],
+    [{ text: "Term Liability/TNW", width: particularsWidth }, ...ratioData.map((d: any) => ({ text: f(d.termLiabilityToTnw), width: cellWidth, align: "center" }))]
+  ];
+
+  // --- LOGIC TO SPLIT AND DRAW ---
+  const firstPageRows = [tableHeader, ...allRows.slice(0, 18)];
+  const secondPageRows = [tableHeader, ...allRows.slice(18)];
+
+  // Draw Page 1
+  if (doc.y > 300) doc.addPage();
+  doc.fillColor("#b91c1c").fontSize(10).text("IMPORTANT RATIO ANALYSIS (PART-I)", { align: "center", bold: true });
+  doc.moveDown(0.5);
+  drawFlexibleTable(doc, firstPageRows, { ...fonts, fontSize, padding: 3 });
+
+  // Draw Page 2
+  doc.addPage();
+  doc.fillColor("#b91c1c").fontSize(10).text("IMPORTANT RATIO ANALYSIS (PART-II)", { align: "center", bold: true });
+  doc.moveDown(0.5);
+  drawFlexibleTable(doc, secondPageRows, { ...fonts, fontSize, padding: 3 });
+};
+export const drawSensitivityAnalysis = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
+  const sensitivity = projectData?.sensitivityAnalysis;
+  if (!sensitivity) return;
+
+  const loanPeriod = projectData.loanPeriod || 5;
+  const particularsWidth = 180;
+  const totalWidth = 540;
+  const cellWidth = (totalWidth - particularsWidth) / loanPeriod;
+  const dynamicFontSize = loanPeriod > 7 ? 7 : 8;
+
+  const scenarios = [
+    { title: "Scenario 1", subtitle: "Decrease in Sales/Revenue by 5%", data: sensitivity.scenarioSalesDecrease },
+    { title: "Scenario 2", subtitle: "Increase in Variable Cost 5%", data: sensitivity.scenarioVariableCostIncrease },
+    { title: "Scenario 3", subtitle: "Increase in Fixed Cost (other than Depreciation) 5%", data: sensitivity.scenarioFixedCostIncrease }
+  ];
+
+  scenarios.forEach((scen) => {
+    if (!scen.data || scen.data.length === 0) return;
+
+    if (doc.y > 550) doc.addPage();
+
+    // --- ERROR FIX: String ki jagah direct fonts.bold/regular use kiya hai ---
+    doc.moveDown(1);
+
+    // Yahan fonts.bold wo path hai jo senior ne bheja hai, system isse crash nahi karega
+    if (fonts?.bold) doc.font(fonts.bold);
+
+    doc.fillColor("#b91c1c")
+      .fontSize(10)
+      .text(scen.title, 20);
+
+    if (fonts?.regular) doc.font(fonts.regular);
+
+    doc.fillColor("#374151")
+      .fontSize(9)
+      .text(scen.subtitle);
+
+    doc.moveDown(0.5);
+
+    const rows: TableRow[] = [
+      [
+        { text: "PARTICULARS", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
+        ...scen.data.map((d: any, i: number) => ({
+          text: `${i === 0 ? 'ESTIMATED' : 'PROJECTED'} FY ${d.financialYear}`,
+          width: cellWidth,
+          color: "#b91c1c",
+          bold: true,
+          fontSize: dynamicFontSize,
+          align: "center" as const
+        }))
+      ],
+      [
+        { text: "Revenue Income / Gross Sales", width: particularsWidth, fontSize: dynamicFontSize },
+        ...scen.data.map((d: any) => ({
+          text: formatInMillions(d.totalRevenueIncome),
+          width: cellWidth,
+          align: "center" as const,
+          fontSize: dynamicFontSize
+        }))
+      ],
+      [
+        { text: "EBITDA", width: particularsWidth, fontSize: dynamicFontSize },
+        ...scen.data.map((d: any) => ({
+          text: formatInMillions(d.ebitdaValue),
+          width: cellWidth,
+          align: "center" as const,
+          fontSize: dynamicFontSize
+        }))
+      ],
+      [
+        { text: "EBIT", width: particularsWidth, fontSize: dynamicFontSize },
+        ...scen.data.map((d: any) => ({
+          text: formatInMillions(d.ebitValue),
+          width: cellWidth,
+          align: "center" as const,
+          fontSize: dynamicFontSize
+        }))
+      ],
+      [
+        { text: "Profit Before Tax", width: particularsWidth, fontSize: dynamicFontSize, bold: true, color: "#b91c1c" },
+        ...scen.data.map((d: any) => ({
+          text: formatInMillions(d.profitBeforeTaxValue),
+          width: cellWidth,
+          align: "center" as const,
+          fontSize: dynamicFontSize,
+          bold: true,
+          color: "#b91c1c"
+        }))
+      ]
+    ];
+
+    drawFlexibleTable(doc, rows, {
+      fontSize: dynamicFontSize,
+      startX: 30,
+      ...fonts // Iske andar fonts.fontPath aur fonts.fontBoldPath ja rahe hain
+    });
+
+    doc.moveDown(1.5);
+  });
+};
 export const drawAssumptionsTable = (doc: any, projectData: any, fonts: any) => {
   const assumptions = projectData.assumptions?.particulars || {};
   const industryList = projectData.assumptions?.industryJustifications || [];
@@ -1303,7 +1534,77 @@ export const drawAssumptionsTable = (doc: any, projectData: any, fonts: any) => 
 };
 
 
-export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: Function , fonts: any) => {
+export const drawProjectedBalanceSheet = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
+  const balanceSheetData = projectData.projectedBalanceSheet || [];
+  if (balanceSheetData.length === 0) return;
+
+  const loanPeriod = balanceSheetData.length;
+  const particularsWidth = 185;
+  const totalWidth = 540;
+  const cellWidth = (totalWidth - particularsWidth) / loanPeriod;
+  const dynamicFontSize = loanPeriod > 5 ? 7 : 8;
+
+  // 1. Header Logic (Estimated vs Projected)
+  const headerStatusRow = [
+    { text: "", width: particularsWidth },
+    ...balanceSheetData.map((d: any, index: number) => ({
+      text: index === 0 ? "ESTIMATED" : "PROJECTED",
+      width: cellWidth,
+      color: "#b91c1c",
+      bold: true,
+      fontSize: dynamicFontSize - 1,
+      align: "center"
+    }))
+  ];
+
+  // 2. Year Header
+  const yearHeaderRow = [
+    { text: "YEARS", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
+    ...balanceSheetData.map((d: any) => ({
+      text: `FY ${d.year}`,
+      width: cellWidth,
+      color: "#b91c1c",
+      bold: true,
+      fontSize: dynamicFontSize,
+      align: "center"
+    }))
+  ];
+
+  // 3. Merged Data Rows (Liabilities + Assets)
+  const TableRows: any[] = [
+    headerStatusRow,
+    yearHeaderRow,
+    // LIABILITIES SECTION
+    [{ text: "LIABILITIES", width: totalWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize }],
+    [{ text: "Capital", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.capital || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Add:- Profit During year", width: particularsWidth, fontSize: dynamicFontSize, italic: true }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.addProfitDuringYear || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Less:- Drawings", width: particularsWidth, fontSize: dynamicFontSize, italic: true }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.lessDrawings || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Term Loan", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.termLoan || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Cash Credit", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.cashCredit || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Current Liabilities & Provision", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.currentLiabilitiesAndProvision || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Provision For Tax", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.provisionForTax || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "TOTAL LIABILITIES", width: particularsWidth, fontSize: dynamicFontSize, bold: true, color: "#b91c1c" }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.totalLiabilities || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize, bold: true, color: "#b91c1c" }))],
+
+    // ASSETS SECTION (Merged directly below)
+    [{ text: "ASSETS", color: "#b91c1c",width: totalWidth, bold: true, fontSize: dynamicFontSize }],
+    [{ text: "Net Fixed Assets (W.D.V.)", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.netFixedAssetsWDV || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Stock of W.I.P. & Finished Product", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.stockOfWIP || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Sundry Debtors", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.sundryDebtors || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Deposit & Advance", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.depositAndAdvance || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "Cash & Bank Balance", width: particularsWidth, fontSize: dynamicFontSize }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.cashAndBankBalance || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize }))],
+    [{ text: "TOTAL ASSETS", width: particularsWidth, fontSize: dynamicFontSize, bold: true, color: "#b91c1c" }, ...balanceSheetData.map((d: any) => ({ text: formatRupee(d.totalAssets || 0), width: cellWidth, align: "center", fontSize: dynamicFontSize, bold: true, color: "#1e293b" }))]
+  ];
+
+  // Heading & Final Table Draw
+  if (doc.y > 500) doc.addPage();
+  doc.fillColor("#b91c1c").fontSize(11).text("PROJECTED BALANCE SHEET", 30);
+  doc.moveDown(0.5);
+
+  // Flexible table ko ab merged data pass ho raha hai
+  drawFlexibleTable(doc, TableRows, { fontSize: dynamicFontSize, ...fonts });
+};
+
+export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: Function, fonts: any) => {
   const loanData = projectData.loanCalculation || [];
   const fontSize = 8;
   const colWidth = 540 / 6;
@@ -1312,7 +1613,7 @@ export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: 
   const yearlyRows = [];
   for (let i = 0; i < loanData.length; i += 12) {
     const chunk = loanData.slice(i, i + 12);
-    const yearLabel = chunk[0].date.split('/')[2]; 
+    const yearLabel = chunk[0].date.split('/')[2];
 
     const yearPrincipal = chunk.reduce((s: number, m: any) => s + m.principal, 0);
     const yearInterest = chunk.reduce((s: number, m: any) => s + m.interest, 0);
@@ -1345,7 +1646,7 @@ export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: 
 
   // --- 3. RENDER TABLE 2 (INTEREST SUMMARY) ---
   const summaryWidth = 540 / (yearlyRows.length + 1);
-  
+
   // Logic for CC Interest (Fixed based on Working Capital Loan)
   const ccInterestYearly = (projectData.loanDetails.workingCapitalLoan * (projectData.assumptions?.particulars?.interestRateCashCredit / 100));
 
@@ -1374,16 +1675,16 @@ export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: 
   drawFlexibleTable(doc, summaryRows, { ...fonts, fontSize });
 
   // --- 4. RENDER NOTES SECTION (Now safely at the bottom) ---
-  doc.x = 72; 
+  doc.x = 72;
   // doc.moveDown(2); 
 
   doc.fontSize(8).fillColor("#000000");
- const notesOptions = { align: 'left', width: 500 };
+  const notesOptions = { align: 'left', width: 500 };
   doc.fontSize(8).fillColor("#000000");
-  doc.text(`1. Repayment term has been considered to be in equally monthly installment starting from ${loanData[0]?.date }`,notesOptions);
-  doc.text(`2. Term Loan Interest has been considered @ ${projectData.assumptions?.particulars?.interestRateTermLoan } % p.a.`,notesOptions);
-  doc.text(`3. Cash Credit Interest has been considered @ ${projectData.assumptions?.particulars?.interestRateCashCredit } % p.a.`,notesOptions);
+  doc.text(`1. Repayment term has been considered to be in equally monthly installment starting from ${loanData[0]?.date}`, notesOptions);
+  doc.text(`2. Term Loan Interest has been considered @ ${projectData.assumptions?.particulars?.interestRateTermLoan} % p.a.`, notesOptions);
+  doc.text(`3. Cash Credit Interest has been considered @ ${projectData.assumptions?.particulars?.interestRateCashCredit} % p.a.`, notesOptions);
   doc.moveDown(1);
 
- 
+
 };

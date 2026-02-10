@@ -4,7 +4,7 @@ import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawAssumptionsTable ,drawLoanInterestTables } from "@/helpers/pdfSections";
+import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios,drawSensitivityAnalysis,drawProjectedBalanceSheet, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/pdfSections";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
   doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
@@ -152,6 +152,30 @@ export async function POST(request: Request) {
     doc.addPage();
     drawHeader(doc, "Break Even Analysis", fontBoldPath)
     drawBreakEvenSales(doc, projectData, formatRupees, fonts)
+    //---------Loan Interest Table Detail-------
+    doc.addPage();
+    drawHeader(doc, "Loan Interest Table Detail", fontBoldPath)
+    drawLoanInterestTables(doc, projectData, formatRupees, fonts)
+    //---------Computation of MPBF-------
+    doc.addPage();
+    drawHeader(doc, "Computation of Maximum Permissible Bank Finance (MPBF)", fontBoldPath);
+    drawComputationOfMPBF(doc, projectData, formatRupees, fonts);
+
+    //------------drawImportantRatios----------
+    doc.addPage();
+    drawHeader(doc, "CALCULATION OF SOME IMPORTANT RATIOS", fontBoldPath);
+    drawImportantRatios(doc, projectData, formatRupees, fonts);
+
+
+    //-------------drawSensitivityAnalysis
+    doc.addPage();
+    drawHeader(doc, "SENSITIVITY ANALYSIS", fontBoldPath);
+    drawSensitivityAnalysis(doc, projectData, formatRupees, fonts);
+    //----------------drawProjectedBalanceSheet-------------
+    doc.addPage();
+    drawHeader(doc, "PROJECTED BALANCE SHEET", fontBoldPath);
+    drawProjectedBalanceSheet(doc, projectData, formatRupees, fonts);
+
     //-----------Assumption-----------
     doc.addPage();
     drawHeader(doc, "ASSSUMPTION", fontBoldPath)
@@ -161,11 +185,8 @@ export async function POST(request: Request) {
     doc.addPage();
     drawHeader(doc, "Loan Calculation", fontBoldPath)
     drawLoanCalculation(doc, projectData, formatRupees, fonts)
-  
-    //---------Loan Interest Table Detail-------
-    doc.addPage();
-    drawHeader(doc,"Loan Interest Table Detail", fontBoldPath)
-    drawLoanInterestTables(doc,projectData,formatRupees, fonts)
+
+
     doc.end();
     const pdfBuffer = await pdfDone;
 
