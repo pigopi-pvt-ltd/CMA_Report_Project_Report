@@ -511,7 +511,7 @@ export async function POST(request: Request) {
 
     //
 
-    const breakEvenAnalysis = [];
+    const breakEvenSalesData = [];
 
     for (let i = 0; i < data.loanPeriod; i++) {
       const profit = profitabilityStatement[i];
@@ -538,7 +538,7 @@ export async function POST(request: Request) {
         ? Math.round((sales * fixedCosts) / grossProfit)
         : 0;
 
-      breakEvenAnalysis.push({
+      breakEvenSalesData.push({
         year: profit.year,
         sales: sales,
         variableCosts: variableCosts,
@@ -821,7 +821,251 @@ export async function POST(request: Request) {
       currentCapitalBalance = (currentCapitalBalance + profitDuringYear) - drawings;
     }
 
+    //--------------Break Even Analysis---------------
+    // Break-Even Analysis API Logic
+    const breakEvenAnalysis = [];
 
+    // Profitability Statement se data fetch karke BEA calculate karein
+    for (let i = 0; i < profitabilityStatement.length; i++) {
+      const p = profitabilityStatement[i];
+
+      // 1. VARIABLE COSTS MAPPING
+      const varCosts = {
+        purchaseEquipments: p.purchaseOfEquipments || 0,
+        purchaseRawMaterials: p.rawMaterialConsumed || 0,
+        freight: p.freight || 0,
+        powerFuel: p.powerFuel || 0,
+        printingStationery: p.printingStationery || 0,
+        electricityExpenses: p.electricityExpenses || 0,
+        miscExpenses: p.miscExpenses || 0,
+        otherExpenses: p.otherExpenses || 0,
+        postageCourier: p.postageCourier || 0,
+        repairMaintenance: p.repairMaintenance || 0,
+      };
+
+      // Total Variable Cost Calculation
+      const vTotal = Object.values(varCosts).reduce((a, b) => a + b, 0);
+
+      // 2. FIXED COSTS MAPPING
+      const fixedCostsData = {
+        rent: p.rent || 0,
+        salaryWages: p.salaryWages || 0,
+        interestTermLoan: p.interestOnTermLoan || 0,
+        interestCCLoan: p.interestOnWorkingCapital || 0,
+        advertisement: p.advertisement || 0,
+        depreciation: p.depreciation || 0,
+        staffWelfare: p.staffWelfare || 0,
+        transportConvenyance: p.transportConvenyance || 0,
+      };
+
+      // Total Fixed Cost Calculation
+      const fTotal = Object.values(fixedCostsData).reduce((a, b) => a + b, 0);
+
+      // 3. BREAK-EVEN METRICS CALCULATION
+      const sales = p.totalA || 0; // Revenue from Sales
+      const contribution = sales - vTotal; // D = A - B
+
+      // E. P.V Ratio (D/A * 100)
+      const pvRatio = sales > 0 ? (contribution / sales) * 100 : 0;
+
+      // F. Break-Even Sales (Fixed Cost / PV Ratio)
+      const bepSales = pvRatio > 0 ? (fTotal / (pvRatio / 100)) : 0;
+
+      // G. CASH BREAK-EVEN (Fixed Cost without Depr / PV Ratio)
+      const fixedCostWithoutDepr = fTotal - (p.depreciation || 0);
+      const cashBep = pvRatio > 0 ? (fixedCostWithoutDepr / (pvRatio / 100)) : 0;
+
+      // Final Object for Database & PDF
+      breakEvenAnalysis.push({
+        year: p.year,
+        // Metrics
+        revenueSales: sales,
+        variableCostTotal: vTotal,
+        fixedCostTotal: fTotal,
+        contribution: contribution,
+        pvRatio: parseFloat(pvRatio.toFixed(2)),
+        breakEvenSales: Math.round(bepSales),
+        cashBreakEven: Math.round(cashBep),
+        // Fixed Cost Breakup
+        ...fixedCostsData,
+        fixedCostWithoutDepr: fixedCostWithoutDepr,
+        // Variable Cost Breakup
+        ...varCosts
+      });
+    }
+
+
+    //--------------------projectedCashFlowType------------------
+
+    const projectedCashFlow = [];
+    let runningCashBalance = 0;
+
+    for (let i = 0; i < profitabilityStatement.length; i++) {
+      const profit = profitabilityStatement[i];
+      const balanceSheet = projectedBalanceSheet[i];
+      const previousBalanceSheet = i > 0 ? projectedBalanceSheet[i - 1] : null;
+
+      // SOURCES [A]
+      const pbit = profit.profitBeforeTax + profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
+      const depreciation = profit.depreciation || 0;
+      const increaseInCapital = i === 0 ? (totalProjectCost * 0.10) : 0;
+      const increaseInTermLoan = i === 0 ? termLoan : 0;
+      const increaseInCashCredit = i === 0 ? workingCapitalLoan : 0;
+
+      const decreaseInDebtors = i > 0 ? Math.max(0, (previousBalanceSheet?.sundryDebtors || 0) - (balanceSheet?.sundryDebtors || 0)) : 0;
+      const decreaseInStock = i > 0 ? Math.max(0, (previousBalanceSheet?.stockOfWIP || 0) - (balanceSheet?.stockOfWIP || 0)) : 0;
+      const provisions = profit.provisionForTaxation || 0;
+      const decreaseInAdvanceDeposits = 0; // As per your requirement
+
+      const totalA = pbit + depreciation + increaseInCapital + increaseInTermLoan + increaseInCashCredit + decreaseInAdvanceDeposits + decreaseInDebtors + provisions + decreaseInStock;
+
+      // USES [B]
+      const increaseInFixedAssets = i === 0 ? fixedCapitalInvested : 0;
+      const interestOnBankLoan = profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
+      const drawing = i === 0 ? 0 : Math.round(profit.profitAfterTax * 0.20);
+      const taxPayment = profit.provisionForTaxation || 0;
+
+      const totalB = increaseInFixedAssets + interestOnBankLoan + drawing + taxPayment;
+
+      const netSurplusDeficit = totalA - totalB;
+      const openCashBalance = Math.round(runningCashBalance);
+      const closingCashBalance = Math.round(openCashBalance + netSurplusDeficit);
+
+      projectedCashFlow.push({
+        year: profit.year,
+        pbit,
+        depreciation,
+        increaseInCapital,
+        increaseInTermLoan,
+        increaseInCashCredit,
+        decreaseInAdvanceDeposits,
+        decreaseInDebtors,
+        provisions,
+        decreaseInStock,
+        totalA,
+        increaseInFixedAssets,
+        interestOnBankLoan,
+        drawing,
+        taxPayment,
+        totalB,
+        openCashBalance,
+        netSurplusDeficit,
+        closingCashBalance
+      });
+
+      runningCashBalance = closingCashBalance;
+    }
+
+    const financialPosition = [];
+
+    for (let i = 0; i < profitabilityStatement.length; i++) {
+      const profit = profitabilityStatement[i];
+      const ratio = ratioAnalysis[i];
+      const balanceSheet = projectedBalanceSheet[i];
+
+      // Fix: Safe calculation with fallback to 0
+      const profitAfterTax = Number(profit.profitAfterTax) || 0;
+      const depreciation = Number(profit.depreciation) || 0;
+      const cashGeneration = profitAfterTax + depreciation;
+
+      // Safe Balance Sheet values
+      const totalAssets = Number(balanceSheet.totalAssets) || 0;
+      const netFixedAssets = Number(balanceSheet.netFixedAssetsWDV) || 0;
+      const currentLiabilities = Number(balanceSheet.currentLiabilitiesAndProvision) || 0;
+
+      financialPosition.push({
+        year: profit.year.toString(),
+        netSales: Number(profit.totalA) || 0,
+        netProfitAfterTax: profitAfterTax,
+        cashGeneration: cashGeneration, // Ab ye NaN nahi aayega
+        netWorkingCapital: (totalAssets - netFixedAssets) - currentLiabilities,
+        currentRatio: Number(ratio.currentRatio) || 0,
+        totalNetWorth: Number(ratio.tnw) || 0,
+        tolToTnwRatio: Number(ratio.tolToTnw) || 0,
+        termLiabilityToTnwRatio: Number(ratio.termLiabilityToTnw) || 0
+      });
+    }
+
+
+    //-----------------------AFPTable------------------
+    const AFPTable = [];
+
+    for (let i = 0; i < profitabilityStatement.length; i++) {
+      const balanceSheet = projectedBalanceSheet[i];
+
+      // Liabilities Side
+      const capitalAndReserves = Number(balanceSheet.capital) || 0;
+      const longTermLiabilities = Number(balanceSheet.termLoan) || 0;
+      const currentLiabilities = (Number(balanceSheet.currentLiabilitiesAndProvision) || 0) + (Number(balanceSheet.cashCredit) || 0);
+      const totalLiability = capitalAndReserves + longTermLiabilities + currentLiabilities;
+
+      // Assets Side
+      const fixedAssets = Number(balanceSheet.netFixedAssetsWDV) || 0;
+      const nonCurrentAssets = 0;
+      const currentAssets = (Number(balanceSheet.stockOfWIP) || 0) +
+        (Number(balanceSheet.sundryDebtors) || 0) +
+        (Number(balanceSheet.depositAndAdvance) || 0) +
+        (Number(balanceSheet.cashAndBankBalance) || 0);
+      const intangibleAssets = 0;
+      const totalAssets = fixedAssets + nonCurrentAssets + currentAssets + intangibleAssets;
+
+      AFPTable.push({
+        year: balanceSheet.year.toString(),
+        capitalAndReserves,
+        longTermLiabilities,
+        currentLiabilities,
+        totalLiability,
+        fixedAssets,
+        nonCurrentAssets,
+        currentAssets,
+        intangibleAssets,
+        totalAssets
+      });
+    }
+
+
+    //--------------final Assumption------------
+
+    // 1. Dynamic Data Extraction (Loan Period aur Workforce)
+    const selectedLoanPeriodText = data.loanDetails?.loanPeriod || "5 Years";
+    // Text mein se number nikalne ke liye (e.g., "5 Years" -> 5)
+    const loanDurationYearsCount = parseInt(selectedLoanPeriodText.toString().replace(/[^0-9]/g, '')) || 5;
+
+    const employmentPotentialCount = data.businessDetails?.employmentPotential || "10 Above";
+    const averageDebtServiceCoverageRatio = averageDSCR || 0;
+
+    // 2. Initialize Arrays (Senior Style)
+    const revenueFromSalesSummary = [];
+    const totalExpensesSummary = [];
+    const taxationProvisionSummary = [];
+
+    // 3. Loop through Profitability Statement and Push Data
+    for (const profitabilityItem of profitabilityStatement) {
+
+      // Revenue (Gross Receipts) Table Data Push
+      revenueFromSalesSummary.push({
+        year: profitabilityItem.year.toString(),
+        grossReceipts: Number(profitabilityItem.totalA) || 0
+      });
+
+      // Total Expenses Table Data Push
+      totalExpensesSummary.push({
+        year: profitabilityItem.year.toString(),
+        totalExpenditure: Number(profitabilityItem.totalB) || 0
+      });
+
+      // Taxation Table Data Push
+      taxationProvisionSummary.push({
+        year: profitabilityItem.year.toString(),
+        taxAmount: Number(profitabilityItem.provisionForTaxation) || 0
+      });
+    }
+
+    // 4. Final Assumptions Object taiyaar karein
+    const finalFinancialAssumptions = {
+      incrementInGrossReceipts: data.assumptions?.projectedIncrementReceipts || "125%",
+      incrementInExpenditure: data.assumptions?.projectedIncrementExpenditure || "110%"
+    };
 
     // --- 4. PREPARE FINAL DATA ---
 
@@ -856,13 +1100,18 @@ export async function POST(request: Request) {
       targetMarket,
       ebidtaAnalysis,
       returnOnInvestmentAnalysis,
-      breakEvenAnalysis,
+      breakEvenSalesData,
       loanCalculation,
       loanInterestTablesDetail,
       mpbfAnalysis,
       sensitivityAnalysis,
       ratioAnalysis,
       projectedBalanceSheet,
+      breakEvenAnalysis,
+      projectedCashFlow,
+      financialPosition,
+      AFPTable,
+      finalFinancialAssumptions,
       assumptions: assumptions,
       industryJustifications: industryList
 
