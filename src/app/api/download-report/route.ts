@@ -4,7 +4,7 @@ import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios,drawSensitivityAnalysis,drawProjectedBalanceSheet, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/pdfSections";
+import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios, drawSensitivityAnalysis, drawProjectedBalanceSheet,drawBreakEvenAnalysis,drawCashFlowStatement,drawFinancialPosition,drawAFPTable,drawFinalAssumption, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/pdfSections";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
   doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
 
     //--------- breakEvenAnalysis--------------
     doc.addPage();
-    drawHeader(doc, "Break Even Analysis", fontBoldPath)
+    drawHeader(doc, "BREAK EVEN SALSE", fontBoldPath)
     drawBreakEvenSales(doc, projectData, formatRupees, fonts)
     //---------Loan Interest Table Detail-------
     doc.addPage();
@@ -176,10 +176,31 @@ export async function POST(request: Request) {
     drawHeader(doc, "PROJECTED BALANCE SHEET", fontBoldPath);
     drawProjectedBalanceSheet(doc, projectData, formatRupees, fonts);
 
+    //------------BreakEvenAnalysis------------------
+    doc.addPage();
+    drawHeader(doc, "BREAK EVEN ANALYSIS", fontBoldPath);
+    drawBreakEvenAnalysis(doc, projectData, formatRupees, fonts);
+
+    //--------------drawCashFlowStatement
+    doc.addPage();
+    drawHeader(doc, "CASH FLOW STATEMENT", fontBoldPath);
+    drawCashFlowStatement(doc, projectData, formatRupees, fonts);
+
+    doc.addPage();
+    drawHeader(doc,"Financial Position",fontBoldPath);
+    drawFinancialPosition(doc,projectData,formatRupees,fonts);
+    
+    drawHeader(doc,"AFP",fontBoldPath);
+    drawAFPTable(doc,projectData,formatRupees, fonts);
+  //-------------Final Assumption-------------
+    doc.addPage();
+    drawHeader(doc, "ASSSUMPTION", fontBoldPath)
+    drawFinalAssumption(doc, projectData, formatRupees, fonts)
     //-----------Assumption-----------
     doc.addPage();
     drawHeader(doc, "ASSSUMPTION", fontBoldPath)
     drawAssumptionsTable(doc, projectData, fonts)
+    
 
     //-------------LoanCalculation-------------
     doc.addPage();

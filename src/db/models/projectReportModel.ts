@@ -170,7 +170,7 @@ export type targetMarketType = {
   expectedShare: string;
 }
 
-export type breakEvenAnalysisType = {
+export type breakEvenSalesType = {
   year: number;
   sales: number;
   variableCosts: number;
@@ -270,7 +270,79 @@ export type projectedBalanceSheetType = {
   totalAssets: number;                    // Grand Total (Assets)
 };
 
+export type breakEvenAnalysisType = {
+  year: string;
+  // BREAK-EVEN METRICS
+  revenueSales: number;
+  variableCostTotal: number;
+  fixedCostTotal: number;
+  contribution: number;
+  pvRatio: number;
+  breakEvenSales: number;
+  cashBreakEven: number;
 
+  // FIXED COSTS
+  rent: number;
+  salaryWages: number;
+  interestTermLoan: number;
+  interestCCLoan: number;
+  advertisement: number;
+  depreciation: number;
+  staffWelfare: number;
+  transportConvenyance: number;
+  fixedCostWithoutDepr: number;
+
+  // VARIABLE COSTS
+  purchaseEquipments: number;
+  purchaseRawMaterials: number;
+  freight: number;
+  powerFuel: number;
+  printingStationery: number;
+  electricityExpenses: number;
+  miscExpenses: number;
+  otherExpenses: number;
+  postageCourier: number;
+  repairMaintenance: number;
+};
+
+
+export type projectedCashFlowType = {
+  year: string;
+  // SOURCES
+  pbit: number;
+  depreciation: number;
+  increaseInCapital: number;
+  increaseInTermLoan: number;
+  increaseInCashCredit: number;
+  decreaseInAdvanceDeposits: number;
+  decreaseInDebtors: number;
+  provisions: number;
+  decreaseInStock: number;
+  totalA: number;
+
+  // USES
+  increaseInFixedAssets: number;
+  interestOnBankLoan: number;
+  drawing: number;
+  taxPayment: number;
+  totalB: number;
+
+  // POSITION
+  openCashBalance: number;
+  netSurplusDeficit: number;
+  closingCashBalance: number;
+};
+export type financialPositionType = {
+  year: string;
+  netSales: number;
+  netProfitAfterTax: number;
+  cashGeneration: number;
+  netWorkingCapital: number;
+  currentRatio: number;
+  totalNetWorth: number; // TNW
+  tolToTnwRatio: number; // TOL/TNW
+  termLiabilityToTnwRatio: number; // Term Liability/TNW
+};
 
 export type IndustryJustificationEntry = {
   industry: string;           // Manufacturing, Service, etc.
@@ -292,6 +364,51 @@ export type ProjectAssumptionsType = {
   industryJustifications: IndustryJustificationEntry[];
 };
 
+export type AFPTableType = {
+  year: string;
+  capitalAndReserves: number;
+  longTermLiabilities: number;
+  currentLiabilities: number;
+  totalLiability: number;
+  fixedAssets: number;
+  nonCurrentAssets: number;
+  currentAssets: number;
+  intangibleAssets: number;
+  totalAssets: number;
+};
+
+
+export type finalAssumptionType = {
+  loanDurationYearsCount: number;
+  averageDebtServiceCoverageRatio: number;
+
+  // Tables
+  revenueFromSalesSummary: {
+    year: string;
+    grossReceipts: number;
+  }[];
+
+  totalExpensesSummary: {
+    year: string;
+    totalExpenditure: number;
+  }[];
+
+  taxationProvisionSummary: {
+    year: string;
+    taxAmount: number;
+  }[];
+
+  // Assumptions
+  financialAssumptions: {
+    incrementInGrossReceipts: string;
+    incrementInExpenditure: string;
+  };
+
+  // Workforce
+  workforceDetails: {
+    employmentPotentialCount: string;
+  };
+};
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -317,7 +434,7 @@ export interface ProjectData extends Document {
   ebidtaAnalysis: ebidtaAnalysisType[];
   returnOnInvestmentAnalysis: ReturnOnInvestmentType[];
   targetMarket: targetMarketType[];
-  breakEvenAnalysis: breakEvenAnalysisType[];
+  breakEvenSalesData: breakEvenSalesType[];
   loanCalculation: LoanCalculationEntry[];
   mpbfAnalysis: mpbfAnalysisType[];
   ratioAnalysis: ratioAnalysisType[];
@@ -327,8 +444,13 @@ export interface ProjectData extends Document {
     scenarioFixedCostIncrease: SensitivityScenarioEntry[];
   };
   projectedBalanceSheet: projectedBalanceSheetType[];
+  breakEvenAnalysis: breakEvenAnalysisType[];
+  projectedCashFlow: projectedCashFlowType[];
+  financialPosition: financialPositionType[];
+  AFPTable: AFPTableType[];
   loanInterestTablesDetail: any[];
   assumptions: ProjectAssumptionsType;
+  finalAssumption: finalAssumptionType;
 
 
 }
@@ -685,7 +807,7 @@ const ProjectReportSchema = new Schema<ProjectData>(
         ReturnOnInvestment: Number
       }
     ],
-    breakEvenAnalysis: [
+    breakEvenSalesData: [
       {
         year: { type: Number, required: true },
         sales: { type: Number, default: 0 },
@@ -782,6 +904,114 @@ const ProjectReportSchema = new Schema<ProjectData>(
         totalAssets: Number,
       }
     ],
+    breakEvenAnalysis: [{
+      year: String,
+      // BREAK-EVEN METRICS
+      revenueSales: { type: Number, default: 0 },
+      variableCostTotal: { type: Number, default: 0 },
+      fixedCostTotal: { type: Number, default: 0 },
+      contribution: { type: Number, default: 0 },
+      pvRatio: { type: Number, default: 0 },
+      breakEvenSales: { type: Number, default: 0 },
+      cashBreakEven: { type: Number, default: 0 },
+
+      // FIXED COSTS
+      rent: { type: Number, default: 0 },
+      salaryWages: { type: Number, default: 0 },
+      interestTermLoan: { type: Number, default: 0 },
+      interestCCLoan: { type: Number, default: 0 },
+      advertisement: { type: Number, default: 0 },
+      depreciation: { type: Number, default: 0 },
+      staffWelfare: { type: Number, default: 0 },
+      transportConvenyance: { type: Number, default: 0 },
+      fixedCostWithoutDepr: { type: Number, default: 0 },
+
+      // VARIABLE COSTS
+      purchaseEquipments: { type: Number, default: 0 },
+      purchaseRawMaterials: { type: Number, default: 0 },
+      freight: { type: Number, default: 0 },
+      powerFuel: { type: Number, default: 0 },
+      printingStationery: { type: Number, default: 0 },
+      electricityExpenses: { type: Number, default: 0 },
+      miscExpenses: { type: Number, default: 0 },
+      otherExpenses: { type: Number, default: 0 },
+      postageCourier: { type: Number, default: 0 },
+      repairMaintenance: { type: Number, default: 0 }
+
+    }],
+    projectedCashFlow: [{
+      year: String,
+      pbit: { type: Number, default: 0 },
+      depreciation: { type: Number, default: 0 },
+      increaseInCapital: { type: Number, default: 0 },
+      increaseInTermLoan: { type: Number, default: 0 },
+      increaseInCashCredit: { type: Number, default: 0 },
+      decreaseInAdvanceDeposits: { type: Number, default: 0 },
+      decreaseInDebtors: { type: Number, default: 0 },
+      provisions: { type: Number, default: 0 },
+      decreaseInStock: { type: Number, default: 0 },
+      totalA: { type: Number, default: 0 },
+      increaseInFixedAssets: { type: Number, default: 0 },
+      interestOnBankLoan: { type: Number, default: 0 },
+      drawing: { type: Number, default: 0 },
+      taxPayment: { type: Number, default: 0 },
+      totalB: { type: Number, default: 0 },
+      openCashBalance: { type: Number, default: 0 },
+      netSurplusDeficit: { type: Number, default: 0 },
+      closingCashBalance: { type: Number, default: 0 }
+    }],
+    financialPosition: [{
+      year: String,
+      netSales: { type: Number, default: 0 },
+      netProfitAfterTax: { type: Number, default: 0 },
+      cashGeneration: { type: Number, default: 0 },
+      netWorkingCapital: { type: Number, default: 0 },
+      currentRatio: { type: Number, default: 0 },
+      totalNetWorth: { type: Number, default: 0 },
+      tolToTnwRatio: { type: Number, default: 0 },
+      termLiabilityToTnwRatio: { type: Number, default: 0 }
+    }],
+    AFPTable: [{
+      year: String,
+      capitalAndReserves: { type: Number, default: 0 },
+      longTermLiabilities: { type: Number, default: 0 },
+      currentLiabilities: { type: Number, default: 0 },
+      totalLiability: { type: Number, default: 0 },
+      fixedAssets: { type: Number, default: 0 },
+      nonCurrentAssets: { type: Number, default: 0 },
+      currentAssets: { type: Number, default: 0 },
+      intangibleAssets: { type: Number, default: 0 },
+      totalAssets: { type: Number, default: 0 }
+    }],
+
+    finalAssumption: [{
+      loanDurationYearsCount: { type: Number },
+      averageDebtServiceCoverageRatio: { type: Number },
+
+      revenueFromSalesSummary: [{
+        year: String,
+        grossReceipts: Number
+      }],
+
+      totalExpensesSummary: [{
+        year: String,
+        totalExpenditure: Number
+      }],
+
+      taxationProvisionSummary: [{
+        year: String,
+        taxAmount: Number
+      }],
+
+      financialAssumptions: {
+        incrementInGrossReceipts: String,
+        incrementInExpenditure: String
+      },
+
+      workforceDetails: {
+        employmentPotentialCount: String
+      }
+    }],
 
     // ProjectReportSchema ke andar add karein
     assumptions: {
@@ -819,6 +1049,7 @@ const ProjectReportSchema = new Schema<ProjectData>(
         closingBalance: { type: Number },
       }
     ],
+
 
 
 
