@@ -1745,97 +1745,138 @@ export const drawAFPTable = (doc: any, projectData: any, formatRupee: Function, 
   drawFlexibleTable(doc, rows, { fontSize: 8, ...fonts, padding: 4 });
 };
 
-export const drawFinalAssumption = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
-  // 1. Data Safety Checks (Data extraction as per your API part)
+export const drawFinalAssumption = (doc: any, projectData: any, formatRupee: Function, fonts: any, leftX: number) => {
   const profitability = projectData?.profitabilityStatement || [];
-  const assumptionsParticulars = projectData?.assumptions?.particulars || {};
+  const assumptions = projectData?.assumptions?.particulars || {};
 
   // Dynamic Values
-  const rawLoanPeriod = projectData?.loanDetails?.loanPeriod || "5";
-  const loanPeriodValue = typeof rawLoanPeriod === 'string' ? rawLoanPeriod.replace(/[^0-9]/g, '') : rawLoanPeriod;
-  const averageDSCR = Number(projectData?.averageDSCR || 0).toFixed(2);
-  const employmentPotential = projectData?.loanDetails?.employmentPotential || projectData?.businessDetails?.employementPotential || "10 Above";
+  const loanPeriod = projectData?.loanPeriod || "5";
+  const averageDSCR = projectData?.averageDSCR || "0.00";
+  const employmentPotential = projectData?.loanDetails?.employmentPotential || "10 Above";
 
-  const startX = 30;
   const tableWidth = 530;
-  const particularsWidth = 230;
+  const particularsWidth = 160;
   const cellWidth = profitability.length > 0 ? (tableWidth - particularsWidth) / profitability.length : 0;
 
-  // Font Helper: System fonts ki jagah aapke passed fonts use honge
-  const boldFont = fonts.bold || 'Helvetica';
-  const normalFont = fonts.normal || 'Helvetica';
-
   // --- 1. INCREMENT TABLE ---
-  const incrementRows = [
+  const incrementRows: any[][] = [
     [
-      { text: "Particulars", width: particularsWidth, bold: true, fillColor: "#f3f4f6" },
-      { text: "Assumed Percentage", width: tableWidth - particularsWidth, align: "center", bold: true, fillColor: "#f3f4f6" }
+      { text: "Particulars", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+      { text: "Assumed Percentage", width: tableWidth - particularsWidth, align: "center", bold: true, fillColor: "#b91c1c" }
     ],
     [
       { text: "Projected Increment in Gross receipts", width: particularsWidth },
-      { text: String(assumptionsParticulars.projectedIncrementReceipts || "125%"), width: tableWidth - particularsWidth, align: "center" }
+      { text: assumptions.projectedIncrementReceipts , width: tableWidth - particularsWidth, align: "center" }
     ],
     [
       { text: "Projected Increment in Expenditure", width: particularsWidth },
-      { text: String(assumptionsParticulars.projectedIncrementExpenditure || "110%"), width: tableWidth - particularsWidth, align: "center" }
+      { text: assumptions.projectedIncrementExpenditure , width: tableWidth - particularsWidth, align: "center" }
     ]
   ];
+  drawFlexibleTable(doc, incrementRows, { ...fonts });
 
-  // Senior Fix: Yahan 'incrementRows' pass karna jaruri tha
-  try {
-    // drawFlexibleTable(doc, incrementRows, { fontSize: 9, ...fonts });
-  } catch (err) {
-    console.error("Error drawing increment table:", err);
-  }
-
+  doc.moveDown(1);
+  doc.x = leftX
+  if (fonts?.regular) doc.font(fonts.regular).fontSize(10);
+  doc.text(`The entire projection is based on the assumption that the sales for ${loanPeriod} years will be growing as per the industry standards.`);
   doc.moveDown(1.5);
 
-  // --- 2. REVENUE TABLE (Fixing the Font Error) ---
+  // --- 2. REVENUE FROM SALES ---
   if (profitability.length > 0) {
-    // FIX: String font name ki jagah variable use kiya
-    doc.font(boldFont).fontSize(10).text("Revenue from sales");
-    doc.moveDown(0.5);
-
-    const revenueRows = [
+    const revenueRows: any[][] = [
       [
-        { text: "Particulars", width: particularsWidth, bold: true },
-        ...profitability.map((p: any) => ({ text: `FY ${p.year}`, width: cellWidth, align: "center", bold: true }))
+        { text: "", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+        ...profitability.map((p: any, i: number) => ({
+          text: i === 0 ? "ESTIMATED" : "PROJECTED",
+          width: cellWidth, align: "center", bold: true, fillColor: "#b91c1c", fontSize: 7
+        }))
+      ],
+      [
+        { text: "PARTICULARS", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+        ...profitability.map((p: any) => ({
+          text: `FY ${p.year}`, width: cellWidth, align: "center", bold: true, fillColor: "#b91c1c", fontSize: 8
+        }))
       ],
       [
         { text: "Gross Receipts/Turnover", width: particularsWidth },
-        ...profitability.map((p: any) => ({ text: formatRupee(p.totalA || 0), width: cellWidth, align: "center" }))
+        ...profitability.map((p: any) => ({ text: formatRupee(p.totalA || 0), width: cellWidth, align: "center", fontSize: 8 }))
       ]
     ];
-    drawFlexibleTable(doc, revenueRows, { fontSize: 8, ...fonts });
+    drawFlexibleTable(doc, revenueRows, { title: "REVENUE FROM SALES", ...fonts });
+    doc.moveDown(1.5);
   }
 
-  // --- 3. DYNAMIC TEXT CONTENT ---
-  doc.moveDown(1);
-  doc.font(normalFont).fontSize(10).fillColor("black");
+  // --- 3. TOTAL EXPENSES ---
+  if (profitability.length > 0) {
+    const expenseRows: any[][] = [
+      [
+        { text: "", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+        ...profitability.map((p: any, i: number) => ({
+          text: i === 0 ? "ESTIMATED" : "PROJECTED",
+          width: cellWidth, align: "center", bold: true, fillColor: "#b91c1c", fontSize: 7
+        }))
+      ],
+      [
+        { text: "PARTICULARS", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+        ...profitability.map((p: any) => ({
+          text: `FY ${p.year}`, width: cellWidth, align: "center", bold: true, fillColor: "#b91c1c", fontSize: 8
+        }))
+      ],
+      [
+        { text: "Total Expenses", width: particularsWidth },
+        ...profitability.map((p: any) => ({ text: formatRupee(p.totalB || 0), width: cellWidth, align: "center", fontSize: 8 }))
+      ]
+    ];
+    doc.x = leftX
+    drawFlexibleTable(doc, expenseRows, { title: "TOTAL EXPENSE FOR THE FIRM DURING THE PROJECTION YEARS WILL BE AS FOLLOWS", ...fonts });
+    doc.moveDown(1.5);
+  }
 
-  doc.text(
-    `The entire projection is based on the assumption that the sales for ${loanPeriodValue} years will be growing as per the industry standards.`,
-    { width: tableWidth, align: 'justify' }
-  );
+  // --- 4. PROVISION FOR TAXATION ---
+  if (profitability.length > 0) {
+    const taxRows: any[][] = [
+      [
+        { text: "", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+        ...profitability.map((p: any, i: number) => ({
+          text: i === 0 ? "ESTIMATED" : "PROJECTED",
+          width: cellWidth, align: "center", bold: true, fillColor: "#b91c1c", fontSize: 7
+        }))
+      ],
+      [
+        { text: "PARTICULARS", width: particularsWidth, bold: true, fillColor: "#b91c1c" },
+        ...profitability.map((p: any) => ({
+          text: `FY ${p.year}`, width: cellWidth, align: "center", bold: true, fillColor: "#b91c1c", fontSize: 8
+        }))
+      ],
+      [
+        { text: "Provision for Taxation", width: particularsWidth },
+        ...profitability.map((p: any) => ({ text: formatRupee(p.taxation || 0), width: cellWidth, align: "center", fontSize: 8 }))
+      ]
+    ];
+    doc.x = leftX
+    drawFlexibleTable(doc, taxRows, { title: "PROVISION FOR TAXATION ARE AS FOLLOWS", ...fonts });
+    doc.x = leftX
+    doc.moveDown(0.5);
+    doc.fontSize().fillColor("#060707").text("*Since the tax provision aligns with the 30% corporate tax rate.");
+    doc.moveDown(1.5);
+  }
+  doc.x = leftX
+  // --- 5. BUSINESS TEAM MEMBERS ---
+  const employmentRows: any[][] = [
+    [{ text: "Business Team Members", width: tableWidth, bold: true, fillColor: "#b91c1c", color: "#b91c1c" }],
+    [{ text: `The company initially plans to recruit ${employmentPotential} employees. As the business grows, the workforce will be expanded accordingly, with the anticipated rise in salary expenses already factored into the financial projections.`, width: tableWidth, align: 'justify' }]
+  ];
+  drawFlexibleTable(doc, employmentRows, { ...fonts });
 
-  doc.moveDown(0.5);
-  doc.text(
-    `*The provision for taxation is considered as per the prevailing income tax rates for the respective assessment years.`,
-    { width: tableWidth, align: 'justify', oblique: true }
-  );
-
-  // --- 4. CONCLUSION SECTION ---
+  // --- 6. CONCLUSION ---
   doc.moveDown(2);
-  doc.font(boldFont).fontSize(12).fillColor("#b91c1c").text("CONCLUSION");
+  if (fonts?.bold) doc.font(fonts.bold).fontSize(11).fillColor("#b91c1c").text("CONCLUSION");
   doc.moveDown(0.5);
-
-  doc.font(normalFont).fontSize(10).fillColor("black");
-  doc.text(
-    `Based on the projected financial statements, the project shows an Average Debt Service Coverage Ratio (DSCR) of ${averageDSCR}:1, which indicates the unit's strong ability to service its debt obligations. The employment potential of the unit is estimated at ${employmentPotential} persons.`,
-    { width: tableWidth, align: 'justify' }
-  );
+  if (fonts?.regular) doc.font(fonts.regular).fontSize(10).fillColor("black");
+  doc.x = leftX
+  const conclusionText = `A detailed analysis of the Debt Service Coverage Ratio (DSCR) reveals an average ratio of ${averageDSCR}, which indicates the unit's ability to service its debt obligations based on the projected financials.`;
+  doc.text(conclusionText, { width: tableWidth, align: 'justify' });
 };
-
 export const drawCashFlowStatement = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
   const cashFlowData = projectData.projectedCashFlow || [];
   const particularsWidth = 200; // Thoda bada rakha hai pure naam ke liye

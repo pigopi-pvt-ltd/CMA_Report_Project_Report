@@ -189,13 +189,13 @@ export async function POST(request: Request) {
     doc.addPage();
     drawHeader(doc,"Financial Position",fontBoldPath);
     drawFinancialPosition(doc,projectData,formatRupees,fonts);
-    
+    doc.x = leftX
     drawHeader(doc,"AFP",fontBoldPath);
     drawAFPTable(doc,projectData,formatRupees, fonts);
   //-------------Final Assumption-------------
     doc.addPage();
     drawHeader(doc, "ASSSUMPTION", fontBoldPath)
-    drawFinalAssumption(doc, projectData, formatRupees, fonts)
+    drawFinalAssumption(doc, projectData, formatRupees, fonts, leftX)
     //-----------Assumption-----------
     doc.addPage();
     drawHeader(doc, "ASSSUMPTION", fontBoldPath)
