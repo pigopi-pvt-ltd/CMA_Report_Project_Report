@@ -619,8 +619,8 @@ export const drawGeneralExpensesTable = (doc: any, projectData: any, formatInMil
 export const drawProfitabilityStatement = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const years = projectData.costStatement || [];
   const profitData = projectData.profitabilityStatement || [];
-  const genExpData = projectData.generalExpensesStatement || [];
-  const purchaseData = projectData.purchaseCostStatement || [];
+  // const genExpData = projectData.generalExpensesStatement || [];
+  // const purchaseData = projectData.purchaseCostStatement || [];
   const loanPeriod = projectData.loanPeriod || 5;
 
   const particularsWidth = 200;
@@ -646,25 +646,25 @@ export const drawProfitabilityStatement = (doc: any, projectData: any, formatInM
 
     // [{ text: "EXPENDITURE", color: "#b91c1c", width: 540, bold: true, fontSize: 8 }],
     // General Expenses se data utha rahe hain
-    [{ text: "Salary & Wages", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.salary || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Total Purchase of Equipments", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.totalPurchaseOfEquipments || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Frieght", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: "N/A", width: cellWidth, align: "center" }))],
-    [{ text: "Power & Fuel", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.powerAndFuel || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Interest on Loan (Term + WC)", width: particularsWidth }, ...profitData.map((p: any) => ({ text: formatInMillions((p.interestOnTermLoan || 0) + (p.interestOnWorkingCapital || 0)), width: cellWidth, align: "center" }))],
-    [{ text: "Interest on CC Loan", width: particularsWidth }, ...profitData.map((p: any) => ({ text: formatInMillions(p.interestOnCC || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Printing & Stationery", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.printingAndStationery || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Advertisement", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.advertisement || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Miscellaneous Expenses", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.miscellaneousExpenses || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Other Expenses", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.otherExpenses || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Postage & Courier", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.postageAndCourier || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Transport & Conveyance", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.transportAndConveyance || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Staff Welfare Expenses", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.staffWelfare || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Repair & Maintenance", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.repairAndMaintenance || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Depreciation", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.depreciation || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Rent", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.rent || 0), width: cellWidth, align: "center" }))],
-    [{ text: "Electricity Expenses", width: particularsWidth }, ...genExpData.map((g: any) => ({ text: formatInMillions(g.electricityExpenses || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Salary & Wages", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.salary || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Total Purchase of Equipments", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.totalPurchaseEquipment|| 0), width: cellWidth, align: "center" }))],
+    [{ text: "Frieght", width: particularsWidth }, ...profitData.map((g: any) => ({ text: "N/A", width: cellWidth, align: "center" }))],
+    [{ text: "Power & Fuel", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.powerAndFuel || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Interest on Loan (Term + WC)", width: particularsWidth }, ...profitData.map((p: any) => ({ text: formatInMillions((p.interestOnTermLoan || 0) + (p.interestOnCC || 0)), width: cellWidth, align: "center" }))],
+    [{ text: "Interest on CC Loan", width: particularsWidth }, ...profitData.map((p: any) => ({ text: formatInMillions(p.interestOnWorkingCapital || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Printing & Stationery", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.printingAndStationery || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Advertisement", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.advertisement || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Miscellaneous Expenses", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.miscellaneousExpenses || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Other Expenses", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.otherExpenses || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Postage & Courier", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.postageAndCourier || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Transport & Conveyance", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.transportAndConveyance || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Staff Welfare Expenses", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.staffWelfare || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Repair & Maintenance", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.repairAndMaintenance || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Depreciation", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.yearDepreciation || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Rent", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.rent || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Electricity Expenses", width: particularsWidth }, ...profitData.map((g: any) => ({ text: formatInMillions(g.electricityExpenses || 0), width: cellWidth, align: "center" }))],
     // Purchase Statement se data
-    [{ text: "Total Purchase of Raw Materials", width: particularsWidth }, ...purchaseData.map((pd: any) => ({ text: formatInMillions(pd.indigenous || 0), width: cellWidth, align: "center" }))],
+    [{ text: "Total Purchase of Raw Materials", width: particularsWidth }, ...profitData.map((pd: any) => ({ text: 'N/A', width: cellWidth, align: "center" }))],
 
     [
       { text: "TOTAL (B)", width: particularsWidth, bold: true, color: "#b91c1c" },
@@ -876,7 +876,7 @@ export const drawEBIDTAAnalysis = (doc: any, projectData: any, formatInMillions:
   const loanPeriod = projectData.loanPeriod || 5;
   const particularsWidth = 150;
   const dataWidth = 370;
-  const srNoWidth = 30; // Sr No के लिए अलग विड्थ
+  const srNoWidth = 30; 
 
   const rows: any[] = [
     // Header Row - Sr No + Particulars + Years
@@ -1010,7 +1010,7 @@ export const drawReturnOnInvestment = (doc: any, projectData: any, formatInMilli
 
 //---------BreakEvenSales------------
 export const drawBreakEvenSales = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
-  const beData = projectData.breakEvenAnalysis || [];
+  const beData = projectData.breakEvenSalesData || [];
   const loanPeriod = projectData.loanPeriod || 5;
 
   const srWidth = 50;
@@ -1116,12 +1116,12 @@ export const drawCalculationOfInterestOnTermLoan = (doc: any, projectData: any, 
     ],
     [
       { text: "CASH CREDIT INTEREST", width: particularsWidth, color: "#b91c1c", bold: true },
-      ...profitability.map((d: any) => ({ text: formatInMillions(d.interestOnWorkingCapital || 0), width: cellWidth, align: "center" }))
+      ...profitability.map((d: any) => ({ text: formatInMillions(d.interestOnCC || 0), width: cellWidth, align: "center" }))
     ],
     [
       { text: "TOTAL INTEREST", width: particularsWidth, color: "#b91c1c", bold: true },
       ...profitability.map((d: any) => ({
-        text: formatInMillions(d.interestOnTermLoan + (d.interestOnWorkingCapital || 0)),
+        text: formatInMillions(d.interestOnTermLoan + (d.interestOnCC || 0)),
         width: cellWidth,
         align: "center",
         bold: true

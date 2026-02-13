@@ -87,6 +87,9 @@ export type generalExpensesStatementType = {
   depreciation: number;
   rent: number;
   electricityExpenses: number;
+  interestOnTermLoan: number;
+  interestOnCC: number;
+  totalFinanceCharges: number;
   totalGeneralExpenses: number; // Total (Expenses + Depreciation)
   operatingProfit: number       // Gross Profit - Total Expenses
 }
@@ -109,7 +112,21 @@ export type DepreciationYear = {
 
 export type profitabilityStatementType = {
   year: number;
+  salary: number;
   totalA: number;
+  totalPurchaseEquipment: number;
+  powerAndFuel: number;
+  printingAndStationery: number;
+  advertisement: number;
+  miscellaneousExpenses: number;
+  otherExpenses: number;
+  postageAndCourier: number;
+  transportAndConveyance: number;
+  staffWelfare: number;
+  repairAndMaintenance: number;
+  yearDepreciation: number;
+  rent: number;
+  electricityExpenses: number;
   totalB: number;
   netCredit: number;
   profitBeforeTax: number;
@@ -127,7 +144,8 @@ export type dscrStatementType = {
   interestOnCC: number;
   totalCashAccrual: number; // [X]
   loanRepayment: number;
-  totalDebtService: number; // [Y]
+  installmentOfTermLoan: number;
+  totalDebtService: Number// [Y]
   dscrRatio: number; // X / Y
 }
 export type SWOTAnalysisType = {
@@ -269,6 +287,8 @@ export type projectedBalanceSheetType = {
   cashAndBankBalance: number;             // Closing Balance
   totalAssets: number;                    // Grand Total (Assets)
 };
+
+
 
 export type breakEvenAnalysisType = {
   year: string;
@@ -727,6 +747,9 @@ const ProjectReportSchema = new Schema<ProjectData>(
         depreciation: Number,
         rent: Number,
         electricityExpenses: Number,
+        interestOnTermLoan: Number,
+        interestOnCC: Number,
+        totalFinanceCharges: Number,
         totalGeneralExpenses: Number, // Total (Expenses + Depreciation)
         operatingProfit: Number       // Gross Profit - Total Expenses
       }
@@ -734,15 +757,29 @@ const ProjectReportSchema = new Schema<ProjectData>(
     profitabilityStatement: [
       {
         year: Number,
+        salary: Number,
         totalA: Number,
+        totalPurchaseEquipment: Number,
+        powerAndFuel: Number,
+        printingAndStationery: Number,
+        advertisement: Number,
+        miscellaneousExpenses: Number,
+        otherExpenses: Number,
+        postageAndCourier: Number,
+        transportAndConveyance: Number,
+        staffWelfare:Number,
+        repairAndMaintenance: Number,
+        yearDepreciation:Number,
+        rent:Number,
+        electricityExpenses: Number,
         totalB: Number,
         netCredit: Number,
         profitBeforeTax: Number,
         provisionForTaxation: Number,
         profitAfterTax: Number,
-        balanceCarriedOverToBalanceSheet: Number,
         interestOnTermLoan: Number,
         interestOnWorkingCapital: Number,
+        balanceCarriedOverToBalanceSheet: Number
       }
     ],
     dscrStatement: [
@@ -754,7 +791,9 @@ const ProjectReportSchema = new Schema<ProjectData>(
         interestOnCC: Number,
         totalCashAccrual: Number, // [X]
         loanRepayment: Number,
-        totalDebtService: Number, // [Y]
+        installmentOfTermLoan: Number,
+        totalDebtService: Number,// [Y]
+
         dscrRatio: Number, // X / Y
       }
     ],
