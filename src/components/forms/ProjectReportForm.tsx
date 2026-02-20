@@ -201,6 +201,7 @@ export const ProjectReportForm = () => {
       productName: "",
       salesType: undefined as any,
       salesRevenue: 0,
+      yearlyGrowthRate: 0,
     },
     // step 8
     loanPeriod: 5,

@@ -20,14 +20,13 @@ export async function POST(request: Request) {
     const businessReq: Record<string, number | undefined> = data.businessRequirements ?? {};
     const monthExp: Record<string, number | undefined> = data.monthlyExpenses ?? {};
     const govtMarginPercent = 0.54;
+    const yearlyGrowthRate = (data.revenueDetails.yearlyGrowthRate) * .01;
+    let currentGrowthFactor = 1;
 
     // --- 1. CALCULATE FINANCIALS ---
-    // const fixedCapitalInvested = Object.values(businessReq)
-    //   .filter((value): value is number => typeof value === "number" )
-    //   .reduce((sum, value) => sum + value, 0);
+
     const fixedCapitalInvested = Object.entries(businessReq)
       .filter((value) => {
-        // if(value[0]==="workingExpenses" && typeof value[1] === "number")
         return value[0] !== "workingExpenses" && typeof value[1] === "number"
 
       })
@@ -64,11 +63,7 @@ export async function POST(request: Request) {
     };
 
 
-    // // Multipliers nikalna loop mein use karne ke liye
-    // const receiptsMultiplier = parseFloat(assumptions.particulars.projectedIncrementReceipts) / 100;
-    // const expenditureMultiplier = parseFloat(assumptions.particulars.projectedIncrementExpenditure) / 100;
 
-    // Annual Rate ko dynamic banana (Static 11.10 hata kar)
     // --- LOAN & EMI CALCULATION (STEP 1) ---
     const annualRate = assumptions.particulars.interestRateTermLoan;
     const totalMonths = data.loanPeriod * 12;
@@ -119,6 +114,8 @@ export async function POST(request: Request) {
 
     const getYearlyPrincipal = (yr: number) =>
       monthlySchedule.slice((yr - 1) * 12, yr * 12).reduce((sum, m) => sum + m.principal, 0);
+
+
     // --- 3. GENERATE COST STATEMENT ---
     const annualSales = data.revenueDetails.salesRevenue * 12
     let sales = annualSales;
@@ -136,46 +133,49 @@ export async function POST(request: Request) {
         principalRepayment: repaymentAmount > 0 ? repaymentAmount : 0
       });
       currentYearLabel++;
-      sales = sales * 1.25;
+      if (index > 0) {
+        currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
+      }
+      sales = sales + (sales * currentGrowthFactor);
     }
+    currentGrowthFactor = 1;
 
-
-    // --- 2.5 GENERATE DETAILED PURCHASE COST STATEMENT ---
+    // --- 2.5 COST OF PRODUCTION & GROSS PROFIT DETERMINATION ---
     let rawMaterialAnnual = (businessReq.rawMaterials || 0) + (monthExp.purchaseOfRawMaterials || 0) * 12;
     let purchaseYear = new Date().getFullYear();
     const purchaseCostStatement = [];
 
+
+
+
     for (let i = 0; i < data.loanPeriod; i++) {
       const currentYearSales = costStatement[i].netSales;
+      if (i > 0) {
+        currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
 
-      const indigenous = Math.round(fixedCapitalInvested);
-
-      // 1. Freight & Direct Expenses (PDF logic)
-      const freightAndOtherExpenses = 0//Math.round(indigenous * 0.02); // 2% Freight
+      }
+      let indigenous = workingCapitalInvested * (1 + currentGrowthFactor);
+      // 1. Freight & Direct Expenses
+      const freightAndOtherExpenses = 0;
       const totalDirectExpenses = freightAndOtherExpenses;
       const subTotal = indigenous + totalDirectExpenses;
-
-      // 2. Work In Progress (WIP) Logic - 2% of subtotal
+      // 2. Work In Progress (WIP) Logic
       const openingStockOfWIP = i === 0 ? 0 : Math.round(subTotal * 0.02);
       const subTotalAfterOpeningStock = subTotal + openingStockOfWIP;
-      const closingStockOfWIP = 0//Math.round(subTotal * 0.02);
-
+      const closingStockOfWIP = 0;
       // 3. Cost of Production
       const totalCostOfProduction = subTotalAfterOpeningStock - closingStockOfWIP;
-
-      // 4. Finished Goods Logic - 3% of COP
+      // 4. Finished Goods Logic
       const openingStockOfFinishedGoods = i === 0 ? 0 : Math.round(totalCostOfProduction * 0.03);
       const subTotalAfterOpeningStockFinishedGoods = totalCostOfProduction + openingStockOfFinishedGoods;
-      const closingStockOfFinishedGoods = 0//Math.round(totalCostOfProduction * 0.03);
-
+      const closingStockOfFinishedGoods = 0;
       // 5. Final Cost of Sales & Profit
       const totalCostOfSales = subTotalAfterOpeningStockFinishedGoods - closingStockOfFinishedGoods;
       const grossProfit = currentYearSales - totalCostOfSales;
-
       purchaseCostStatement.push({
         year: purchaseYear,
         imported: 0,
-        indigenous,
+        indigenous: indigenous, // Updated value yahan push hogi
         freightAndOtherExpenses,
         totalDirectExpenses,
         subTotal,
@@ -191,10 +191,10 @@ export async function POST(request: Request) {
       });
 
       purchaseYear++;
-      // Raw Material growth rate 15% (as per your code)
-      rawMaterialAnnual = rawMaterialAnnual * 1.15;
+      // Raw Material growth calculation
+      rawMaterialAnnual = Math.round(rawMaterialAnnual * currentGrowthFactor);
     }
-
+    currentGrowthFactor = 1;
 
 
 
@@ -250,14 +250,14 @@ export async function POST(request: Request) {
     const generalExpensesStatement = [];
     const interestRate = 0.11;
     const interestOnCC = Math.round(workingCapitalLoan * interestRate);
+
     for (let i = 0; i < data.loanPeriod; i++) {
-      const growth = Math.pow(1.12, i); // 12% growth logic
+      if (i > 0) {
+        currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
+      }
 
-      // Helper to calculate monthly to annual with growth
-      const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * growth);
+      const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * currentGrowthFactor);
       const interestOnTermLoan = Math.round(getYearlyInterest(i + 1));
-
-
 
       const yearExp = {
         salary: calcAnn(monthExp.salary),
@@ -293,28 +293,24 @@ export async function POST(request: Request) {
         operatingProfit
       });
     }
-
+    currentGrowthFactor = 1;
     // --- 2.8 PROFITABILITY STATEMENT CALCULATION LOGIC (FINAL FIX) ---
-    const profitabilityStatement: any[] = [];
-    for (let i = 0; i < data.loanPeriod; i++) {
-       const growth = Math.pow(1.12, i); // 12% growth logic
 
-      // Helper to calculate monthly to annual with growth
-      const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * growth);
-      // 1. Income (A)
+
+    const profitabilityStatement: any[] = [];
+
+    for (let i = 0; i < data.loanPeriod; i++) {
+      if (i > 0) {
+        currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
+      }
+      const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * currentGrowthFactor);
       const totalGrossIncome = costStatement[i].totalGrossIncome || 0;
       const totalA = costStatement[i].totalGrossIncome || 0;
       
 
-      // 2. Expenditure (B)
-      // const genExp = generalExpensesStatement[i];
-      // const purExp = purchaseCostStatement[i];
-
-
-
       const yearExp = {
         salary: calcAnn(monthExp.salary),
-        totalPurchaseEquipment :calcAnn(monthExp.purchaseOfEquipments),
+        totalPurchaseEquipment: calcAnn(monthExp.purchaseOfEquipments),
         powerAndFuel: calcAnn(monthExp.powerAndFuel),
         printingAndStationery: calcAnn(monthExp.printingAndStationery),
         advertisement: calcAnn(monthExp.advertisement),
@@ -327,26 +323,18 @@ export async function POST(request: Request) {
         rent: calcAnn(monthExp.rent),
         electricityExpenses: calcAnn(monthExp.electricityExpenses),
       };
-      // Pehle har saal ka Interest nikal lo (Jo humne Step 1 mein function banaya tha)
+     
       const interestOnTermLoan = Math.round(getYearlyInterest(i + 1));
       const interestOnWorkingCapital = Math.round(workingCapitalLoan * interestRate);
-       const yearDepreciation = depreciationSchedule[i]?.totalDepreciationForYear || 0;
+      const yearDepreciation = depreciationSchedule[i]?.totalDepreciationForYear || 0;
 
-      // Total B = Operating Expenses + Raw Material + Freight
+
       const totalB = Object.values(yearExp).reduce((a, b) => a + b, 0) + interestOnCC + interestOnTermLoan + yearDepreciation; // +
-        //  (purExp.indigenous || 0) +
-        //  (purExp.freightAndOtherExpenses || 0);
-
-      // 3. Profit Calculations
       const netCredit = totalA - totalB;
 
-      // Profit Before Tax (PBT) mein se Interest minus karna zaroori hai
-      const profitBeforeTax = netCredit 
 
-      // 4. Tax Logic (30%)
-      const provisionForTaxation =  Math.round(profitBeforeTax * 0.30) ;
-
-      // 5. Final Profits
+      const profitBeforeTax = netCredit
+      const provisionForTaxation = Math.round(profitBeforeTax * 0.30);
       const profitAfterTax = profitBeforeTax - provisionForTaxation;
 
       profitabilityStatement.push({
@@ -356,7 +344,7 @@ export async function POST(request: Request) {
         ...yearExp,
         totalB,
         netCredit,
-        interestOnTermLoan, // Ab ye error nahi dega
+        interestOnTermLoan,
         interestOnWorkingCapital,
         yearDepreciation,
         profitBeforeTax,
@@ -365,6 +353,7 @@ export async function POST(request: Request) {
         balanceCarriedOverToBalanceSheet: profitAfterTax
       });
     }
+    currentGrowthFactor = 1;
     // --- 2.9 GENERATE DSCR STATEMENT ---
     const dscrStatement: any[] = [];
     let totalDSCRSum = 0;
@@ -373,7 +362,7 @@ export async function POST(request: Request) {
       const profit = profitabilityStatement[i];
       const depr = depreciationSchedule[i].totalDepreciationForYear;
       const repayment = (costStatement[i] as any).principalRepayment || 0;
-      
+
 
       // X = Profit + Depr + Interest
       const totalCashAccrual =
@@ -484,7 +473,7 @@ export async function POST(request: Request) {
       const profit = profitabilityStatement[i];
       const depr = depreciationSchedule[i].totalDepreciationForYear;
 
-      const ebidta = profit.netCredit + profit.provisionForTaxation + profit.interestOnTermLoan +profit.interestOnWorkingCapital+depr;
+      const ebidta = profit.netCredit + profit.provisionForTaxation + profit.interestOnTermLoan + profit.interestOnWorkingCapital + depr;
       const ebit = ebidta - depr;
 
       ebidtaAnalysis.push({
@@ -549,27 +538,18 @@ export async function POST(request: Request) {
       const genExp = generalExpensesStatement[i];
       const purExp = purchaseCostStatement[i];
 
-      // 1. Sales (A)
-      const sales = profit.totalA;
 
-      // 2. Variable Costs
-      // Raw Material + Freight + Other Direct Costs
+      const sales = profit.totalA;
       const variableCosts = profit.totalPurchaseEquipment +
-      profit.powerAndFuel+
-      profit.printingAndStationery+
-      profit.miscellaneousExpenses+
-      profit.otherExpenses+
-      profit.repairAndMaintenance;
+        profit.powerAndFuel +
+        profit.printingAndStationery +
+        profit.miscellaneousExpenses +
+        profit.otherExpenses +
+        profit.repairAndMaintenance;
 
       // 3. Gross Profit (B) = Sales - Variable Costs
       const grossProfit = sales - variableCosts;
-
-      // 4. Fixed Costs (C)
-      // Operating Expenses + Interest on Loans (Interest on CC agar hai to add karein)
       const fixedCosts = genExp.totalGeneralExpenses + profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
-
-      // 5. Break Even Sales Formula: (Sales * Fixed Cost) / Gross Profit
-      // Division by zero check
       const breakEvenSales = grossProfit > 0
         ? Math.round((sales * fixedCosts) / grossProfit)
         : 0;
@@ -651,7 +631,6 @@ export async function POST(request: Request) {
       const profit = profitabilityStatement[i];
       const depr = depreciationSchedule[i]?.totalDepreciationForYear || 0;
       const mpbf = mpbfAnalysis[i];
-
       const currentSales = profit.totalA || 0;
       const currentNetProfit = profit.profitAfterTax || 0;
 
@@ -695,7 +674,7 @@ export async function POST(request: Request) {
         interestOnCCY: intCC_Y,                           // 7
         totalInterestY: totalY,                           // 8
         iscr: iscr,                                       // 9
-        netProfitXY: iscr === 0 ? 0 : currentNetProfit / iscr, // 10
+        netProfitXY: currentNetProfit, // 10
         revenueIncome: currentSales,                      // 11
         netProfitToSales: netProfitToSales,               // 12
         pbit: pbit,                                       // 13
@@ -723,7 +702,6 @@ export async function POST(request: Request) {
 
 
     // --- SENSITIVITY ANALYSIS CALCULATION ---
-    // --- SENSITIVITY ANALYSIS ARRAYS ---
     const scenarioSalesDecrease = [];
     const scenarioVariableCostIncrease = [];
     const scenarioFixedCostIncrease = [];
@@ -750,9 +728,12 @@ export async function POST(request: Request) {
         ebitValue: s1_ebitda - depr,
         profitBeforeTaxValue: (s1_ebitda - depr) - interest
       });
+      if (i > 0) {
+        currentGrowthFactor = currentGrowthFactor * (1 + currentGrowthFactor)
+      }
 
       // 2. Scenario: Variable Cost Increase by 5%
-      const s2_varCosts = Math.round(varCostsBase * 1.05);
+      const s2_varCosts = Math.round(varCostsBase + varCostsBase * currentGrowthFactor);
       const s2_ebitda = sales - (s2_varCosts + fixedCostsBase);
       scenarioVariableCostIncrease.push({
         financialYear: profit.year,
@@ -763,7 +744,7 @@ export async function POST(request: Request) {
       });
 
       // 3. Scenario: Fixed Cost Increase by 5%
-      const s3_fixedCosts = Math.round(fixedCostsBase * 1.05);
+      const s3_fixedCosts = Math.round(fixedCostsBase + fixedCostsBase * currentGrowthFactor);
       const s3_ebitda = sales - (varCostsBase + s3_fixedCosts);
       scenarioFixedCostIncrease.push({
         financialYear: profit.year,
@@ -794,11 +775,7 @@ export async function POST(request: Request) {
 
       // --- LIABILITIES SIDE CALCULATIONS ---
       const profitDuringYear = profit.profitAfterTax || 0;
-
-      // Senior style logic: Agar profit hai toh drawings dikhate hain, 
-      // yahan hum accumulated profit ko adjust karne ke liye drawings calculate kar rahe hain
-      const drawings = i === 0 ? 0 : Math.round(profitDuringYear * 0.20); // Example: 20% drawings or keep 0 as per need
-
+      const drawings = i === 0 ? 0 : Math.round(profitDuringYear * 0.20);
       const termLoan = yearlyLoanData.closingBalance || 0;
       const cashCredit = workingCapitalLoan || 0;
       const provisionForTax = profit.provisionForTaxation || 0;
@@ -817,21 +794,15 @@ export async function POST(request: Request) {
 
       // --- ASSETS SIDE CALCULATIONS ---
       const netFixedAssetsWDV = deprYear ? deprYear.assets.reduce((sum: number, asset: any) => sum + asset.closingBalance, 0) : 0;
-
-      // Calculations based on your previous business logic
       const stockOfWIP = Math.round((purchaseCostStatement[i]?.closingStockOfWIP || 0) + (purchaseCostStatement[i]?.closingStockOfFinishedGoods || 0));
-      const sundryDebtors = Math.round(profit.totalA * 0.08); // Assuming 8% of sales as debtors
-      const depositAndAdvance = 0; // Default as per sample
-
-      // Cash & Bank Balance (The Balancing Figure)
+      const sundryDebtors = Math.round(profit.totalA * 0.08);
+      const depositAndAdvance = 0;
       let cashAndBankBalance = totalLiabilities - (netFixedAssetsWDV + stockOfWIP + sundryDebtors + depositAndAdvance);
 
-      // Safety: Cash cannot be negative in bank reports
       if (cashAndBankBalance < 0) cashAndBankBalance = 10000;
 
       const totalAssets = netFixedAssetsWDV + stockOfWIP + sundryDebtors + depositAndAdvance + cashAndBankBalance;
 
-      // PUSHING DATA WITH EXACT KEYS FROM SAMPLE
       projectedBalanceSheet.push({
         year: profit.year,
         // Liabilities Side
@@ -853,12 +824,10 @@ export async function POST(request: Request) {
         totalAssets: Math.round(totalAssets)
       });
 
-      // Update Capital for Next Year: Opening + Profit - Drawings
       currentCapitalBalance = (currentCapitalBalance + profitDuringYear) - drawings;
     }
 
     //--------------Break Even Analysis---------------
-    // Break-Even Analysis API Logic
     const breakEvenAnalysis = [];
 
     // Profitability Statement se data fetch karke BEA calculate karein
@@ -867,16 +836,16 @@ export async function POST(request: Request) {
 
       // 1. VARIABLE COSTS MAPPING
       const varCosts = {
-        purchaseEquipments: p.purchaseOfEquipments || 0,
+        purchaseEquipments: p.totalPurchaseEquipment || 0,
         purchaseRawMaterials: p.rawMaterialConsumed || 0,
         freight: p.freight || 0,
-        powerFuel: p.powerFuel || 0,
-        printingStationery: p.printingStationery || 0,
+        powerFuel: p.powerAndFuel || 0,
+        printingStationery: p.printingAndStationery || 0,
         electricityExpenses: p.electricityExpenses || 0,
-        miscExpenses: p.miscExpenses || 0,
+        miscExpenses: p.miscellaneousExpenses || 0,
         otherExpenses: p.otherExpenses || 0,
         postageCourier: p.postageCourier || 0,
-        repairMaintenance: p.repairMaintenance || 0,
+        repairMaintenance: p.repairAndMaintenance || 0,
       };
 
       // Total Variable Cost Calculation
@@ -885,13 +854,13 @@ export async function POST(request: Request) {
       // 2. FIXED COSTS MAPPING
       const fixedCostsData = {
         rent: p.rent || 0,
-        salaryWages: p.salaryWages || 0,
+        salaryWages: p.salary || 0,
         interestTermLoan: p.interestOnTermLoan || 0,
         interestCCLoan: p.interestOnWorkingCapital || 0,
         advertisement: p.advertisement || 0,
-        depreciation: p.depreciation || 0,
+        depreciation: p.yearDepreciation || 0,
         staffWelfare: p.staffWelfare || 0,
-        transportConvenyance: p.transportConvenyance || 0,
+        transportConvenyance: p.transportAndConveyance || 0,
       };
 
       // Total Fixed Cost Calculation
@@ -908,7 +877,7 @@ export async function POST(request: Request) {
       const bepSales = pvRatio > 0 ? (fTotal / (pvRatio / 100)) : 0;
 
       // G. CASH BREAK-EVEN (Fixed Cost without Depr / PV Ratio)
-      const fixedCostWithoutDepr = fTotal - (p.depreciation || 0);
+      const fixedCostWithoutDepr = fTotal - (p.yearDepreciation || 0);
       const cashBep = pvRatio > 0 ? (fixedCostWithoutDepr / (pvRatio / 100)) : 0;
 
       // Final Object for Database & PDF
@@ -943,7 +912,7 @@ export async function POST(request: Request) {
 
       // SOURCES [A]
       const pbit = profit.profitBeforeTax + profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
-      const depreciation = profit.depreciation || 0;
+      const depreciation = profit.yearDepreciation;
       const increaseInCapital = i === 0 ? (totalProjectCost * 0.10) : 0;
       const increaseInTermLoan = i === 0 ? termLoan : 0;
       const increaseInCashCredit = i === 0 ? workingCapitalLoan : 0;
@@ -1001,7 +970,7 @@ export async function POST(request: Request) {
 
       // Fix: Safe calculation with fallback to 0
       const profitAfterTax = Number(profit.profitAfterTax) || 0;
-      const depreciation = Number(profit.depreciation) || 0;
+      const depreciation = Number(profit.yearDepreciation) || 0;
       const cashGeneration = profitAfterTax + depreciation;
 
       // Safe Balance Sheet values
@@ -1064,9 +1033,7 @@ export async function POST(request: Request) {
 
     // 1. Dynamic Data Extraction (Loan Period aur Workforce)
     const selectedLoanPeriodText = data.loanDetails?.loanPeriod || "5 Years";
-    // Text mein se number nikalne ke liye (e.g., "5 Years" -> 5)
     const loanDurationYearsCount = parseInt(selectedLoanPeriodText.toString().replace(/[^0-9]/g, '')) || 5;
-
     const employmentPotentialCount = data.businessDetails?.employmentPotential || "10 Above";
     const averageDebtServiceCoverageRatio = averageDSCR || 0;
 
@@ -1093,7 +1060,7 @@ export async function POST(request: Request) {
       // Taxation Table Data Push
       taxationProvisionSummary.push({
         year: profitabilityItem.year.toString(),
-        taxAmount: Number(profitabilityItem.provisionForTaxation) || 0
+        taxAmount: Number(profitabilityItem.provisionForTaxation)
       });
     }
 
@@ -1122,7 +1089,8 @@ export async function POST(request: Request) {
         productName: data.revenueDetails.productName,
         salesType: data.revenueDetails.salesType,
         salesRevenue: data.revenueDetails.salesRevenue,
-        totalSalesRevenueAnually: data.revenueDetails.salesRevenue * 12
+        totalSalesRevenueAnually: data.revenueDetails.salesRevenue * 12,
+        yearlyGrowthRate: yearlyGrowthRate
       },
       costStatement,
       depreciationSchedule,
@@ -1147,7 +1115,7 @@ export async function POST(request: Request) {
       projectedCashFlow,
       financialPosition,
       AFPTable,
-      finalFinancialAssumptions,
+      // finalFinancialAssumptions,
       assumptions: assumptions,
       industryJustifications: industryList
 

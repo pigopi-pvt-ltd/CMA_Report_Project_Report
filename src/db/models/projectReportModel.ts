@@ -31,6 +31,7 @@ export type salesRevenueDetails = {
   salesType: "monthly" | "unit",
   salesRevenue: number;
   totalSalesRevenueAnually: number;
+  yearlyGrowthRate: number;
 }
 
 export type LoanDetails = {
@@ -551,6 +552,11 @@ const ProjectReportSchema = new Schema<ProjectData>(
         required: true,
         min: 0,
       },
+      yearlyGrowthRate:{
+        type: Number,
+        require: true,
+        
+      }
 
     },
 
@@ -1042,10 +1048,10 @@ const ProjectReportSchema = new Schema<ProjectData>(
         taxAmount: Number
       }],
 
-      financialAssumptions: {
-        incrementInGrossReceipts: String,
-        incrementInExpenditure: String
-      },
+      // financialAssumptions: {
+      //   incrementInGrossReceipts: String,
+      //   incrementInExpenditure: String
+      // },
 
       workforceDetails: {
         employmentPotentialCount: String

@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     // 5. cost statement Table
     doc.addPage();
     drawHeader(doc, "COST STATEMENT", fontBoldPath)
-    drawCostStatement(doc, projectData, formatInMillions, fonts);
+    drawCostStatement(doc, projectData, formatRupees, fonts);
     //  Purchase Cost Statement
     doc.addPage();
     drawPurchaseCostStatement(doc, projectData, formatInMillions, fonts);
