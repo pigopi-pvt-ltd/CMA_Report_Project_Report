@@ -141,7 +141,7 @@ export async function POST(request: Request) {
     // EBIDTA Analysis Page
     doc.addPage();
     drawHeader(doc, "EBIDTA ANALYSIS", fontBoldPath);
-    drawEBIDTAAnalysis(doc, projectData, formatRupees, fonts);
+    drawEBIDTAAnalysis(doc, projectData, formatInMillions, fonts);
 
     //Return on Investment (ROI) Analysis
     doc.addPage();

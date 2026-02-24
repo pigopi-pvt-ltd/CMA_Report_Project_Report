@@ -148,17 +148,17 @@ export async function POST(request: Request) {
     for (let i = 0; i < data.loanPeriod; i++) {
       const currentYearSales = costStatement[i].netSales;
 
-      const indigenous = Math.round(rawMaterialAnnual);
+      const indigenous = Math.round(fixedCapitalInvested);
 
       // 1. Freight & Direct Expenses (PDF logic)
-      const freightAndOtherExpenses = Math.round(indigenous * 0.02); // 2% Freight
+      const freightAndOtherExpenses = 0//Math.round(indigenous * 0.02); // 2% Freight
       const totalDirectExpenses = freightAndOtherExpenses;
       const subTotal = indigenous + totalDirectExpenses;
 
       // 2. Work In Progress (WIP) Logic - 2% of subtotal
       const openingStockOfWIP = i === 0 ? 0 : Math.round(subTotal * 0.02);
       const subTotalAfterOpeningStock = subTotal + openingStockOfWIP;
-      const closingStockOfWIP = Math.round(subTotal * 0.02);
+      const closingStockOfWIP = 0//Math.round(subTotal * 0.02);
 
       // 3. Cost of Production
       const totalCostOfProduction = subTotalAfterOpeningStock - closingStockOfWIP;
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
       // 4. Finished Goods Logic - 3% of COP
       const openingStockOfFinishedGoods = i === 0 ? 0 : Math.round(totalCostOfProduction * 0.03);
       const subTotalAfterOpeningStockFinishedGoods = totalCostOfProduction + openingStockOfFinishedGoods;
-      const closingStockOfFinishedGoods = Math.round(totalCostOfProduction * 0.03);
+      const closingStockOfFinishedGoods = 0//Math.round(totalCostOfProduction * 0.03);
 
       // 5. Final Cost of Sales & Profit
       const totalCostOfSales = subTotalAfterOpeningStockFinishedGoods - closingStockOfFinishedGoods;
@@ -248,14 +248,16 @@ export async function POST(request: Request) {
     // ---- GENERATE GENERAL EXPENSES STATEMENT ---
 
     const generalExpensesStatement = [];
-
+    const interestRate = 0.11;
+    const interestOnCC = Math.round(workingCapitalLoan * interestRate);
     for (let i = 0; i < data.loanPeriod; i++) {
       const growth = Math.pow(1.12, i); // 12% growth logic
 
       // Helper to calculate monthly to annual with growth
       const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * growth);
       const interestOnTermLoan = Math.round(getYearlyInterest(i + 1));
-      const interestOnCC = 0;
+
+
 
       const yearExp = {
         salary: calcAnn(monthExp.salary),
@@ -294,43 +296,69 @@ export async function POST(request: Request) {
 
     // --- 2.8 PROFITABILITY STATEMENT CALCULATION LOGIC (FINAL FIX) ---
     const profitabilityStatement: any[] = [];
-
     for (let i = 0; i < data.loanPeriod; i++) {
+       const growth = Math.pow(1.12, i); // 12% growth logic
+
+      // Helper to calculate monthly to annual with growth
+      const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * growth);
       // 1. Income (A)
-      const totalA = costStatement[i].netSales || 0;
+      const totalGrossIncome = costStatement[i].totalGrossIncome || 0;
+      const totalA = costStatement[i].totalGrossIncome || 0;
+      
 
       // 2. Expenditure (B)
-      const genExp = generalExpensesStatement[i];
-      const purExp = purchaseCostStatement[i];
+      // const genExp = generalExpensesStatement[i];
+      // const purExp = purchaseCostStatement[i];
 
+
+
+      const yearExp = {
+        salary: calcAnn(monthExp.salary),
+        totalPurchaseEquipment :calcAnn(monthExp.purchaseOfEquipments),
+        powerAndFuel: calcAnn(monthExp.powerAndFuel),
+        printingAndStationery: calcAnn(monthExp.printingAndStationery),
+        advertisement: calcAnn(monthExp.advertisement),
+        miscellaneousExpenses: calcAnn(monthExp.miscellaneousExpenses),
+        otherExpenses: calcAnn(monthExp.otherExpenses),
+        postageAndCourier: calcAnn(monthExp.postageAndCourier),
+        transportAndConveyance: calcAnn(monthExp.transportAndConveyance),
+        staffWelfare: calcAnn(monthExp.staffWelfare),
+        repairAndMaintenance: calcAnn(monthExp.repairAndMaintenance),
+        rent: calcAnn(monthExp.rent),
+        electricityExpenses: calcAnn(monthExp.electricityExpenses),
+      };
       // Pehle har saal ka Interest nikal lo (Jo humne Step 1 mein function banaya tha)
       const interestOnTermLoan = Math.round(getYearlyInterest(i + 1));
+      const interestOnWorkingCapital = Math.round(workingCapitalLoan * interestRate);
+       const yearDepreciation = depreciationSchedule[i]?.totalDepreciationForYear || 0;
 
       // Total B = Operating Expenses + Raw Material + Freight
-      const totalB =
-        genExp.totalGeneralExpenses +
-        (purExp.indigenous || 0) +
-        (purExp.freightAndOtherExpenses || 0);
+      const totalB = Object.values(yearExp).reduce((a, b) => a + b, 0) + interestOnCC + interestOnTermLoan + yearDepreciation; // +
+        //  (purExp.indigenous || 0) +
+        //  (purExp.freightAndOtherExpenses || 0);
 
       // 3. Profit Calculations
       const netCredit = totalA - totalB;
 
       // Profit Before Tax (PBT) mein se Interest minus karna zaroori hai
-      const profitBeforeTax = netCredit - interestOnTermLoan;
+      const profitBeforeTax = netCredit 
 
       // 4. Tax Logic (30%)
-      const provisionForTaxation = profitBeforeTax > 0 ? Math.round(profitBeforeTax * 0.30) : 0;
+      const provisionForTaxation =  Math.round(profitBeforeTax * 0.30) ;
 
       // 5. Final Profits
       const profitAfterTax = profitBeforeTax - provisionForTaxation;
 
       profitabilityStatement.push({
         year: costStatement[i].year,
+        totalGrossIncome,
         totalA,
+        ...yearExp,
         totalB,
         netCredit,
         interestOnTermLoan, // Ab ye error nahi dega
-        interestOnWorkingCapital: 0,
+        interestOnWorkingCapital,
+        yearDepreciation,
         profitBeforeTax,
         provisionForTaxation,
         profitAfterTax,
@@ -345,6 +373,7 @@ export async function POST(request: Request) {
       const profit = profitabilityStatement[i];
       const depr = depreciationSchedule[i].totalDepreciationForYear;
       const repayment = (costStatement[i] as any).principalRepayment || 0;
+      
 
       // X = Profit + Depr + Interest
       const totalCashAccrual =
@@ -354,9 +383,10 @@ export async function POST(request: Request) {
         profit.interestOnWorkingCapital;
 
       // Y = Repayment + Interest
-      const totalDebtService = repayment + profit.interestOnTermLoan;
+      const installmentOfTermLoan = repayment + profit.interestOnTermLoan;
+      const totalDebtService = installmentOfTermLoan + profit.interestOnTermLoan + profit.interestOnWorkingCapital;
 
-      const dscrRatio = totalDebtService === 0 ? 0 : Number((totalCashAccrual / totalDebtService).toFixed(2));
+      const dscrRatio = installmentOfTermLoan === 0 ? 0 : Number((totalCashAccrual / totalDebtService).toFixed(2));
 
       totalDSCRSum += dscrRatio;
 
@@ -368,6 +398,7 @@ export async function POST(request: Request) {
         interestOnCC: profit.interestOnWorkingCapital,
         totalCashAccrual,
         loanRepayment: repayment,
+        installmentOfTermLoan,
         totalDebtService,
         dscrRatio
       });
@@ -453,15 +484,15 @@ export async function POST(request: Request) {
       const profit = profitabilityStatement[i];
       const depr = depreciationSchedule[i].totalDepreciationForYear;
 
-      const ebit = profit.profitAfterTax + profit.provisionForTaxation + profit.interestOnTermLoan;
-      const ebidta = ebit + depr;
+      const ebidta = profit.netCredit + profit.provisionForTaxation + profit.interestOnTermLoan +profit.interestOnWorkingCapital+depr;
+      const ebit = ebidta - depr;
 
       ebidtaAnalysis.push({
         year: profit.year,
-        netIncome: profit.profitAfterTax,
+        netIncome: profit.netCredit,
         taxExpense: profit.provisionForTaxation,
         interestOnTermLoan: profit.interestOnTermLoan,
-        interestOnCC: 0,
+        interestOnCC: profit.interestOnWorkingCapital,
         depreciation: depr,
         ebit: ebit,
         ebidta: ebidta
@@ -523,7 +554,12 @@ export async function POST(request: Request) {
 
       // 2. Variable Costs
       // Raw Material + Freight + Other Direct Costs
-      const variableCosts = (purExp.indigenous || 0) + (purExp.freightAndOtherExpenses || 0);
+      const variableCosts = profit.totalPurchaseEquipment +
+      profit.powerAndFuel+
+      profit.printingAndStationery+
+      profit.miscellaneousExpenses+
+      profit.otherExpenses+
+      profit.repairAndMaintenance;
 
       // 3. Gross Profit (B) = Sales - Variable Costs
       const grossProfit = sales - variableCosts;
