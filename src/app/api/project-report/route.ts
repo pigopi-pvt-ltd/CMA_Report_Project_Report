@@ -28,16 +28,12 @@ export async function POST(request: Request) {
     const fixedCapitalInvested = Object.entries(businessReq)
       .filter((value) => {
         return value[0] !== "workingExpenses" && typeof value[1] === "number"
-
       })
       .reduce((sum, [first, second]) => {
         return sum + (second || 0);
 
       }, 0)
-
     const workingCapitalInvested = businessReq.workingExpenses || 0;
-
-
     const totalProjectCost = fixedCapitalInvested + workingCapitalInvested;
     const termLoan = totalProjectCost * govtMarginPercent;
     const workingCapitalLoan = totalProjectCost * 0.36;
@@ -78,8 +74,7 @@ export async function POST(request: Request) {
     let monthlySchedule: { interest: number; principal: number }[] = [];
 
     let tempBalance = termLoan;
-    const reportDate = new Date(); // Aaj ki date
-
+    const reportDate = new Date();
     for (let i = 1; i <= totalMonths; i++) {
       const interestM = tempBalance * monthlyRate;
       const principalM = emi - interestM;
@@ -154,7 +149,7 @@ export async function POST(request: Request) {
         currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
 
       }
-      let indigenous = workingCapitalInvested * (1 + currentGrowthFactor);
+      let indigenous = fixedCapitalInvested * (currentGrowthFactor);
       // 1. Freight & Direct Expenses
       const freightAndOtherExpenses = 0;
       const totalDirectExpenses = freightAndOtherExpenses;
@@ -306,7 +301,7 @@ export async function POST(request: Request) {
       const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * currentGrowthFactor);
       const totalGrossIncome = costStatement[i].totalGrossIncome || 0;
       const totalA = costStatement[i].totalGrossIncome || 0;
-      
+
 
       const yearExp = {
         salary: calcAnn(monthExp.salary),
@@ -323,7 +318,7 @@ export async function POST(request: Request) {
         rent: calcAnn(monthExp.rent),
         electricityExpenses: calcAnn(monthExp.electricityExpenses),
       };
-     
+
       const interestOnTermLoan = Math.round(getYearlyInterest(i + 1));
       const interestOnWorkingCapital = Math.round(workingCapitalLoan * interestRate);
       const yearDepreciation = depreciationSchedule[i]?.totalDepreciationForYear || 0;
@@ -528,46 +523,6 @@ export async function POST(request: Request) {
     }
 
 
-
-    //
-
-    const breakEvenSalesData = [];
-
-    for (let i = 0; i < data.loanPeriod; i++) {
-      const profit = profitabilityStatement[i];
-      const genExp = generalExpensesStatement[i];
-      const purExp = purchaseCostStatement[i];
-
-
-      const sales = profit.totalA;
-      const variableCosts = profit.totalPurchaseEquipment +
-        profit.powerAndFuel +
-        profit.printingAndStationery +
-        profit.miscellaneousExpenses +
-        profit.otherExpenses +
-        profit.repairAndMaintenance;
-
-      // 3. Gross Profit (B) = Sales - Variable Costs
-      const grossProfit = sales - variableCosts;
-      const fixedCosts = genExp.totalGeneralExpenses + profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
-      const breakEvenSales = grossProfit > 0
-        ? Math.round((sales * fixedCosts) / grossProfit)
-        : 0;
-
-      breakEvenSalesData.push({
-        year: profit.year,
-        sales: sales,
-        variableCosts: variableCosts,
-        grossProfit: grossProfit,
-        depreciation: genExp.depreciation,
-        interestOnTermLoan: profit.interestOnTermLoan,
-        interestOnCC: profit.interestOnWorkingCapital || 0,
-        fixedCosts: fixedCosts,
-        breakEvenSales: breakEvenSales
-      });
-    }
-
-
     const loanInterestTablesDetail = [];
 
     for (let i = 0; i < loanCalculation.length; i += 12) {
@@ -627,12 +582,14 @@ export async function POST(request: Request) {
     const ratioAnalysis = [];
     let cumulativeRepayment = 0;
 
+
     for (let i = 0; i < data.loanPeriod; i++) {
       const profit = profitabilityStatement[i];
       const depr = depreciationSchedule[i]?.totalDepreciationForYear || 0;
       const mpbf = mpbfAnalysis[i];
       const currentSales = profit.totalA || 0;
       const currentNetProfit = profit.profitAfterTax || 0;
+
 
       // PBIT & Interest
       const pbit = profit.profitBeforeTax + profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
@@ -781,8 +738,7 @@ export async function POST(request: Request) {
       const provisionForTax = profit.provisionForTaxation || 0;
 
       // Current Liabilities (Ex: 5% of Expenses)
-      const currentLiabilitiesAndProv = Math.round(profit.totalB * 0.05);
-
+      const currentLiabilitiesAndProv = 0;
       const totalLiabilities =
         currentCapitalBalance +
         profitDuringYear -
@@ -795,7 +751,7 @@ export async function POST(request: Request) {
       // --- ASSETS SIDE CALCULATIONS ---
       const netFixedAssetsWDV = deprYear ? deprYear.assets.reduce((sum: number, asset: any) => sum + asset.closingBalance, 0) : 0;
       const stockOfWIP = Math.round((purchaseCostStatement[i]?.closingStockOfWIP || 0) + (purchaseCostStatement[i]?.closingStockOfFinishedGoods || 0));
-      const sundryDebtors = Math.round(profit.totalA * 0.08);
+      const sundryDebtors = 0;
       const depositAndAdvance = 0;
       let cashAndBankBalance = totalLiabilities - (netFixedAssetsWDV + stockOfWIP + sundryDebtors + depositAndAdvance);
 
@@ -900,6 +856,44 @@ export async function POST(request: Request) {
     }
 
 
+    const breakEvenSalesData = [];
+
+    for (let i = 0; i < data.loanPeriod; i++) {
+      const profit = profitabilityStatement[i];
+      const genExp = generalExpensesStatement[i];
+      const purExp = purchaseCostStatement[i];
+      const breakEvenAnalysisData = breakEvenAnalysis[i];
+
+
+      const sales = profit.totalA;
+      const variableCosts = profit.totalPurchaseEquipment +
+        profit.powerAndFuel +
+        profit.printingAndStationery +
+        profit.miscellaneousExpenses +
+        profit.otherExpenses +
+        profit.repairAndMaintenance;
+
+      // 3. Gross Profit (B) = Sales - Variable Costs
+      const grossProfit = purExp.grossProfit;
+      const fixedCosts = breakEvenAnalysisData.fixedCostTotal;
+      const breakEvenSales = grossProfit > 0
+        ? Math.round((sales * fixedCosts) / grossProfit)
+        : 0;
+
+      breakEvenSalesData.push({
+        year: profit.year,
+        sales: sales,
+        variableCosts: variableCosts,
+        grossProfit: grossProfit,
+        depreciation: genExp.depreciation,
+        interestOnTermLoan: profit.interestOnTermLoan,
+        interestOnCC: profit.interestOnWorkingCapital || 0,
+        fixedCosts: breakEvenAnalysisData.fixedCostTotal,
+        breakEvenSales: breakEvenSales
+      });
+    }
+
+
     //--------------------projectedCashFlowType------------------
 
     const projectedCashFlow = [];
@@ -919,7 +913,7 @@ export async function POST(request: Request) {
 
       const decreaseInDebtors = i > 0 ? Math.max(0, (previousBalanceSheet?.sundryDebtors || 0) - (balanceSheet?.sundryDebtors || 0)) : 0;
       const decreaseInStock = i > 0 ? Math.max(0, (previousBalanceSheet?.stockOfWIP || 0) - (balanceSheet?.stockOfWIP || 0)) : 0;
-      const provisions = profit.provisionForTaxation || 0;
+      const provisions = 0;
       const decreaseInAdvanceDeposits = 0; // As per your requirement
 
       const totalA = pbit + depreciation + increaseInCapital + increaseInTermLoan + increaseInCashCredit + decreaseInAdvanceDeposits + decreaseInDebtors + provisions + decreaseInStock;
@@ -997,8 +991,6 @@ export async function POST(request: Request) {
 
     for (let i = 0; i < profitabilityStatement.length; i++) {
       const balanceSheet = projectedBalanceSheet[i];
-
-      // Liabilities Side
       const capitalAndReserves = Number(balanceSheet.capital) || 0;
       const longTermLiabilities = Number(balanceSheet.termLoan) || 0;
       const currentLiabilities = (Number(balanceSheet.currentLiabilitiesAndProvision) || 0) + (Number(balanceSheet.cashCredit) || 0);
