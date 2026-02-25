@@ -268,7 +268,7 @@ export type SensitivityScenarioEntry = {
 }
 
 export type projectedBalanceSheetType = {
-  year: string; // Sample mein "FY 2025-26" ya number dono chalenge
+  year: string; 
 
   // --- LIABILITIES (Senior Sample Rows) ---
   capital: number;                        // Opening Capital

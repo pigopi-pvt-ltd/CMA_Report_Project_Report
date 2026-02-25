@@ -97,7 +97,7 @@ export default function ProjectReports({
 
   const handleDownload = async (reportId: string) => {
     const response = await axios.post(
-      "/api/download-report",
+      "/api/download-project-report",
       { projectId: reportId },
       { responseType: "blob" }
     );

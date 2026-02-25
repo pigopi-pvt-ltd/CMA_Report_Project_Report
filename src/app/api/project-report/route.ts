@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { FaFirstAid } from "react-icons/fa";
 import { Value } from "@radix-ui/react-select";
-import { drawEBIDTAAnalysis } from "@/helpers/pdfSections";
+import { drawEBIDTAAnalysis } from "@/helpers/projectReportpdfSections";
 
 
 export async function POST(request: Request) {
@@ -527,41 +527,7 @@ export async function POST(request: Request) {
 
     //
 
-    const breakEvenSalesData = [];
 
-    for (let i = 0; i < data.loanPeriod; i++) {
-      const profit = profitabilityStatement[i];
-      const genExp = generalExpensesStatement[i];
-      const purExp = purchaseCostStatement[i];
-
-
-      const sales = profit.totalA;
-      const variableCosts = profit.totalPurchaseEquipment +
-        profit.powerAndFuel +
-        profit.printingAndStationery +
-        profit.miscellaneousExpenses +
-        profit.otherExpenses +
-        profit.repairAndMaintenance;
-
-      // 3. Gross Profit (B) = Sales - Variable Costs
-      const grossProfit = sales - variableCosts;
-      const fixedCosts = genExp.totalGeneralExpenses + profit.interestOnTermLoan + (profit.interestOnWorkingCapital || 0);
-      const breakEvenSales = grossProfit > 0
-        ? Math.round((sales * fixedCosts) / grossProfit)
-        : 0;
-
-      breakEvenSalesData.push({
-        year: profit.year,
-        sales: sales,
-        variableCosts: variableCosts,
-        grossProfit: grossProfit,
-        depreciation: genExp.depreciation,
-        interestOnTermLoan: profit.interestOnTermLoan,
-        interestOnCC: profit.interestOnWorkingCapital || 0,
-        fixedCosts: fixedCosts,
-        breakEvenSales: breakEvenSales
-      });
-    }
 
 
     const loanInterestTablesDetail = [];

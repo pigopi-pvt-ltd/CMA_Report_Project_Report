@@ -4,7 +4,7 @@ import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios, drawSensitivityAnalysis, drawProjectedBalanceSheet,drawBreakEvenAnalysis,drawCashFlowStatement,drawFinancialPosition,drawAFPTable,drawFinalAssumption, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/pdfSections";
+import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios, drawSensitivityAnalysis, drawProjectedBalanceSheet,drawBreakEvenAnalysis,drawCashFlowStatement,drawFinancialPosition,drawAFPTable,drawFinalAssumption, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/projectReportpdfSections";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
   doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
