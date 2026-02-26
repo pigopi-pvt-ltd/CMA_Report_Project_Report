@@ -21,7 +21,7 @@ export const drawPromoterTable = (doc: any, data: any, fonts: any) => {
 /**
  * SECTION 2: BUSINESS DETAILS
  */
-export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX: any) => {
+export const drawBusinessTable = (doc: any, projectData: any, fonts: any) => {
   const bDetails = projectData.businessDetails;
   const pDetails = projectData.personalDetails;
   const rows: TableRow[] = [
@@ -33,8 +33,9 @@ export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX:
     [{ text: "Contact Number", width: 250, bold: true }, { text: pDetails.businessMobile, width: 300 }],
     [{ text: "Business Start Date", width: 250, bold: true }, { text: bDetails.businessStartDate, width: 300 }]
   ];
-  doc.x = leftX
+  
   drawFlexibleTable(doc, rows, { title: "BUSINESS DETAILS", ...fonts });
+  
 };
 
 /**
@@ -54,14 +55,13 @@ export const drawLoanTable = (doc: any, projectData: any, formatRupees: Function
     [{ text: "Average DSCR", width: 250, bold: true }, { text: "1.65", width: 300 }],
   ];
   drawFlexibleTable(doc, rows, { title: "LOAN DETAILS", ...fonts });
+ 
 };
 
 /**
  * SECTION: SALES AND REVENUE BREAKDOWN
  */
-/**
- * SECTION: SALES & REVENUE (As per Screenshot)
- */
+
 export const drawSalesRevenueTable = (doc: any, projectData: any, formatRupees: Function, fonts: any) => {
 
   const data = projectData.revenueDetails
@@ -70,12 +70,7 @@ export const drawSalesRevenueTable = (doc: any, projectData: any, formatRupees: 
   const rightX = doc.page.width - doc.page.margins.right;
 
   // --- 1. Header Section ---
-  doc.fontSize(18)
-    .fillColor("#4154F1")
-    .font(fontBoldPath)
-    .text("SALES & REVENUE", { align: "center" });
-
-  doc.moveDown(0.2);
+  
   const lineY = doc.y;
   doc.strokeColor("#4154F1")
     .lineWidth(1.5)
@@ -219,8 +214,50 @@ export const drawMeansOfFinance = (doc: any, lDetails: any, formatRupees: Functi
  */
 export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupees: Function, fonts: any, leftX: number) => {
   schedule.forEach((yearData: any, index: number) => {
-    if (index % 2 !== 0) doc.x = leftX;
-    if (index % 2 === 0) doc.addPage();
+    // Check if there's enough space on the current page for the next table
+    // Approximate height needed: header (1 line) + assets rows + totals row + some buffer
+    const estimatedRowsCount = (yearData.assets?.length || 0) + 5; // Assets + headers + totals + buffer
+    const estimatedRowHeight = 20; // Approximate height per row
+    const estimatedTableHeight = estimatedRowsCount * estimatedRowHeight;
+    const estimatedHeaderHeight = 40; // Space for both headers
+    const estimatedTotalHeight = estimatedTableHeight + estimatedHeaderHeight;
+    
+    // Check remaining page space (accounting for margins)
+    const currentPageY = doc.y;
+    const pageHeight = doc.page.height;
+    const bottomMargin = doc.page.margins.bottom;
+    const availableHeight = pageHeight - currentPageY - bottomMargin;
+    
+    // If not enough space, add a new page
+    if (availableHeight < estimatedTotalHeight && index > 0) {
+      doc.addPage();
+    } else if (index > 0) {
+      // If it's not the first item and there's space, add some spacing
+      doc.moveDown(1);
+    }
+    
+    // Create centered, single-line title for "YEAR X DEPRECIATION" using proper centering
+    const yearTitleText = `YEAR ${index + 1} DEPRECIATION`;
+    
+    // Calculate the usable page width (excluding margins)
+    const leftMargin1 = doc.page.margins.left;
+    const rightMargin1 = doc.page.margins.right;
+    const usableWidth1 = doc.page.width - leftMargin1 - rightMargin1;
+    
+    // Reset x position to the left margin to ensure proper centering
+    doc.x = leftMargin1;
+    
+    // Set font properties for year title
+    doc.fontSize(10).fillColor("#b91c1c").font(fonts.fontBoldPath);
+    
+    // Draw the centered year title across the full usable width
+    doc.text(yearTitleText, 0, doc.y, { 
+      width: usableWidth1,
+      align: "center",
+      underline: true
+    });
+    
+    doc.moveDown(0.5);
 
     const deprRows: TableRow[] = [
       [
@@ -244,10 +281,29 @@ export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupee
       [{ text: "TOTAL", width: 140, bold: true, fontSize: 8 }, { text: "", width: 85 }, { text: "", width: 60 }, { text: "", width: 80 }, { text: "", width: 40 }, { text: formatRupees(yearData.totalDepreciationForYear), width: 75, bold: true, fontSize: 8, align: "center" }, { text: "", width: 70 }]
     ];
 
-    drawFlexibleTable(doc, deprRows, {
-      title: `PROJECTED DEPRECIATION SCHEDULE FOR FY ${yearData.year} -${(yearData.year + 1) % 100} `,
-      ...fonts
+    // Create centered, single-line title using proper centering
+    const scheduleTitleText = `DEPRECIATION SCHEDULE - FY ${yearData.year}-${(yearData.year + 1) % 100}`;
+    
+    // Calculate the usable page width (excluding margins)
+    const leftMargin2 = doc.page.margins.left;
+    const rightMargin2 = doc.page.margins.right;
+    const usableWidth2 = doc.page.width - leftMargin2 - rightMargin2;
+    
+    // Reset x position to the left margin to ensure proper centering
+    doc.x = leftMargin2;
+    
+    // Set font properties
+    doc.fontSize(16).fillColor("#000000").font(fonts.fontBoldPath || "Helvetica-Bold");
+    
+    // Draw the centered text across the full usable width
+    doc.text(scheduleTitleText, 0, doc.y, { 
+      width: usableWidth2,
+      align: "center" 
     });
+    
+    doc.moveDown(0.5);
+    
+    drawFlexibleTable(doc, deprRows, { ...fonts });
     doc.moveDown(2);
   });
 };
@@ -1132,13 +1188,13 @@ export const drawBreakEvenAnalysis = (doc: any, projectData: any, formatRupee: F
 
   // --- Page Start Check ---
   if (doc.y > 700) doc.addPage();
-  doc.fillColor("#b91c1c").fontSize(11).text("BREAK EVEN ANALYSIS", 30);
+  doc.fillColor("#b91c1c").fontSize(11).text("BREAK EVEN ANALYSIS", { align: "center" });
 
 
   // SECTION 1: METRICS
   const metricsRows: any[] = [
     ...getHeaderRows(),
-    [{ text: "BREAK-EVEN METRICS", width: totalWidth, bold: true, color: "#b91c1c" }],
+    [{ text: "BREAK-EVEN METRICS", width: totalWidth, bold: true, color: "#b91c1c", align: "center" }],
     [{ text: "A. Revenue/Sales", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.revenueSales), width: cellWidth, align: "center" }))],
     [{ text: "B. Variable Cost", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.variableCostTotal), width: cellWidth, align: "center" }))],
     [{ text: "C. Fixed Cost", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostTotal), width: cellWidth, align: "center" }))],
@@ -1446,7 +1502,7 @@ export const drawLoanCalculation = (doc: any, projectData: any, formatrupee: Fun
       doc.rect(x, rowY, summaryBoxWidth, standardRowHeight).strokeColor("#e5e7eb").lineWidth(0.5).stroke();
       if (regularFontFamily) doc.font(regularFontFamily);
       doc.fillColor("#374151").fontSize(8).text(label, x + 8, rowY + 6);
-      doc.text(value, x + 120, rowY + 6, { width: 120, align: "right" });
+      doc.text(value, x + 120, rowY + 6, { width: 120, align: "center" });
       rowY += standardRowHeight;
     });
     return rowY;
@@ -1520,7 +1576,7 @@ export const drawLoanCalculation = (doc: any, projectData: any, formatrupee: Fun
     values.forEach((val, i) => {
       doc.text(val, xData, currentYCoordinate + 5, {
         width: colWidths[i],
-        align: i < 2 ? "center" : "right"
+        align: "center"
       });
       xData += colWidths[i];
     });

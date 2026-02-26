@@ -14,6 +14,27 @@ import {
 import DashboardCreateReportButton from "./DashboardCreateReportButton";
 import DashboardSearch from "./DashboardSearch";
 
+import axios from "axios";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 /* ================= TYPES ================= */
 
 type CMAReport = {
@@ -29,6 +50,33 @@ export default function CMAReports({
 }: {
   reports: CMAReport[];
 }) {
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
+
+  const handleDownload = async (reportId: string, name: string) => {
+    try {
+      setIsDownloading(reportId);
+      const response = await axios.post("/api/download-cma-report",
+        { projectId: reportId },
+        { responseType: "blob" }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `CMA_Report_${name.replace(/\s+/g, '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("Download started");
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Failed to download report");
+    } finally {
+      setIsDownloading(null);
+    }
+  };
+
   /* ================= PAGINATION STATE ================= */
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -48,6 +96,39 @@ export default function CMAReports({
   useEffect(() => {
     setPage(0);
   }, [reports, rowsPerPage]);
+
+  /* ================= ACTION STATE ================= */
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await axios.delete(`/api/delete-cma-report?id=${deleteId}`);
+      toast.success("Report deleted");
+      window.location.reload();
+    } catch (error) {
+      toast.error("Failed to delete report");
+    } finally {
+      setDeleteId(null);
+    }
+  };
+
+  const saveEdit = async () => {
+    if (!editId || !editName.trim()) return;
+    try {
+      await axios.put(`/api/edit-cma-report?id=${editId}`, {
+        businessName: editName,
+      });
+      toast.success("Report name updated");
+      window.location.reload();
+    } catch (error) {
+      toast.error("Failed to update report");
+    } finally {
+      setEditId(null);
+    }
+  };
 
   return (
     <div className="p-1 w-full">
@@ -140,6 +221,8 @@ export default function CMAReports({
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700 p-2"
+                          onClick={() => handleDownload(report.id, report.name)}
+                          disabled={isDownloading === report.id}
                         >
                           <ArrowDown
                             className="h-5 w-5 text-white"
@@ -157,10 +240,21 @@ export default function CMAReports({
                       </td>
 
                       <td className="px-4 py-3 flex justify-end gap-2">
-                        <Button size="sm" variant="secondary">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            setEditId(report.id);
+                            setEditName(report.name);
+                          }}
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="destructive">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setDeleteId(report.id)}
+                        >
                           <Trash className="h-4 w-4" />
                         </Button>
                       </td>
@@ -184,6 +278,49 @@ export default function CMAReports({
           </div>
         </CardContent>
       </Card>
+
+      {/* ================= DIALOGS ================= */}
+
+      {/* DELETE DIALOG */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this CMA report?
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* EDIT DIALOG */}
+      <Dialog open={!!editId} onOpenChange={() => setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Business Name</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label>Business Name</Label>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setEditId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

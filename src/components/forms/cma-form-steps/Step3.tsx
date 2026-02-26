@@ -1,6 +1,6 @@
 import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from '../../ui/field';
 import { Controller, UseFormReturn } from 'react-hook-form';
-import { cmaReportType } from '@/Schemas/cmaReportSchema';
+import {cmaReportType } from '@/Schemas/cmaReportSchema';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../ui/select';
 import StepHeaderSection from '../sections/StepHeaderSection';
 
@@ -20,19 +20,49 @@ const Step3 = ({ currentStep, form }: Props) => {
       <Controller
         name="industryType"
         control={form.control}
-        render={({ field }) => (
-          <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Industry" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="manufacturing">Manufacturing</SelectItem>
-              <SelectItem value="service">Service</SelectItem>
-              <SelectItem value="trading">Trading</SelectItem>
-              <SelectItem value="agriculture">Agriculture</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
+        render={({ field, fieldState }) => {
+          const options = [
+            { label: "Manufacturing", value: "manufacturing" },
+            { label: "Service", value: "service" },
+            { label: "Trading", value: "trading" },
+            { label: "Agriculture", value: "agriculture" },
+          ];
+
+          return (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="industryType">
+                Select Your Industry
+              </FieldLabel>
+              <Select
+                name={field.name}
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={false}
+              >
+                <SelectTrigger
+                  id="industryType"
+                  aria-invalid={fieldState.invalid}
+                >
+                  <SelectValue placeholder="Choose the industry category that best fits your business" />
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Select an industry</SelectLabel>
+                      {options.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </SelectTrigger>
+              </Select>
+              <FieldDescription></FieldDescription>
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          );
+        }}
       />
     </FieldGroup>
   )

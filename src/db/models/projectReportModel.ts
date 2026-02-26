@@ -430,6 +430,14 @@ export type finalAssumptionType = {
     employmentPotentialCount: string;
   };
 };
+
+const SensitivityScenarioSchema = {
+  financialYear: Number,
+  totalRevenueIncome: Number,
+  ebitdaValue: Number,
+  ebitValue: Number,
+  profitBeforeTaxValue: Number
+};
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -476,13 +484,7 @@ export interface ProjectData extends Document {
 
 }
 
-const SensitivityScenarioSchema = {
-  financialYear: Number,
-  totalRevenueIncome: Number,
-  ebitdaValue: Number,
-  ebitValue: Number,
-  profitBeforeTaxValue: Number
-};
+
 
 const ProjectReportSchema = new Schema<ProjectData>(
   {

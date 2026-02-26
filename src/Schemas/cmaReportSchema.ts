@@ -78,6 +78,7 @@ export const salesRevenueDetailsSchema = z.object({
   productName: z.string().min(1),
   salesType: salesTypeEnum,
   salesRevenue: z.number().min(0),
+  yearlyGrowthRate: z.number().min(5, "Growth rate must be at least 5%"),
 });
 
 // ✅ FINAL CMA SCHEMA

@@ -1,4 +1,4 @@
-import { loanTypeEnum } from '@/Schemas/cmaReportSchema';
+import { loanTypeEnum } from '@/Schemas/projectReportSchema';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { Field, FieldError, FieldGroup, FieldLabel } from '../../ui/field';
@@ -40,21 +40,28 @@ const Step4 = ({ currentStep, form }: Props) => {
       <StepHeaderSection title="Loan Type" description="What type of loan do you need for your business?" />
 
       {/* Loan Type(loanType) */}
-       <Controller
+      <Controller
         name="loanType"
         control={form.control}
-        render={({ field }) => (
-          <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Loan Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="mudra">Mudra</SelectItem>
-              <SelectItem value="pmegp">PMEGP</SelectItem>
-              <SelectItem value="msme">MSME</SelectItem>
-              <SelectItem value="others">Others</SelectItem>
-            </SelectContent>
-          </Select>
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="loanType">Loan Type</FieldLabel>
+            <Select onValueChange={(value) => {
+              field.onChange(value);
+
+            }} value={field.value}>
+              <SelectTrigger id="loanType">
+                <SelectValue placeholder="Select a loan type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mudra">Mudra</SelectItem>
+                <SelectItem value="pmegp">PMEGP</SelectItem>
+                <SelectItem value="msme">MSME Loan</SelectItem>
+                <SelectItem value="others">Others</SelectItem>
+              </SelectContent>
+            </Select>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
         )}
       />
 

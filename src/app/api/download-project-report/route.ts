@@ -150,7 +150,7 @@ export async function POST(request: Request) {
 
     //--------- breakEvenAnalysis--------------
     doc.addPage();
-    drawHeader(doc, "BREAK EVEN SALSE", fontBoldPath)
+    drawHeader(doc, "BREAK EVEN SALES", fontBoldPath)
     drawBreakEvenSales(doc, projectData, formatRupees, fonts)
     //---------Loan Interest Table Detail-------
     doc.addPage();
