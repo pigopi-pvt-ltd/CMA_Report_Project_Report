@@ -29,7 +29,7 @@ export function drawFlexibleTable(
   const boldFont = options?.fontBoldPath || "Helvetica-Bold";
 
   if (options?.title) {
-    doc.font(boldFont).fontSize(16).fillColor("#000000").text(options.title, { align: "left" });
+    doc.font(boldFont).fontSize(16).fillColor("#000000").text(options.title, { align: "center" });
     doc.moveDown(0.5);
   }
 
@@ -60,9 +60,10 @@ export function drawFlexibleTable(
     const finalRowHeight = rowContentHeight + padding;
 
     // --- 2. PAGE BREAK CHECK ---
-    if (y + finalRowHeight > doc.page.height - 50) {
+    if (doc.y + finalRowHeight > doc.page.height - 50) {
       doc.addPage();
     }
+    const drawingY = doc.y;
 
     // --- 3. DRAWING ---
     row.forEach((cell) => {
@@ -73,7 +74,7 @@ export function drawFlexibleTable(
       // Draw border
       doc.strokeColor("#000000")
         .lineWidth(0.5)
-        .rect(currentX, y, colWidth, finalRowHeight)
+        .rect(currentX, drawingY, colWidth, finalRowHeight)
         .stroke();
 
       // Set Font and Size
@@ -83,7 +84,7 @@ export function drawFlexibleTable(
       const textHeight = doc.heightOfString(String(cell.text ?? "-"), { width: colWidth - 10 });
       const verticalOffset = (finalRowHeight - textHeight) / 2;
 
-      doc.text(String(cell.text ?? "-"), currentX + 5, y + verticalOffset, {
+      doc.text(String(cell.text ?? "-"), currentX + 5, drawingY + verticalOffset, {
         width: colWidth - 10,
         align: cell.align || "left",
       });
@@ -91,7 +92,7 @@ export function drawFlexibleTable(
       currentX += colWidth;
     });
 
-    doc.y = y + finalRowHeight;
+    doc.y = drawingY + finalRowHeight;
   });
   doc.moveDown(0.5);
 }

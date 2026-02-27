@@ -1,6 +1,5 @@
 import { Field, FieldLabel, FieldError } from '@/components/ui/field';
-import { Controller, UseFormReturn } from 'react-hook-form';
-import { projectReportType } from '@/Schemas/projectReportSchema';
+import { Controller, FieldValues, UseFormReturn } from 'react-hook-form';
 import { FieldContent } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -51,7 +50,7 @@ type MapConfig =
 
 type NumericCheckboxAmountRowProps = {
   label: string;
-  form: UseFormReturn<projectReportType>;
+  form: UseFormReturn<any>;
 } & MapConfig;
 
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
 // Sidebar
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
@@ -21,8 +21,13 @@ import CMAReportsGraph from "@/components/dashboard/CMAReportsGraph";
 import { getDashboardData } from "@/services/dashboard.service";
 import { DashboardData } from "@/types/dashboard";
 
-export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<"project" | "cma">("project");
+import { useSearchParams } from "next/navigation";
+
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === "cma" ? "cma" : "project";
+
+  const [activeTab, setActiveTab] = useState<"project" | "cma">(initialTab);
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
@@ -30,6 +35,13 @@ export default function DashboardPage() {
       .then((res) => setData(res))
       .catch((err) => console.error("Dashboard data error:", err));
   }, []);
+
+  // Sync tab with URL if needed (optional, but good for back button)
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "cma") setActiveTab("cma");
+    if (tab === "project") setActiveTab("project");
+  }, [searchParams]);
 
   // Loading state
   if (!data) {
@@ -87,5 +99,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

@@ -31,6 +31,7 @@ export type salesRevenueDetails = {
   salesType: "monthly" | "unit",
   salesRevenue: number;
   totalSalesRevenueAnually: number;
+  yearlyGrowthRate: number;
 }
 
 export type LoanDetails = {
@@ -267,7 +268,7 @@ export type SensitivityScenarioEntry = {
 }
 
 export type projectedBalanceSheetType = {
-  year: string; // Sample mein "FY 2025-26" ya number dono chalenge
+  year: string; 
 
   // --- LIABILITIES (Senior Sample Rows) ---
   capital: number;                        // Opening Capital
@@ -429,6 +430,14 @@ export type finalAssumptionType = {
     employmentPotentialCount: string;
   };
 };
+
+const SensitivityScenarioSchema = {
+  financialYear: Number,
+  totalRevenueIncome: Number,
+  ebitdaValue: Number,
+  ebitValue: Number,
+  profitBeforeTaxValue: Number
+};
 export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
@@ -475,13 +484,7 @@ export interface ProjectData extends Document {
 
 }
 
-const SensitivityScenarioSchema = {
-  financialYear: Number,
-  totalRevenueIncome: Number,
-  ebitdaValue: Number,
-  ebitValue: Number,
-  profitBeforeTaxValue: Number
-};
+
 
 const ProjectReportSchema = new Schema<ProjectData>(
   {
@@ -551,6 +554,11 @@ const ProjectReportSchema = new Schema<ProjectData>(
         required: true,
         min: 0,
       },
+      yearlyGrowthRate:{
+        type: Number,
+        require: true,
+        
+      }
 
     },
 
@@ -1042,10 +1050,10 @@ const ProjectReportSchema = new Schema<ProjectData>(
         taxAmount: Number
       }],
 
-      financialAssumptions: {
-        incrementInGrossReceipts: String,
-        incrementInExpenditure: String
-      },
+      // financialAssumptions: {
+      //   incrementInGrossReceipts: String,
+      //   incrementInExpenditure: String
+      // },
 
       workforceDetails: {
         employmentPotentialCount: String

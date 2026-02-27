@@ -1,72 +1,77 @@
-export const dynamic = 'force-dynamic';
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
+import CmaReport from "@/db/models/cmaReportModel";
 import { requireAuth } from "@/lib/requireAuth";
-import CmaReportModel from "@/db/models/cmaReportModel";
-import { cmaReportSchema } from "@/Schemas/cmaReportSchema";
-import { NextResponse } from "next/server";
-import { ZodError } from "zod";
+import { generateProjectReport } from "@/lib/services/report-calculation.service";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    // 1️⃣ Auth
     const session = await requireAuth(request);
-
-    // 2️⃣ DB connect
     await dbConnect();
 
-    // 3️⃣ Read body
     const body = await request.json();
 
-    // 4️⃣ Validate (NO calculation)
-    const data = cmaReportSchema.parse(body);
+    // 1. Basic required validation for Schema requirements
+    const businessName = body.businessName || body.businessDetails?.businessName;
+    const businessType = body.businessType || body.industryType; // Fallback if missing
 
-    // 5️⃣ Save EXACT user input
-    const report = new CmaReportModel({
-      userId: session.user.id,
-
-      businessName: data.businessName, // ✅ FIXED
-
-      businessType: data.businessType,
-      industryType: data.industryType,
-      loanType: data.loanType,
-
-      businessRequirements: data.businessRequirements,
-      monthlyExpenses: data.monthlyExpenses,
-
-      revenueDetails: data.revenueDetails,
-      loanPeriod: data.loanPeriod,
-
-      personalDetails: data.personalDetails,
-      businessDetails: data.businessDetails,
-    });
-
-    await report.save();
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "CMA Report saved successfully",
-        reportId: report._id,
-      },
-      { status: 201 }
-    );
-
-  } catch (error) {
-    console.error("CMA REPORT ERROR:", error);
-
-    if (error instanceof ZodError) {
+    if (
+      !businessName ||
+      !body.industryType ||
+      !body.loanType ||
+      !body.loanPeriod ||
+      !body.personalDetails ||
+      !body.businessDetails ||
+      !body.revenueDetails
+    ) {
       return NextResponse.json(
-        { message: "Validation Error", errors: error },
+        { message: "Missing required fields (Business Name, Industry, Loan Type, etc.)" },
         { status: 400 }
       );
     }
 
-    if ((error as Error).message === "UNAUTHORIZED") {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    // 2. 🔥 CORE CALCULATION ENGINE
+    // We pass the body to the engine
+    const reportCoreData = await generateProjectReport(body);
+
+    // 3. 🧠 MERGE DATA & CLEANUP
+    // Remove _id if it exists to prevent duplicate key errors on create
+    const { _id, ...cleanBody } = body;
+
+    const finalData = {
+      ...cleanBody,
+      businessName,
+      businessType: body.businessType || body.industryType, // Ensure it's top level for schema
+      userId: session.user.id,
+      ...reportCoreData,
+      // Ensure nested fields that might be missing in reportCoreData are preserved from body
+      loanDetails: {
+        ...reportCoreData.loanDetails
+      }
+    };
+
+    // 4. 💾 SAVE
+    // Using findOneAndUpdate with upsert:true if we want to allow editing, 
+    // but for now, let's keep it as create or handle the existing ID if the user intends to update.
+    const savedData = await CmaReport.create(finalData);
 
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      {
+        message: "CMA Report Generated & Saved Successfully",
+        data: savedData,
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error("CMA_REPORT_ERROR:", error);
+
+    // Provide more specific error message if it's a Mongoose validation error
+    const message = error.name === "ValidationError"
+      ? `Validation Error: ${Object.values(error.errors).map((err: any) => err.message).join(", ")}`
+      : error.message;
+
+    return NextResponse.json(
+      { message },
       { status: 500 }
     );
   }

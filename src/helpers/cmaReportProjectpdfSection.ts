@@ -21,7 +21,7 @@ export const drawPromoterTable = (doc: any, data: any, fonts: any) => {
 /**
  * SECTION 2: BUSINESS DETAILS
  */
-export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX: any) => {
+export const drawBusinessTable = (doc: any, projectData: any, fonts: any) => {
   const bDetails = projectData.businessDetails;
   const pDetails = projectData.personalDetails;
   const rows: TableRow[] = [
@@ -33,8 +33,9 @@ export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX:
     [{ text: "Contact Number", width: 250, bold: true }, { text: pDetails.businessMobile, width: 300 }],
     [{ text: "Business Start Date", width: 250, bold: true }, { text: bDetails.businessStartDate, width: 300 }]
   ];
-  doc.x = leftX
+  
   drawFlexibleTable(doc, rows, { title: "BUSINESS DETAILS", ...fonts });
+  
 };
 
 /**
@@ -54,14 +55,13 @@ export const drawLoanTable = (doc: any, projectData: any, formatRupees: Function
     [{ text: "Average DSCR", width: 250, bold: true }, { text: "1.65", width: 300 }],
   ];
   drawFlexibleTable(doc, rows, { title: "LOAN DETAILS", ...fonts });
+ 
 };
 
 /**
  * SECTION: SALES AND REVENUE BREAKDOWN
  */
-/**
- * SECTION: SALES & REVENUE (As per Screenshot)
- */
+
 export const drawSalesRevenueTable = (doc: any, projectData: any, formatRupees: Function, fonts: any) => {
 
   const data = projectData.revenueDetails
@@ -70,12 +70,7 @@ export const drawSalesRevenueTable = (doc: any, projectData: any, formatRupees: 
   const rightX = doc.page.width - doc.page.margins.right;
 
   // --- 1. Header Section ---
-  doc.fontSize(18)
-    .fillColor("#4154F1")
-    .font(fontBoldPath)
-    .text("SALES & REVENUE", { align: "center" });
-
-  doc.moveDown(0.2);
+  
   const lineY = doc.y;
   doc.strokeColor("#4154F1")
     .lineWidth(1.5)
@@ -213,127 +208,56 @@ export const drawMeansOfFinance = (doc: any, lDetails: any, formatRupees: Functi
   drawFlexibleTable(doc, rows, fonts);
 };
 
-/**
- * SECTION 6: INCOME TABLE (Projected)
- */
 
-export const drawCostStatement = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
-  const years = projectData.costStatement;
-  const srWidth = 30;
-  const particularsWidth = 100;
-  const dataWidth = 550 - (particularsWidth + srWidth);
-  const loanPeriod = projectData.loanPeriod;
-  const dynamicFontSize = loanPeriod > 7 ? 7 : 8;
-
-  const incomeTableRows: TableRow[] = [
-    // Row 1: Headers
-    [
-      { text: "Sr No", width: srWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-      { text: "Particulars", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-      ...years.map((y: any) => {
-        const startYear = y.year || 0;
-        const endYearShort = (startYear + 1) % 100;
-        const endYearFormatted = String(endYearShort).padStart(2, '0');
-        return {
-          text: `PROJECTED FY ${startYear} -${endYearFormatted} `,
-          width: dataWidth / loanPeriod,
-          color: "#b91c1c",
-          fontSize: dynamicFontSize,
-          align: "center" as const,
-          bold: true,
-        };
-      })
-    ],
-    // Row 2: Section Header
-    [
-      { text: "1", width: srWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-      { text: "Income", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-      { text: "", width: dataWidth }
-    ],
-    // Row 3: Sales Header
-    [
-      { text: "a", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Sales (net of returns)", width: particularsWidth, color: "#b91c1c", fontSize: dynamicFontSize },
-      { text: "", width: dataWidth }
-    ],
-    // Row 4: Domestic Sales
-    [
-      { text: "1", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Domestic Sales", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...years.map((y: any) => ({ text: formatInMillions(y.domesticSales), width: dataWidth / loanPeriod, bold: true, align: "center" as const, fontSize: dynamicFontSize }))
-    ],
-    // Row 5: Export Sales
-    [
-      { text: "2", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Export Sales", width: particularsWidth, fontSize: dynamicFontSize },
-      ...years.map((y: any) => ({ text: y.exportSales ? formatInMillions(y.exportSales) : "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
-    ],
-    // Row 6: Sub-Total
-    [
-      { text: "3", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Sub-Total", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...years.map((y: any) => ({ text: formatInMillions(y.subTotal), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
-    ],
-    // Row 7: GST
-    [
-      { text: "4", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Less:GST", width: particularsWidth, fontSize: dynamicFontSize },
-      ...years.map((y: any) => ({ text: formatInMillions(y.gst), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
-    ],
-    // Row 8: Net Sales
-    [
-      { text: "5", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Net Sales", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...years.map((y: any) => ({ text: formatInMillions(y.netSales), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
-    ],
-    // Row 9: Other Income
-    [
-      { text: "6", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Total Other Income", width: particularsWidth, fontSize: dynamicFontSize },
-      ...years.map((y: any) => ({ text: formatInMillions(y.totalOtherIncome), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
-    ],
-    // Row 10: Total Gross Income
-    [
-      { text: "7", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Total Gross Income", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...years.map((y: any) => ({ text: formatInMillions(y.totalGrossIncome), width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
-    ],
-    // Section Divider: Cost of Production
-    [
-      { text: "Cost of Production & Cost of Sales", color: "#b91c1c", width: 550, bold: true, fontSize: 8 }
-    ],
-    [
-      { text: "(Raw Materials Including Stores and other items used in process)", width: 550, fontSize: 8 }
-    ],
-    // Row 11: Imported
-    [
-      { text: "1", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Imported", width: particularsWidth, fontSize: dynamicFontSize },
-      ...years.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
-    ],
-    // Row 12: Indigenous
-    [
-      { text: "2", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Indigenous", width: particularsWidth, fontSize: dynamicFontSize },
-      ...years.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize }))
-    ],
-    // Row 13: Sub-Total (Cost)
-    [
-      { text: "3", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Sub-Total", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...years.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center" as const, fontSize: dynamicFontSize, bold: true }))
-    ],
-  ];
-
-  drawFlexibleTable(doc, incomeTableRows, { fontSize: dynamicFontSize, ...fonts });
-};
 /**
  * SECTION 7: DEPRECIATION SCHEDULES
  */
 export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupees: Function, fonts: any, leftX: number) => {
   schedule.forEach((yearData: any, index: number) => {
-    if (index % 2 !== 0) doc.x = leftX;
-    if (index % 2 === 0) doc.addPage();
+    // Check if there's enough space on the current page for the next table
+    // Approximate height needed: header (1 line) + assets rows + totals row + some buffer
+    const estimatedRowsCount = (yearData.assets?.length || 0) + 5; // Assets + headers + totals + buffer
+    const estimatedRowHeight = 20; // Approximate height per row
+    const estimatedTableHeight = estimatedRowsCount * estimatedRowHeight;
+    const estimatedHeaderHeight = 40; // Space for both headers
+    const estimatedTotalHeight = estimatedTableHeight + estimatedHeaderHeight;
+    
+    // Check remaining page space (accounting for margins)
+    const currentPageY = doc.y;
+    const pageHeight = doc.page.height;
+    const bottomMargin = doc.page.margins.bottom;
+    const availableHeight = pageHeight - currentPageY - bottomMargin;
+    
+    // If not enough space, add a new page
+    if (availableHeight < estimatedTotalHeight && index > 0) {
+      doc.addPage();
+    } else if (index > 0) {
+      // If it's not the first item and there's space, add some spacing
+      doc.moveDown(1);
+    }
+    
+    // Create centered, single-line title for "YEAR X DEPRECIATION" using proper centering
+    const yearTitleText = `YEAR ${index + 1} DEPRECIATION`;
+    
+    // Calculate the usable page width (excluding margins)
+    const leftMargin1 = doc.page.margins.left;
+    const rightMargin1 = doc.page.margins.right;
+    const usableWidth1 = doc.page.width - leftMargin1 - rightMargin1;
+    
+    // Reset x position to the left margin to ensure proper centering
+    doc.x = leftMargin1;
+    
+    // Set font properties for year title
+    doc.fontSize(10).fillColor("#b91c1c").font(fonts.fontBoldPath);
+    
+    // Draw the centered year title across the full usable width
+    doc.text(yearTitleText, 0, doc.y, { 
+      width: usableWidth1,
+      align: "center",
+      underline: true
+    });
+    
+    doc.moveDown(0.5);
 
     const deprRows: TableRow[] = [
       [
@@ -357,264 +281,34 @@ export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupee
       [{ text: "TOTAL", width: 140, bold: true, fontSize: 8 }, { text: "", width: 85 }, { text: "", width: 60 }, { text: "", width: 80 }, { text: "", width: 40 }, { text: formatRupees(yearData.totalDepreciationForYear), width: 75, bold: true, fontSize: 8, align: "center" }, { text: "", width: 70 }]
     ];
 
-    drawFlexibleTable(doc, deprRows, {
-      title: `PROJECTED DEPRECIATION SCHEDULE FOR FY ${yearData.year} -${(yearData.year + 1) % 100} `,
-      ...fonts
+    // Create centered, single-line title using proper centering
+    const scheduleTitleText = `DEPRECIATION SCHEDULE - FY ${yearData.year}-${(yearData.year + 1) % 100}`;
+    
+    // Calculate the usable page width (excluding margins)
+    const leftMargin2 = doc.page.margins.left;
+    const rightMargin2 = doc.page.margins.right;
+    const usableWidth2 = doc.page.width - leftMargin2 - rightMargin2;
+    
+    // Reset x position to the left margin to ensure proper centering
+    doc.x = leftMargin2;
+    
+    // Set font properties
+    doc.fontSize(16).fillColor("#000000").font(fonts.fontBoldPath || "Helvetica-Bold");
+    
+    // Draw the centered text across the full usable width
+    doc.text(scheduleTitleText, 0, doc.y, { 
+      width: usableWidth2,
+      align: "center" 
     });
+    
+    doc.moveDown(0.5);
+    
+    drawFlexibleTable(doc, deprRows, { ...fonts });
     doc.moveDown(2);
   });
 };
 
-/**
- * SECTION 8: PURCHASE COST STATEMENT
- */
 
-export const drawPurchaseCostStatement = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
-  // Data seedha database se aa raha hai
-  const purchaseData = projectData.purchaseCostStatement || [];
-  const loanPeriod = projectData.loanPeriod;
-
-  const srWidth = 30;
-  const particularsWidth = 150;
-  const dataWidth = 550 - (particularsWidth + srWidth);
-  const dynamicFontSize = loanPeriod > 7 ? 7 : 8;
-
-  const rows: TableRow[] = [
-    // 1. Header Row
-    [
-      { text: "Sr No", width: srWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-      { text: "Particulars", width: particularsWidth, color: "#b91c1c", bold: true, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any, i: number) => ({
-        text: `${i === 0 ? 'ESTIMATED' : 'PROJECTED'} FY ${p.year}-${(p.year + 1) % 100}`,
-        width: dataWidth / loanPeriod,
-        color: "#b91c1c",
-        bold: true,
-        fontSize: dynamicFontSize,
-        align: "center"
-      }))
-    ],
-    [
-      { text: "b", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Other Consumable Spares (Purchase)", color: "#b91c1c", width: 550, bold: true, fontSize: 8 }
-    ],
-    // 4. Imported
-    [
-      { text: "4", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Imported", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map(() => ({ text: "N/A", width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 5. Indigenous 
-    [
-      { text: "5", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Indigenous", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.indigenous), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 6. Sub-total
-    [
-      { text: "6", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Sub-total", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.indigenous), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize, bold: true }))
-    ],
-    // 7. Freight & Other Expenses
-    [
-      { text: "7", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Freight & Other Exp", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.freightAndOtherExpenses), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 8. Total Direct Expenses
-    [
-      { text: "8", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Total Direct Expenses", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.totalDirectExpenses), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 9. Sub-total (Direct)
-    [
-      { text: "9", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Sub-total", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.subTotal), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize, bold: true }))
-    ],
-    // 10. Opening stock of W.I.P.
-    [
-      { text: "10", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Add: Opening stock of W.I.P.", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.openingStockOfWIP), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 11. Sub-total After Opening Stock of W.I.P.
-    [
-      { text: "11", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Sub-total After WIP Opening", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.subTotalAfterOpeningStock), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 12. Less: closing stock of W.I.P.
-    [
-      { text: "12", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Less: closing stock of W.I.P.", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.closingStockOfWIP), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 13. Total Cost of Production
-    [
-      { text: "13", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Total Cost of Production", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.totalCostOfProduction), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize, bold: true }))
-    ],
-    // 14. Add: Opening Stock of Finished Goods
-    [
-      { text: "14", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Add: Opening Stock of FG", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.openingStockOfFinishedGoods), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 15. Sub-total After FG Opening
-    [
-      { text: "15", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Sub-total After FG Opening", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.subTotalAfterOpeningStockFinishedGoods), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize, bold: true }))
-    ],
-    // 16. Less: Closing Stock of Finished Goods
-    [
-      { text: "16", width: srWidth, fontSize: dynamicFontSize },
-      { text: "Less: Closing Stock of FG", width: particularsWidth, fontSize: dynamicFontSize },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.closingStockOfFinishedGoods), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize }))
-    ],
-    // 17. Total Cost of Sales
-    [
-      { text: "17", width: srWidth, fontSize: dynamicFontSize, bold: true },
-      { text: "Total Cost of Sales", width: particularsWidth, fontSize: dynamicFontSize, bold: true },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.totalCostOfSales), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize, bold: true }))
-    ],
-    // 18. Gross Profit 
-    [
-      { text: "18", width: srWidth, color: "#b91c1c", fontSize: dynamicFontSize, bold: true },
-      { text: "Gross Profit", width: particularsWidth, color: "#b91c1c", fontSize: dynamicFontSize, bold: true },
-      ...purchaseData.map((p: any) => ({ text: formatInMillions(p.grossProfit), width: dataWidth / loanPeriod, align: "center", fontSize: dynamicFontSize, bold: true }))
-    ],
-  ];
-
-  drawFlexibleTable(doc, rows, { title: "COST OF PRODUCTION & GROSS PROFIT DETERMINATION", ...fonts });
-};
-
-export const drawGeneralExpensesTable = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
-  const expensesData = projectData.generalExpensesStatement || [];
-  const loanPeriod = projectData.loanPeriod;
-  const particularsWidth = 150;
-  const dataWidth = 370; // Adjusted for space
-  const cellWidth = dataWidth / loanPeriod;
-
-  const rows: any[] = [
-    // Header
-    [
-      { text: "Sr No", width: 30, color: "#b91c1c", bold: true },
-      { text: "Particulars", width: particularsWidth, color: "#b91c1c", bold: true },
-      ...expensesData.map((e: any, i: any) => ({
-        text: `${i === 0 ? 'ESTIMATED' : 'PROJECTED'} FY ${e.year}-${(e.year + 1) % 100}`,
-        width: cellWidth,
-        color: "#b91c1c",
-        bold: true,
-        align: "center"
-      }))
-    ],
-    [
-
-      { text: "General, Administrative & Selling Expenses", color: "#b91c1c", width: 550, bold: true, fontSize: 8 }
-
-    ],
-    // Salary Row Example
-    [
-      { text: "1", width: 30 },
-      { text: "Salary & Wages", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.salary), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "2", width: 30 },
-      { text: "Power & Fuel", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.powerAndFuel), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "3", width: 30 },
-      { text: "Printing & Stationery", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.printingAndStationery), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "4", width: 30 },
-      { text: "Advertisement", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.advertisement), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "5", width: 30 },
-      { text: "Miscellaneous Expenses", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.miscellaneousExpenses), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "6", width: 30 },
-      { text: "Other Expenses", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.otherExpenses), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "7", width: 30 },
-      { text: "Postage & Courier", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.postageAndCourier), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "8", width: 30 },
-      { text: "Transport & Conveyance", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.transportAndConveyance), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "9", width: 30 },
-      { text: "Staff Welfare Expenses", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.staffWelfare), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "10", width: 30 },
-      { text: "Repair & Maintenance", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.repairAndMaintenance), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "11", width: 30 },
-      { text: "Depreciation", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.depreciation), width: cellWidth, align: "center" }))
-
-    ],
-    [
-      { text: "12", width: 30 },
-      { text: "Rent", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.rent), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "13", width: 30 },
-      { text: "Electricity Expenses", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.electricityExpenses), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "14", width: 30 },
-      { text: "Total General, Administrative & Selling Expenses", width: particularsWidth },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.totalGeneralExpenses), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "15", width: 30, color: "#b91c1c", bold: true },
-      { text: "Operating Profit before Interest", width: particularsWidth, color: "#b91c1c", bold: true },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.operatingProfit), width: cellWidth, align: "center", color: "#b91c1c", bold: true }))
-    ],
-    [
-      { text: "Finance Charges", color: "#b91c1c", width: 550, bold: true, fontSize: 8 }
-    ],
-    [
-      { text: "1", width: 30, color: "#b91c1c", bold: true },
-      { text: "Interest on Term Loan", width: particularsWidth, color: "#b91c1c", bold: true },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.interestOnTermLoan), width: cellWidth, align: "center" }))
-    ],
-    [
-      { text: "2", width: 30, color: "#b91c1c", bold: true },
-      { text: "Interest on CC", width: particularsWidth, color: "#b91c1c", bold: true },
-      ...expensesData.map((e: any) => ({ text: formatInMillions(e.interestOnCC), width: cellWidth, align: "center" }))
-    ],
-    [{ text: "3", width: 30, color: "#b91c1c", bold: true },
-    { text: "Total Finance Charges", width: particularsWidth, color: "#b91c1c", bold: true },
-    ...expensesData.map((e: any) => ({ text: formatInMillions(e.totalFinanceCharges), width: cellWidth, align: "center" }))
-    ]
-  ];
-
-  drawFlexibleTable(doc, rows, { title: "GENERAL, ADMINISTRATIVE & SELLING EXPENSES", ...fonts });
-};
 
 export const drawProfitabilityStatement = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const years = projectData.costStatement || [];
@@ -763,113 +457,6 @@ export const drawCalculationOfDSCR = (doc: any, projectData: any, formatInMillio
 
   drawFlexibleTable(doc, rows, { ...fonts, fontSize });
 };
-
-// --- SWOT Analysis Page ---
-export const drawSWOTAnalysisPage = (doc: any, projectData: any, fonts: any) => {
-  const { fontBoldPath, fontPath } = fonts;
-
-  const data = {
-    strengths: projectData?.swotAnalysis?.strengths || [],
-    weaknesses: projectData?.swotAnalysis?.weaknesses || [],
-    opportunities: projectData?.swotAnalysis?.opportunities || [],
-    threats: projectData?.swotAnalysis?.threats || []
-  };
-
-  const startX = 40;
-  let startY = doc.y + 10;
-  const boxWidth = 245;
-  const gap = 15;
-
-  const drawSwotBox = (title: string, items: string[], x: number, y: number, color: string) => {
-    doc.fillColor(color).font(fontBoldPath).fontSize(11).text(title, x, y);
-
-    let currentY = y + 18;
-
-    if (items.length === 0) {
-      doc.rect(x, currentY, boxWidth, 22).fill("#f3f4f6");
-      doc.fillColor("#9ca3af").font(fontPath).fontSize(8)
-        .text("No data available in database", x + 8, currentY + 7);
-      return;
-    }
-
-    items.forEach((item: string) => {
-      doc.rect(x, currentY, boxWidth, 22).fill(color);
-      doc.fillColor("#FFFFFF").font(fontPath).fontSize(8)
-        .text(`->  ${item}`, x + 8, currentY + 7, { width: boxWidth - 15, lineBreak: false });
-      currentY += 23;
-    });
-  };
-
-  drawSwotBox("STRENGTHS", data.strengths, startX, startY, "#1D8CF8");
-  drawSwotBox("WEAKNESSES", data.weaknesses, startX + boxWidth + gap, startY, "#E14E5E");
-
-  const row1MaxItems = Math.max(data.strengths.length, data.weaknesses.length);
-  const row1Height = row1MaxItems > 0 ? (row1MaxItems * 23) + 30 : 60;
-
-  const nextRowY = startY + row1Height + 20;
-
-  drawSwotBox("OPPORTUNITIES", data.opportunities, startX, nextRowY, "#2DCE89");
-  drawSwotBox("THREATS", data.threats, startX + boxWidth + gap, nextRowY, "#11CDEF");
-
-  doc.moveDown(2);
-};
-//--Action Plan Page ---
-export const drawActionPlan = (doc: any, projectData: any, fonts: any) => {
-  const businessName = projectData.businessDetails?.businessName || "Business";
-  const plan = projectData.actionPlan;
-
-  doc.fontSize(12).fillColor("#FF0000")
-    .text(`Action Plan for ${businessName}`, { align: "left" });
-  doc.moveDown(0.5);
-
-  const renderSection = (title: string, items: string[], index: number) => {
-    if (!items || items.length === 0) return;
-
-    doc.fontSize(11).fillColor("#000000")
-      .text(`${index}. ${title}`);
-    doc.moveDown(0.5);
-
-    doc.fontSize(10);
-    items.forEach(item => {
-      doc.text(`•  ${item}`, { indent: 15 });
-      doc.moveDown(0.3);
-    });
-    doc.moveDown(0.8);
-  };
-
-  renderSection("Leverage Strengths", plan?.leverageStrengths || [], 1);
-  renderSection("Improve Weaknesses", plan?.improveWeaknesses || [], 2);
-  renderSection("Capitalize on Opportunities", plan?.capitalizeOpportunities || [], 3);
-  renderSection("Mitigate Threats", plan?.mitigateThreats || [], 4);
-};
-// ----Targate Market ----
-export const drawTargateMarket = (doc: any, projectData: any, fonts: any) => {
-  const marketData = projectData.targetMarket || [];
-
-  const srWidth = 40;
-  const customerWidth = 380;
-  const shareWidth = 120;
-  const fontSize = 10;
-
-  const rows: any[] = [
-    // --- Header Row ---
-    [
-      { text: "Sr No.", width: srWidth, color: "#b91c1c", bold: true, fontSize },
-      { text: "Target Customer", width: customerWidth, color: "#b91c1c", bold: true, fontSize },
-      { text: "Expected Share in Sales", width: shareWidth, color: "#b91c1c", bold: true, align: "center", fontSize }
-    ],
-
-    // --- Data Rows ---
-    ...marketData.map((item: any) => [
-      { text: item.srNo.toString(), width: srWidth, fontSize },
-      { text: item.targetCustomer, width: customerWidth, fontSize, align: "left" },
-      { text: item.expectedShare, width: shareWidth, fontSize, align: "center" }
-    ])
-  ];
-
-  // fonts.normal/bold ka use karke table draw karein
-  drawFlexibleTable(doc, rows, { ...fonts, fontSize });
-};
 // --- EBIDTA Analysis Page ---
 export const drawEBIDTAAnalysis = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const ebidtaData = projectData.ebidtaAnalysis || [];
@@ -1006,8 +593,6 @@ export const drawReturnOnInvestment = (doc: any, projectData: any, formatInMilli
 
   drawFlexibleTable(doc, rows, { title: "RETURN ON INVESTMENT ANALYSIS", ...fonts });
 }
-
-
 //---------BreakEvenSales------------
 export const drawBreakEvenSales = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const beData = projectData.breakEvenSalesData || [];
@@ -1057,8 +642,6 @@ export const drawBreakEvenSales = (doc: any, projectData: any, formatInMillions:
 
   drawFlexibleTable(doc, rows, { ...fonts, fontSize });
 };
-
-
 //-------------calculationOfInterestOnTermLoan------------------
 export const drawCalculationOfInterestOnTermLoan = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const profitability = projectData.profitabilityStatement || [];
@@ -1131,127 +714,6 @@ export const drawCalculationOfInterestOnTermLoan = (doc: any, projectData: any, 
 
   drawFlexibleTable(doc, table2Rows, { ...fonts, fontSize });
 };
-
-export const drawLoanCalculation = (doc: any, projectData: any, formatrupee: Function, fonts: any) => {
-  const loanScheduleArray = projectData.loanCalculation || [];
-  if (loanScheduleArray.length === 0) return;
-
-  const boldFontFamily = fonts?.bold;
-  const regularFontFamily = fonts?.regular;
-
-
-
-  const startXCoordinate = 30;
-  let currentYCoordinate = 50;
-  const summaryBoxWidth = 250;
-  const standardRowHeight = 20;
-
-  // --- 1. TERM LOAN VALUE (FROM LOAN DETAILS) ---
-
-  const termLoanFromDetails = projectData.termLoan || (loanScheduleArray[0]?.openingBalance) || 0;
-  currentYCoordinate += 30;
-
-  // --- 2. SUMMARY BOXES ---
-  const drawSummaryBox = (x: number, y: number, title: string, rows: [string, string][]) => {
-    doc.rect(x, y, summaryBoxWidth, standardRowHeight).fill("#0f172a");
-    if (boldFontFamily) doc.font(boldFontFamily);
-    doc.fillColor("#ffffff").fontSize(9).text(title, x, y + 6, { width: summaryBoxWidth, align: "center" });
-
-    let rowY = y + standardRowHeight;
-    rows.forEach(([label, value]) => {
-      doc.rect(x, rowY, summaryBoxWidth, standardRowHeight).strokeColor("#e5e7eb").lineWidth(0.5).stroke();
-      if (regularFontFamily) doc.font(regularFontFamily);
-      doc.fillColor("#374151").fontSize(8).text(label, x + 8, rowY + 6);
-      doc.text(value, x + 120, rowY + 6, { width: 120, align: "right" });
-      rowY += standardRowHeight;
-    });
-    return rowY;
-  };
-
-  const totalInterest = loanScheduleArray.reduce((s: number, e: any) => s + (e.interest || 0), 0);
-
-  const inputRows: [string, string][] = [
-    ["Term Loan Amount", `${formatrupee(termLoanFromDetails)}`],
-    ["Interest Rate", `${projectData.interestRate || '11.1'}%`],
-    ["Loan Tenure", `${projectData.loanPeriod || '5 Years'}`],
-    ["Repayment Start", loanScheduleArray[0]?.date || 'N/A']
-  ];
-
-  const summaryRows: [string, string][] = [
-    ["Monthly EMI", `${formatrupee(Math.round(loanScheduleArray[0]?.emi || 0))}`],
-    ["Total EMIs", `${loanScheduleArray.length}`],
-    ["Total Interest", `${formatrupee(Math.round(totalInterest))}`],
-    ["Total Payable", `${formatrupee(Math.round(Number(termLoanFromDetails) + totalInterest))}`]
-  ];
-
-  const boxBottomY = drawSummaryBox(startXCoordinate, currentYCoordinate, "LOAN DETAILS", inputRows);
-  drawSummaryBox(startXCoordinate + 265, currentYCoordinate, "REPAYMENT OVERVIEW", summaryRows);
-
-  currentYCoordinate = boxBottomY + 40;
-
-  // --- 3. TABLE SECTION (DATA PRINTING) ---
-  if (boldFontFamily) doc.font(boldFontFamily);
-  doc.fontSize(11).fillColor("#b91c1c").text("ANNEXURE: MONTHLY REPAYMENT SCHEDULE", startXCoordinate, currentYCoordinate);
-  currentYCoordinate += 20;
-
-  const colWidths = [35, 65, 85, 75, 75, 75, 95];
-
-  const drawHeader = (yPos: number) => {
-    doc.rect(startXCoordinate, yPos, 505, 18).fill("#f3f4f6").stroke("#e5e7eb");
-    doc.fillColor("#b91c1c").fontSize(7);
-    let xPos = startXCoordinate;
-    const headers = ["MONTH", "DATE", "OPENING BAL", "EMI", "PRINCIPAL", "INTEREST", "CLOSING BAL"];
-    headers.forEach((h, i) => {
-      doc.text(h, xPos, yPos + 5, { width: colWidths[i], align: "center" });
-      xPos += colWidths[i];
-    });
-    return yPos + 18;
-  };
-
-  currentYCoordinate = drawHeader(currentYCoordinate);
-
-  // --- 4. LOOP FOR TABLE DATA ---
-  loanScheduleArray.forEach((row: any) => {
-    // Page break logic
-    if (currentYCoordinate + 20 > doc.page.height - 50) {
-      doc.addPage();
-      currentYCoordinate = 50;
-      currentYCoordinate = drawHeader(currentYCoordinate);
-    }
-
-    if (regularFontFamily) doc.font(regularFontFamily);
-    doc.fillColor("#374151").fontSize(7);
-
-    let xData = startXCoordinate;
-    const values = [
-      row.month.toString(),
-      row.date || "-",
-      formatrupee(row.openingBalance || 0),
-      formatrupee(row.emi || 0),
-      formatrupee(row.principal || 0),
-      formatrupee(row.interest || 0),
-      formatrupee(row.closingBalance || 0)
-    ];
-
-    values.forEach((val, i) => {
-      doc.text(val, xData, currentYCoordinate + 5, {
-        width: colWidths[i],
-        align: i < 2 ? "center" : "right"
-      });
-      xData += colWidths[i];
-    });
-
-    // Row Line
-    doc.moveTo(startXCoordinate, currentYCoordinate + 18)
-      .lineTo(startXCoordinate + 505, currentYCoordinate + 18)
-      .strokeColor("#eeeeee").lineWidth(0.5).stroke();
-
-    currentYCoordinate += 18;
-  });
-
-  doc.y = currentYCoordinate;
-};
-
 
 export const drawComputationOfMPBF = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const mpbfData = projectData.mpbfAnalysis || [];
@@ -1384,6 +846,7 @@ export const drawImportantRatios = (doc: any, projectData: any, formatrupee: Fun
   doc.moveDown(0.5);
   drawFlexibleTable(doc, secondPageRows, { ...fonts, fontSize, padding: 3 });
 };
+
 export const drawSensitivityAnalysis = (doc: any, projectData: any, formatInMillions: Function, fonts: any) => {
   const sensitivity = projectData?.sensitivityAnalysis;
   if (!sensitivity) return;
@@ -1484,54 +947,6 @@ export const drawSensitivityAnalysis = (doc: any, projectData: any, formatInMill
     doc.moveDown(1.5);
   });
 };
-export const drawAssumptionsTable = (doc: any, projectData: any, fonts: any) => {
-  const assumptions = projectData.assumptions?.particulars || {};
-  const industryList = projectData.assumptions?.industryJustifications || [];
-  const fontSize = 8;
-
-  // --- TABLE 1: PARTICULARS (Top Table) ---
-  const colWidth1 = 540 / 4; // 4 Columns equal width
-  const table1Rows: any[] = [
-    [
-      { text: "Particulars", width: 540, color: "#b91c1c", bold: true, fontSize, colSpan: 4 }
-    ],
-    [
-      { text: "Projected Increment in Gross receipts", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
-      { text: "Projected Increment in Expenditure", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
-      { text: "Interest rate for Term loan (in %)", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
-      { text: "Interest Rate for Cash Credit (in %)", width: colWidth1, color: "#b91c1c", bold: true, fontSize }
-    ],
-    [
-      { text: assumptions.projectedIncrementReceipts || "135%", width: colWidth1, fontSize },
-      { text: assumptions.projectedIncrementExpenditure || "112%", width: colWidth1, fontSize },
-      { text: (assumptions.interestRateTermLoan || 11.1).toString(), width: colWidth1, fontSize },
-      { text: (assumptions.interestRateCashCredit || 11.1).toString(), width: colWidth1, fontSize }
-    ]
-  ];
-
-  drawFlexibleTable(doc, table1Rows, { ...fonts, fontSize });
-
-  doc.moveDown(2); // Thoda gap dono tables ke beech mein
-
-  // --- TABLE 2: INDUSTRY JUSTIFICATION (Bottom Table) ---
-  const industryColWidths = [100, 130, 130, 180];
-  const table2Rows: any[] = [
-    [
-      { text: "Industry", width: industryColWidths[0], color: "#b91c1c", bold: true, fontSize },
-      { text: "Projected Increment in Gross Receipts", width: industryColWidths[1], color: "#b91c1c", bold: true, fontSize },
-      { text: "Projected Increment in Expenditure", width: industryColWidths[2], color: "#b91c1c", bold: true, fontSize },
-      { text: "Justification", width: industryColWidths[3], color: "#b91c1c", bold: true, fontSize }
-    ],
-    ...industryList.map((item: any) => [
-      { text: item.industry, width: industryColWidths[0], color: "#b91c1c", bold: true, fontSize },
-      { text: item.receiptsIncrement, width: industryColWidths[1], fontSize },
-      { text: item.expenditureIncrement, width: industryColWidths[2], fontSize },
-      { text: item.justification, width: industryColWidths[3], fontSize }
-    ])
-  ];
-
-  drawFlexibleTable(doc, table2Rows, { ...fonts, fontSize });
-};
 
 
 export const drawProjectedBalanceSheet = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
@@ -1604,84 +1019,47 @@ export const drawProjectedBalanceSheet = (doc: any, projectData: any, formatRupe
   drawFlexibleTable(doc, TableRows, { fontSize: dynamicFontSize, ...fonts });
 };
 
-export const drawBreakEvenAnalysis = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
-  const beaData = projectData.breakEvenAnalysis || [];
-  if (beaData.length === 0) return;
 
-  const particularsWidth = 180;
+export const drawCashFlowStatement = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
+  const cashFlowData = projectData.projectedCashFlow || [];
+  const particularsWidth = 200; // Thoda bada rakha hai pure naam ke liye
   const totalWidth = 530;
-  const cellWidth = (totalWidth - particularsWidth) / beaData.length;
-  const dynamicFontSize = 8; // Font size standard rakha hai
+  const cellWidth = (totalWidth - particularsWidth) / cashFlowData.length;
 
-  // 1. Common Header (Jo har section ke upar repeat ho sakta hai ya split point check karega)
-  const getHeaderRows = () => [
-    [{ text: "Year", width: particularsWidth, bold: true }, ...beaData.map((d: any, i: number) => ({ text: i === 0 ? "ESTIMATED" : "PROJECTED", width: cellWidth, align: "center", bold: true, color: "#b91c1c" }))],
-    [{ text: "", width: particularsWidth }, ...beaData.map((d: any) => ({ text: `FY ${d.year}`, width: cellWidth, align: "center", bold: true, color: "#b91c1c" }))]
+  if (doc.y > 650) doc.addPage();
+  doc.fillColor("#b91c1c").fontSize(11).text("PROJECTED CASH FLOW STATEMENT", 30);
+  doc.moveDown(0.5);
+
+  const headerRow = [{ text: "Particulars", width: particularsWidth, bold: true }, ...cashFlowData.map((d: any) => ({ text: `FY ${d.year}`, width: cellWidth, align: "center", bold: true, color: "#b91c1c" }))];
+
+  const rows: any[] = [
+    headerRow,
+    [{ text: "SOURCES OF FUNDS (A)", width: totalWidth, bold: true, color: "#b91c1c" }],
+    [{ text: "PBIT", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.pbit), width: cellWidth, align: "center" }))],
+    [{ text: "Depreciation", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.depreciation), width: cellWidth, align: "center" }))],
+    [{ text: "Increase In Capital", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInCapital), width: cellWidth, align: "center" }))],
+    [{ text: "Increase In Term Loan", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInTermLoan), width: cellWidth, align: "center" }))],
+    [{ text: "Increase in Cash Credit", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInCashCredit), width: cellWidth, align: "center" }))],
+    [{ text: "Decrease In Advance Deposits", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.decreaseInAdvanceDeposits), width: cellWidth, align: "center" }))],
+    [{ text: "Decrease In Debtors", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.decreaseInDebtors), width: cellWidth, align: "center" }))],
+    [{ text: "Provisions", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.provisions), width: cellWidth, align: "center" }))],
+    [{ text: "Decrease In Stock", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.decreaseInStock), width: cellWidth, align: "center" }))],
+    [{ text: "Total [A]", width: particularsWidth, bold: true }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.totalA), width: cellWidth, align: "center", bold: true }))],
+
+    [{ text: "APPLICATION OF FUNDS (B)", width: totalWidth, bold: true, color: "#b91c1c" }],
+    [{ text: "Increase in Fixed Assets", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInFixedAssets), width: cellWidth, align: "center" }))],
+    [{ text: "Interest on Bank Loan", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.interestOnBankLoan), width: cellWidth, align: "center" }))],
+    [{ text: "Drawing", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.drawing), width: cellWidth, align: "center" }))],
+    [{ text: "Tax Payment", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.taxPayment), width: cellWidth, align: "center" }))],
+    [{ text: "Total [B]", width: particularsWidth, bold: true }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.totalB), width: cellWidth, align: "center", bold: true }))],
+
+    [{ text: "CASH POSITION", width: totalWidth, bold: true, color: "#b91c1c" }],
+    [{ text: "Open Cash Balance", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.openCashBalance), width: cellWidth, align: "center" }))],
+    [{ text: "Net Surplus / Deficit [A-B]", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.netSurplusDeficit), width: cellWidth, align: "center" }))],
+    [{ text: "Closing Cash Balance", width: particularsWidth, bold: true, color: "#b91c1c" }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.closingCashBalance), width: cellWidth, align: "center", bold: true }))]
   ];
 
-  // --- Page Start Check ---
-  if (doc.y > 700) doc.addPage();
-  doc.fillColor("#b91c1c").fontSize(11).text("BREAK EVEN ANALYSIS", 30);
-
-
-  // SECTION 1: METRICS
-  const metricsRows: any[] = [
-    ...getHeaderRows(),
-    [{ text: "BREAK-EVEN METRICS", width: totalWidth, bold: true, color: "#b91c1c" }],
-    [{ text: "A. Revenue/Sales", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.revenueSales), width: cellWidth, align: "center" }))],
-    [{ text: "B. Variable Cost", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.variableCostTotal), width: cellWidth, align: "center" }))],
-    [{ text: "C. Fixed Cost", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostTotal), width: cellWidth, align: "center" }))],
-    [{ text: "D. Contribution (A-B)", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.contribution), width: cellWidth, align: "center", bold: true }))],
-    [{ text: "E. P.V Ratio (D/A*100)", width: particularsWidth }, ...beaData.map((d: any) => ({ text: `${d.pvRatio}`, width: cellWidth, align: "center" }))],
-    [{ text: "F. Break-Even (C/E*100)", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.breakEvenSales), width: cellWidth, align: "center", bold: true }))],
-    [{ text: "G. CASH BREAK-EVEN", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.cashBreakEven), width: cellWidth, align: "center" }))]
-  ];
-  drawFlexibleTable(doc, metricsRows, { fontSize: dynamicFontSize, ...fonts, padding: 3 });
-
-  // --- Check space before Fixed Costs ---
-  // Agar 150 units se kam jagah hai to naye page par jao
-  if (doc.y > 650) {
-    doc.addPage();
-  }
-
-  // SECTION 2: FIXED COSTS
-  const fixedCostRows: any[] = [
-    [{ text: "FIXED COSTS", width: totalWidth, bold: true, color: "#b91c1c" }],
-    [{ text: "Rent", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.rent), width: cellWidth, align: "center" }))],
-    [{ text: "Salary & Wages", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.salaryWages), width: cellWidth, align: "center" }))],
-    [{ text: "Interest on Term Loan", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.interestTermLoan), width: cellWidth, align: "center" }))],
-    [{ text: "Interest on CC Loan", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.interestCCLoan), width: cellWidth, align: "center" }))],
-    [{ text: "Advertisement", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.advertisement), width: cellWidth, align: "center" }))],
-    [{ text: "Depreciation", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.depreciation), width: cellWidth, align: "center" }))],
-    [{ text: "Staff Welfare", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.staffWelfare), width: cellWidth, align: "center" }))],
-    [{ text: "Transport & Convenyance", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.transportConvenyance), width: cellWidth, align: "center" }))],
-    [{ text: "Total", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostTotal), width: cellWidth, align: "center", bold: true }))],
-    [{ text: "Total (without depreciation)", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostWithoutDepr), width: cellWidth, align: "center" }))]
-  ];
-  drawFlexibleTable(doc, fixedCostRows, { fontSize: dynamicFontSize, ...fonts, padding: 3 });
-
-  // --- Check space before Variable Costs ---
-  if (doc.y > 650) {
-    doc.addPage();
-
-  }
-
-  // SECTION 3: VARIABLE COSTS
-  const variableCostRows: any[] = [
-    [{ text: "VARIABLE COSTS", width: totalWidth, bold: true, color: "#b91c1c" }],
-    [{ text: "Purchase of Equipments", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.purchaseEquipments), width: cellWidth, align: "center" }))],
-    [{ text: "Purchase of Raw Materials", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.purchaseRawMaterials), width: cellWidth, align: "center" }))],
-    [{ text: "Freight", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.freight), width: cellWidth, align: "center" }))],
-    [{ text: "Power & Fuel", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.powerFuel), width: cellWidth, align: "center" }))],
-    [{ text: "Printing & Stationery", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.printingStationery), width: cellWidth, align: "center" }))],
-    [{ text: "Electricity Expenses", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.electricityExpenses), width: cellWidth, align: "center" }))],
-    [{ text: "Misc Expenses", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.miscExpenses), width: cellWidth, align: "center" }))],
-    [{ text: "Other Expenses", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.otherExpenses), width: cellWidth, align: "center" }))],
-    [{ text: "Postage & Courier", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.postageCourier), width: cellWidth, align: "center" }))],
-    [{ text: "Repair & Maintenance", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.repairMaintenance), width: cellWidth, align: "center" }))],
-    [{ text: "Total", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.variableCostTotal), width: cellWidth, align: "center", bold: true }))]
-  ];
-  drawFlexibleTable(doc, variableCostRows, { fontSize: dynamicFontSize, ...fonts, padding: 3 });
+  drawFlexibleTable(doc, rows, { fontSize: 8, ...fonts, padding: 3 });
 };
 
 export const drawFinancialPosition = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
@@ -1744,6 +1122,136 @@ export const drawAFPTable = (doc: any, projectData: any, formatRupee: Function, 
 
   drawFlexibleTable(doc, rows, { fontSize: 8, ...fonts, padding: 4 });
 };
+export const drawAssumptionsTable = (doc: any, projectData: any, fonts: any) => {
+  const assumptions = projectData.assumptions?.particulars || {};
+  const industryList = projectData.assumptions?.industryJustifications || [];
+  const fontSize = 8;
+
+  // --- TABLE 1: PARTICULARS (Top Table) ---
+  const colWidth1 = 540 / 4; // 4 Columns equal width
+  const table1Rows: any[] = [
+    [
+      { text: "Particulars", width: 540, color: "#b91c1c", bold: true, fontSize, colSpan: 4 }
+    ],
+    [
+      { text: "Projected Increment in Gross receipts", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
+      { text: "Projected Increment in Expenditure", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
+      { text: "Interest rate for Term loan (in %)", width: colWidth1, color: "#b91c1c", bold: true, fontSize },
+      { text: "Interest Rate for Cash Credit (in %)", width: colWidth1, color: "#b91c1c", bold: true, fontSize }
+    ],
+    [
+      { text: assumptions.projectedIncrementReceipts || "135%", width: colWidth1, fontSize },
+      { text: assumptions.projectedIncrementExpenditure || "112%", width: colWidth1, fontSize },
+      { text: (assumptions.interestRateTermLoan || 11.1).toString(), width: colWidth1, fontSize },
+      { text: (assumptions.interestRateCashCredit || 11.1).toString(), width: colWidth1, fontSize }
+    ]
+  ];
+
+  drawFlexibleTable(doc, table1Rows, { ...fonts, fontSize });
+
+  doc.moveDown(2); // Thoda gap dono tables ke beech mein
+
+  // --- TABLE 2: INDUSTRY JUSTIFICATION (Bottom Table) ---
+  const industryColWidths = [100, 130, 130, 180];
+  const table2Rows: any[] = [
+    [
+      { text: "Industry", width: industryColWidths[0], color: "#b91c1c", bold: true, fontSize },
+      { text: "Projected Increment in Gross Receipts", width: industryColWidths[1], color: "#b91c1c", bold: true, fontSize },
+      { text: "Projected Increment in Expenditure", width: industryColWidths[2], color: "#b91c1c", bold: true, fontSize },
+      { text: "Justification", width: industryColWidths[3], color: "#b91c1c", bold: true, fontSize }
+    ],
+    ...industryList.map((item: any) => [
+      { text: item.industry, width: industryColWidths[0], color: "#b91c1c", bold: true, fontSize },
+      { text: item.receiptsIncrement, width: industryColWidths[1], fontSize },
+      { text: item.expenditureIncrement, width: industryColWidths[2], fontSize },
+      { text: item.justification, width: industryColWidths[3], fontSize }
+    ])
+  ];
+
+  drawFlexibleTable(doc, table2Rows, { ...fonts, fontSize });
+};
+
+export const drawBreakEvenAnalysis = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
+  const beaData = projectData.breakEvenAnalysis || [];
+  if (beaData.length === 0) return;
+
+  const particularsWidth = 180;
+  const totalWidth = 530;
+  const cellWidth = (totalWidth - particularsWidth) / beaData.length;
+  const dynamicFontSize = 8; // Font size standard rakha hai
+
+  // 1. Common Header (Jo har section ke upar repeat ho sakta hai ya split point check karega)
+  const getHeaderRows = () => [
+    [{ text: "Year", width: particularsWidth, bold: true }, ...beaData.map((d: any, i: number) => ({ text: i === 0 ? "ESTIMATED" : "PROJECTED", width: cellWidth, align: "center", bold: true, color: "#b91c1c" }))],
+    [{ text: "", width: particularsWidth }, ...beaData.map((d: any) => ({ text: `FY ${d.year}`, width: cellWidth, align: "center", bold: true, color: "#b91c1c" }))]
+  ];
+
+  // --- Page Start Check ---
+  if (doc.y > 700) doc.addPage();
+  doc.fillColor("#b91c1c").fontSize(11).text("BREAK EVEN ANALYSIS", { align: "center" });
+
+
+  // SECTION 1: METRICS
+  const metricsRows: any[] = [
+    ...getHeaderRows(),
+    [{ text: "BREAK-EVEN METRICS", width: totalWidth, bold: true, color: "#b91c1c", align: "center" }],
+    [{ text: "A. Revenue/Sales", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.revenueSales), width: cellWidth, align: "center" }))],
+    [{ text: "B. Variable Cost", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.variableCostTotal), width: cellWidth, align: "center" }))],
+    [{ text: "C. Fixed Cost", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostTotal), width: cellWidth, align: "center" }))],
+    [{ text: "D. Contribution (A-B)", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.contribution), width: cellWidth, align: "center", bold: true }))],
+    [{ text: "E. P.V Ratio (D/A*100)", width: particularsWidth }, ...beaData.map((d: any) => ({ text: `${d.pvRatio}`, width: cellWidth, align: "center" }))],
+    [{ text: "F. Break-Even (C/E*100)", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.breakEvenSales), width: cellWidth, align: "center", bold: true }))],
+    [{ text: "G. CASH BREAK-EVEN", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.cashBreakEven), width: cellWidth, align: "center" }))]
+  ];
+  drawFlexibleTable(doc, metricsRows, { fontSize: dynamicFontSize, ...fonts, padding: 3 });
+
+  // --- Check space before Fixed Costs ---
+  // Agar 150 units se kam jagah hai to naye page par jao
+  if (doc.y > 650) {
+    doc.addPage();
+  }
+
+  // SECTION 2: FIXED COSTS
+  const fixedCostRows: any[] = [
+    [{ text: "FIXED COSTS", width: totalWidth, bold: true, color: "#b91c1c" }],
+    [{ text: "Rent", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.rent), width: cellWidth, align: "center" }))],
+    [{ text: "Salary & Wages", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.salaryWages), width: cellWidth, align: "center" }))],
+    [{ text: "Interest on Term Loan", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.interestTermLoan), width: cellWidth, align: "center" }))],
+    [{ text: "Interest on CC Loan", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.interestCCLoan), width: cellWidth, align: "center" }))],
+    [{ text: "Advertisement", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.advertisement), width: cellWidth, align: "center" }))],
+    [{ text: "Depreciation", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.depreciation), width: cellWidth, align: "center" }))],
+    [{ text: "Staff Welfare", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.staffWelfare), width: cellWidth, align: "center" }))],
+    [{ text: "Transport & Convenyance", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.transportConvenyance), width: cellWidth, align: "center" }))],
+    [{ text: "Total", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostTotal), width: cellWidth, align: "center", bold: true }))],
+    [{ text: "Total (without depreciation)", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.fixedCostWithoutDepr), width: cellWidth, align: "center" }))]
+  ];
+  drawFlexibleTable(doc, fixedCostRows, { fontSize: dynamicFontSize, ...fonts, padding: 3 });
+
+  // --- Check space before Variable Costs ---
+  if (doc.y > 650) {
+    doc.addPage();
+
+  }
+
+  // SECTION 3: VARIABLE COSTS
+  const variableCostRows: any[] = [
+    [{ text: "VARIABLE COSTS", width: totalWidth, bold: true, color: "#b91c1c" }],
+    [{ text: "Purchase of Equipments", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.purchaseEquipments), width: cellWidth, align: "center" }))],
+    [{ text: "Purchase of Raw Materials", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.purchaseRawMaterials), width: cellWidth, align: "center" }))],
+    [{ text: "Freight", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.freight), width: cellWidth, align: "center" }))],
+    [{ text: "Power & Fuel", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.powerFuel), width: cellWidth, align: "center" }))],
+    [{ text: "Printing & Stationery", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.printingStationery), width: cellWidth, align: "center" }))],
+    [{ text: "Electricity Expenses", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.electricityExpenses), width: cellWidth, align: "center" }))],
+    [{ text: "Misc Expenses", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.miscExpenses), width: cellWidth, align: "center" }))],
+    [{ text: "Other Expenses", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.otherExpenses), width: cellWidth, align: "center" }))],
+    [{ text: "Postage & Courier", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.postageCourier), width: cellWidth, align: "center" }))],
+    [{ text: "Repair & Maintenance", width: particularsWidth }, ...beaData.map((d: any) => ({ text: formatRupee(d.repairMaintenance), width: cellWidth, align: "center" }))],
+    [{ text: "Total", width: particularsWidth, bold: true }, ...beaData.map((d: any) => ({ text: formatRupee(d.variableCostTotal), width: cellWidth, align: "center", bold: true }))]
+  ];
+  drawFlexibleTable(doc, variableCostRows, { fontSize: dynamicFontSize, ...fonts, padding: 3 });
+};
+
+
 
 export const drawFinalAssumption = (doc: any, projectData: any, formatRupee: Function, fonts: any, leftX: number) => {
   const profitability = projectData?.profitabilityStatement || [];
@@ -1850,7 +1358,7 @@ export const drawFinalAssumption = (doc: any, projectData: any, formatRupee: Fun
       ],
       [
         { text: "Provision for Taxation", width: particularsWidth },
-        ...profitability.map((p: any) => ({ text: formatRupee(p.taxation || 0), width: cellWidth, align: "center", fontSize: 8 }))
+        ...profitability.map((p: any) => ({ text: formatRupee(p.provisionForTaxation || 0), width: cellWidth, align: "center", fontSize: 8 }))
       ]
     ];
     doc.x = leftX
@@ -1877,47 +1385,7 @@ export const drawFinalAssumption = (doc: any, projectData: any, formatRupee: Fun
   const conclusionText = `A detailed analysis of the Debt Service Coverage Ratio (DSCR) reveals an average ratio of ${averageDSCR}, which indicates the unit's ability to service its debt obligations based on the projected financials.`;
   doc.text(conclusionText, { width: tableWidth, align: 'justify' });
 };
-export const drawCashFlowStatement = (doc: any, projectData: any, formatRupee: Function, fonts: any) => {
-  const cashFlowData = projectData.projectedCashFlow || [];
-  const particularsWidth = 200; // Thoda bada rakha hai pure naam ke liye
-  const totalWidth = 530;
-  const cellWidth = (totalWidth - particularsWidth) / cashFlowData.length;
 
-  if (doc.y > 650) doc.addPage();
-  doc.fillColor("#b91c1c").fontSize(11).text("PROJECTED CASH FLOW STATEMENT", 30);
-  doc.moveDown(0.5);
-
-  const headerRow = [{ text: "Particulars", width: particularsWidth, bold: true }, ...cashFlowData.map((d: any) => ({ text: `FY ${d.year}`, width: cellWidth, align: "center", bold: true, color: "#b91c1c" }))];
-
-  const rows: any[] = [
-    headerRow,
-    [{ text: "SOURCES OF FUNDS (A)", width: totalWidth, bold: true, color: "#b91c1c" }],
-    [{ text: "PBIT", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.pbit), width: cellWidth, align: "center" }))],
-    [{ text: "Depreciation", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.depreciation), width: cellWidth, align: "center" }))],
-    [{ text: "Increase In Capital", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInCapital), width: cellWidth, align: "center" }))],
-    [{ text: "Increase In Term Loan", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInTermLoan), width: cellWidth, align: "center" }))],
-    [{ text: "Increase in Cash Credit", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInCashCredit), width: cellWidth, align: "center" }))],
-    [{ text: "Decrease In Advance Deposits", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.decreaseInAdvanceDeposits), width: cellWidth, align: "center" }))],
-    [{ text: "Decrease In Debtors", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.decreaseInDebtors), width: cellWidth, align: "center" }))],
-    [{ text: "Provisions", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.provisions), width: cellWidth, align: "center" }))],
-    [{ text: "Decrease In Stock", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.decreaseInStock), width: cellWidth, align: "center" }))],
-    [{ text: "Total [A]", width: particularsWidth, bold: true }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.totalA), width: cellWidth, align: "center", bold: true }))],
-
-    [{ text: "APPLICATION OF FUNDS (B)", width: totalWidth, bold: true, color: "#b91c1c" }],
-    [{ text: "Increase in Fixed Assets", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.increaseInFixedAssets), width: cellWidth, align: "center" }))],
-    [{ text: "Interest on Bank Loan", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.interestOnBankLoan), width: cellWidth, align: "center" }))],
-    [{ text: "Drawing", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.drawing), width: cellWidth, align: "center" }))],
-    [{ text: "Tax Payment", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.taxPayment), width: cellWidth, align: "center" }))],
-    [{ text: "Total [B]", width: particularsWidth, bold: true }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.totalB), width: cellWidth, align: "center", bold: true }))],
-
-    [{ text: "CASH POSITION", width: totalWidth, bold: true, color: "#b91c1c" }],
-    [{ text: "Open Cash Balance", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.openCashBalance), width: cellWidth, align: "center" }))],
-    [{ text: "Net Surplus / Deficit [A-B]", width: particularsWidth }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.netSurplusDeficit), width: cellWidth, align: "center" }))],
-    [{ text: "Closing Cash Balance", width: particularsWidth, bold: true, color: "#b91c1c" }, ...cashFlowData.map((d: any) => ({ text: formatRupee(d.closingCashBalance), width: cellWidth, align: "center", bold: true }))]
-  ];
-
-  drawFlexibleTable(doc, rows, { fontSize: 8, ...fonts, padding: 3 });
-};
 
 export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: Function, fonts: any) => {
   const loanData = projectData.loanCalculation || [];
@@ -2002,4 +1470,124 @@ export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: 
   doc.moveDown(1);
 
 
+};
+
+export const drawLoanCalculation = (doc: any, projectData: any, formatrupee: Function, fonts: any) => {
+  const loanScheduleArray = projectData.loanCalculation || [];
+  if (loanScheduleArray.length === 0) return;
+
+  const boldFontFamily = fonts?.bold;
+  const regularFontFamily = fonts?.regular;
+
+
+
+  const startXCoordinate = 30;
+  let currentYCoordinate = 50;
+  const summaryBoxWidth = 250;
+  const standardRowHeight = 20;
+
+  // --- 1. TERM LOAN VALUE (FROM LOAN DETAILS) ---
+
+  const termLoanFromDetails = projectData.termLoan || (loanScheduleArray[0]?.openingBalance) || 0;
+  currentYCoordinate += 30;
+
+  // --- 2. SUMMARY BOXES ---
+  const drawSummaryBox = (x: number, y: number, title: string, rows: [string, string][]) => {
+    doc.rect(x, y, summaryBoxWidth, standardRowHeight).fill("#0f172a");
+    if (boldFontFamily) doc.font(boldFontFamily);
+    doc.fillColor("#ffffff").fontSize(9).text(title, x, y + 6, { width: summaryBoxWidth, align: "center" });
+
+    let rowY = y + standardRowHeight;
+    rows.forEach(([label, value]) => {
+      doc.rect(x, rowY, summaryBoxWidth, standardRowHeight).strokeColor("#e5e7eb").lineWidth(0.5).stroke();
+      if (regularFontFamily) doc.font(regularFontFamily);
+      doc.fillColor("#374151").fontSize(8).text(label, x + 8, rowY + 6);
+      doc.text(value, x + 120, rowY + 6, { width: 120, align: "center" });
+      rowY += standardRowHeight;
+    });
+    return rowY;
+  };
+
+  const totalInterest = loanScheduleArray.reduce((s: number, e: any) => s + (e.interest || 0), 0);
+
+  const inputRows: [string, string][] = [
+    ["Term Loan Amount", `${formatrupee(termLoanFromDetails)}`],
+    ["Interest Rate", `${projectData.interestRate || '11.1'}%`],
+    ["Loan Tenure", `${projectData.loanPeriod || '5 Years'}`],
+    ["Repayment Start", loanScheduleArray[0]?.date || 'N/A']
+  ];
+
+  const summaryRows: [string, string][] = [
+    ["Monthly EMI", `${formatrupee(Math.round(loanScheduleArray[0]?.emi || 0))}`],
+    ["Total EMIs", `${loanScheduleArray.length}`],
+    ["Total Interest", `${formatrupee(Math.round(totalInterest))}`],
+    ["Total Payable", `${formatrupee(Math.round(Number(termLoanFromDetails) + totalInterest))}`]
+  ];
+
+  const boxBottomY = drawSummaryBox(startXCoordinate, currentYCoordinate, "LOAN DETAILS", inputRows);
+  drawSummaryBox(startXCoordinate + 265, currentYCoordinate, "REPAYMENT OVERVIEW", summaryRows);
+
+  currentYCoordinate = boxBottomY + 40;
+
+  // --- 3. TABLE SECTION (DATA PRINTING) ---
+  if (boldFontFamily) doc.font(boldFontFamily);
+  doc.fontSize(11).fillColor("#b91c1c").text("ANNEXURE: MONTHLY REPAYMENT SCHEDULE", startXCoordinate, currentYCoordinate);
+  currentYCoordinate += 20;
+
+  const colWidths = [35, 65, 85, 75, 75, 75, 95];
+
+  const drawHeader = (yPos: number) => {
+    doc.rect(startXCoordinate, yPos, 505, 18).fill("#f3f4f6").stroke("#e5e7eb");
+    doc.fillColor("#b91c1c").fontSize(7);
+    let xPos = startXCoordinate;
+    const headers = ["MONTH", "DATE", "OPENING BAL", "EMI", "PRINCIPAL", "INTEREST", "CLOSING BAL"];
+    headers.forEach((h, i) => {
+      doc.text(h, xPos, yPos + 5, { width: colWidths[i], align: "center" });
+      xPos += colWidths[i];
+    });
+    return yPos + 18;
+  };
+
+  currentYCoordinate = drawHeader(currentYCoordinate);
+
+  // --- 4. LOOP FOR TABLE DATA ---
+  loanScheduleArray.forEach((row: any) => {
+    // Page break logic
+    if (currentYCoordinate + 20 > doc.page.height - 50) {
+      doc.addPage();
+      currentYCoordinate = 50;
+      currentYCoordinate = drawHeader(currentYCoordinate);
+    }
+
+    if (regularFontFamily) doc.font(regularFontFamily);
+    doc.fillColor("#374151").fontSize(7);
+
+    let xData = startXCoordinate;
+    const values = [
+      row.month.toString(),
+      row.date || "-",
+      formatrupee(row.openingBalance || 0),
+      formatrupee(row.emi || 0),
+      formatrupee(row.principal || 0),
+      formatrupee(row.interest || 0),
+      formatrupee(row.closingBalance || 0)
+    ];
+
+    values.forEach((val, i) => {
+      doc.text(val, xData, currentYCoordinate + 5, {
+        width: colWidths[i],
+        align: "center"
+      });
+      xData += colWidths[i];
+    });
+
+    // Row Line
+    doc.moveTo(startXCoordinate, currentYCoordinate + 18)
+      .lineTo(startXCoordinate + 505, currentYCoordinate + 18)
+      .strokeColor("#eeeeee").lineWidth(0.5).stroke();
+
+    currentYCoordinate += 18;
+  });
+
+  doc.y = currentYCoordinate;
 };

@@ -4,7 +4,7 @@ import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios, drawSensitivityAnalysis, drawProjectedBalanceSheet,drawBreakEvenAnalysis,drawCashFlowStatement,drawFinancialPosition,drawAFPTable,drawFinalAssumption, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/pdfSections";
+import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawCostStatement, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawPurchaseCostStatement, drawGeneralExpensesTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawSWOTAnalysisPage, drawEBIDTAAnalysis, drawReturnOnInvestment, drawActionPlan, drawTargateMarket, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios, drawSensitivityAnalysis, drawProjectedBalanceSheet,drawBreakEvenAnalysis,drawCashFlowStatement,drawFinancialPosition,drawAFPTable,drawFinalAssumption, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/projectReportpdfSections";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
   doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     // 5. cost statement Table
     doc.addPage();
     drawHeader(doc, "COST STATEMENT", fontBoldPath)
-    drawCostStatement(doc, projectData, formatInMillions, fonts);
+    drawCostStatement(doc, projectData, formatRupees, fonts);
     //  Purchase Cost Statement
     doc.addPage();
     drawPurchaseCostStatement(doc, projectData, formatInMillions, fonts);
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
 
     //--------- breakEvenAnalysis--------------
     doc.addPage();
-    drawHeader(doc, "BREAK EVEN SALSE", fontBoldPath)
+    drawHeader(doc, "BREAK EVEN SALES", fontBoldPath)
     drawBreakEvenSales(doc, projectData, formatRupees, fonts)
     //---------Loan Interest Table Detail-------
     doc.addPage();

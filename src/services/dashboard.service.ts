@@ -24,21 +24,18 @@ function getMonthWiseCount(reports: { createdAt: string }[]) {
 
 export async function getDashboardData(): Promise<DashboardData> {
   let projectReports: { id: string; name: string; createdAt: string }[] = [];
+  let cmaReports: { id: string; name: string; createdAt: string }[] = [];
 
   try {
-    const res = await axios.get("/api/get-report", {
-      withCredentials: true,
-    });
-    projectReports = res.data.data;
+    const [projectRes, cmaRes] = await Promise.all([
+      axios.get("/api/get-report", { withCredentials: true }),
+      axios.get("/api/get-cma-reports", { withCredentials: true })
+    ]);
+    projectReports = projectRes.data.data || [];
+    cmaReports = cmaRes.data.data || [];
   } catch (err) {
-    console.warn(
-      "Failed to fetch project reports from API, using local data.",
-      err
-    );
-    projectReports = reportsData.projectReports;
+    console.warn("Failed to fetch dashboard reports from API, falling back to empty list.", err);
   }
-
-  const cmaReports = reportsData.cmaReports;
 
   const totalReports = projectReports.length + cmaReports.length;
   const today = new Date().toISOString().split("T")[0];
@@ -47,7 +44,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     (r) => r.createdAt === today
   ).length;
 
-    return {
+  return {
     projectReports,
     cmaReports,
 

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Field } from '../ui/field';
@@ -201,6 +202,7 @@ export const ProjectReportForm = () => {
       productName: "",
       salesType: undefined as any,
       salesRevenue: 0,
+      yearlyGrowthRate: 0,
     },
     // step 8
     loanPeriod: 5,
@@ -250,40 +252,16 @@ export const ProjectReportForm = () => {
     }
   };
 
+  const router = useRouter();
+
   const onSubmit = async (values: projectReportType) => {
     try {
-
-      const report = await axios.post("/api/project-report", values)
-
-
-      console.log(report)
-
-      const response = await axios.post("/api/download-report",
-        {
-          projectId: report.data.data._id
-        },
-        {
-          responseType: "blob", // 👈 CRITICAL
-        })
-
-      const blob = new Blob([response.data], {
-        type: "application/pdf",
-      })
-      const url = window.URL.createObjectURL(blob)
-
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "random-table-pdfkit.pdf"
-      document.body.appendChild(a)
-      a.click()
-
-      a.remove()
-      window.URL.revokeObjectURL(url)
-      toast.success(response.data.data.message);
+      await axios.post("/api/project-report", values);
+      toast.success("Project Report created successfully!");
+      router.push("/dashboard");
     } catch (error: any) {
-      toast.error("Error Creating Report")
+      toast.error("Error Creating Report");
     }
-
   };
 
   const renderCurrentStepContent = () => {
@@ -324,70 +302,70 @@ export const ProjectReportForm = () => {
 
   return (
     <>
-    <div className=" w-full  max-w-2xl">
-     <div className="p-4 "><h1 className="text-2xl font-bold "> Create Project Report</h1></div>
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <CardTitle>{currentForm.title}</CardTitle>
-            <p className="text-muted-foreground text-xs">
-              Step {currentStep + 1} of {steps.length}
-            </p>
-          </div>
-          <CardDescription>{currentForm.description}</CardDescription>
-        </div>
-        <Progress value={progress} />
-      </CardHeader>
-      <CardContent>
-        <form id="multi-form" onSubmit={form.handleSubmit(onSubmit)}>
-          <AnimatePresence mode="wait" custom={currentStep}>
-            <motion.div
-              key={currentStep}
-              custom={currentStep}
-              variants={variants as any}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="w-full"
-            >
-              {renderCurrentStepContent()}
-            </motion.div>
-          </AnimatePresence>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Field className="justify-between" orientation="horizontal">
-          {currentStep > 0 && (
-            <Button className="cursor-pointer" type="button" variant="ghost" onClick={handleBackButton}>
-              <ChevronLeft /> Back
-            </Button>
-          )}
-          {!isLastStep && (
-            <Button
-              className="cursor-pointer"
-              type="button"
-              variant="secondary"
-              onClick={handleNextButton}
-            >
-              Next
-              <ChevronRight />
-            </Button>
-          )}
-          {isLastStep && (
-            <Button
-              className="cursor-pointer"
-              type="submit"
-              form="multi-form"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? <Spinner /> : "Submit"}
-            </Button>
-          )}
-        </Field>
-      </CardFooter>
-    </Card>
-    </div>
+      <div className=" w-full  max-w-2xl">
+        <div className="p-4 "><h1 className="text-2xl font-bold "> Create Project Report</h1></div>
+        <Card className="w-full max-w-2xl">
+          <CardHeader className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <CardTitle>{currentForm.title}</CardTitle>
+                <p className="text-muted-foreground text-xs">
+                  Step {currentStep + 1} of {steps.length}
+                </p>
+              </div>
+              <CardDescription>{currentForm.description}</CardDescription>
+            </div>
+            <Progress value={progress} />
+          </CardHeader>
+          <CardContent>
+            <form id="multi-form" onSubmit={form.handleSubmit(onSubmit)}>
+              <AnimatePresence mode="wait" custom={currentStep}>
+                <motion.div
+                  key={currentStep}
+                  custom={currentStep}
+                  variants={variants as any}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="w-full"
+                >
+                  {renderCurrentStepContent()}
+                </motion.div>
+              </AnimatePresence>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <Field className="justify-between" orientation="horizontal">
+              {currentStep > 0 && (
+                <Button className="cursor-pointer" type="button" variant="ghost" onClick={handleBackButton}>
+                  <ChevronLeft /> Back
+                </Button>
+              )}
+              {!isLastStep && (
+                <Button
+                  className="cursor-pointer"
+                  type="button"
+                  variant="secondary"
+                  onClick={handleNextButton}
+                >
+                  Next
+                  <ChevronRight />
+                </Button>
+              )}
+              {isLastStep && (
+                <Button
+                  className="cursor-pointer"
+                  type="submit"
+                  form="multi-form"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? <Spinner /> : "Submit"}
+                </Button>
+              )}
+            </Field>
+          </CardFooter>
+        </Card>
+      </div>
     </>
   );
 };

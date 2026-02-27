@@ -118,6 +118,43 @@ const Step7 = ({ currentStep, form }: Props) => {
           </Field>
         )}
       />
+
+
+      <Controller
+        // 'name' mein aap kuch bhi dummy string daal sakte ho, ye bina schema ke bhi chalega
+        name="revenueDetails.yearlyGrowthRate"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="yearlyGrowthRate">
+              Yearly Growth Rate (%)
+            </FieldLabel>
+            <Input
+              {...field}
+              id="yearlyGrowthRate"
+              type="number"
+              // HTML level par minimum value set kar di hai
+              min="5"
+              placeholder="Enter yearly growth rate (Min 5%)"
+              autoComplete="off"
+              // Agar value undefined hai toh empty string dikhaye
+              value={field.value ?? ""}
+              onChange={(e) =>
+                field.onChange(
+                  e.target.value === "" ? "" : Number(e.target.value)
+                )
+              }
+            />
+            <FieldDescription>Minimum 5% growth is expected.</FieldDescription>
+
+            
+          </Field>
+        )}
+      />
+
+
+
+
     </FieldGroup>
   )
 }

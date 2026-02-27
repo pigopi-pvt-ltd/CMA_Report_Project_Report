@@ -98,9 +98,9 @@ export default function HeroSection() {
                       asChild
                       size="lg"
                       className="rounded-xl px-5 text-base">
-                      <Link href="/create-project-report">
+                      {/*<Link href="/create-project-report">
                         <span className="text-nowrap">Create Project Report</span>
-                      </Link>
+                       </Link> */}
                     </Button>
                   </div>
                   <Button
@@ -109,9 +109,9 @@ export default function HeroSection() {
                     size="lg"
                     variant="ghost"
                     className="h-10.5 rounded-xl px-5 text-base">
-                    <Link href="#">
+                    {/* <Link href="#">
                       <span className="text-nowrap">Create CMA Report</span>
-                    </Link>
+                    </Link> */}
                   </Button>
                 </AnimatedGroup>
               </div>
