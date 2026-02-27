@@ -55,9 +55,19 @@ const variants = {
   }),
 };
 
+// 1. Added Props Interface for the purpose of editing
+interface ProjectReportFormProps {
+  initialData?: projectReportType;
+  reportId?: string;
+  isEditMode?: boolean;
+}
 
-export const ProjectReportForm = () => {
 
+export const ProjectReportForm = ({ 
+  initialData, 
+  reportId, 
+  isEditMode = false 
+}: ProjectReportFormProps) => {
 
   const steps = [
     {
@@ -231,9 +241,13 @@ export const ProjectReportForm = () => {
   };
 
   const form = useForm<projectReportType>({
+    // resolver: zodResolver(projectReportSchema),
+    // mode: "onChange",
+    // defaultValues
+
     resolver: zodResolver(projectReportSchema),
     mode: "onChange",
-    defaultValues
+    defaultValues: initialData || defaultValues // If edit mode then use initialData
   });
 
   const handleNextButton = async () => {
@@ -255,12 +269,27 @@ export const ProjectReportForm = () => {
   const router = useRouter();
 
   const onSubmit = async (values: projectReportType) => {
+    // try {
+    //   await axios.post("/api/project-report", values);
+    //   toast.success("Project Report created successfully!");
+    //   router.push("/dashboard");
+    // } catch (error: any) {
+    //   toast.error("Error Creating Report");
+    // }
+
     try {
-      await axios.post("/api/project-report", values);
-      toast.success("Project Report created successfully!");
+      if (isEditMode && reportId) {
+        // Edit API call
+        await axios.put(`/api/edit-report?id=${reportId}`, values);
+        toast.success("Project Report updated successfully!");
+      } else {
+        // Create API call
+        await axios.post("/api/project-report", values);
+        toast.success("Project Report created successfully!");
+      }
       router.push("/dashboard");
     } catch (error: any) {
-      toast.error("Error Creating Report");
+      toast.error(isEditMode ? "Error Updating Report" : "Error Creating Report");
     }
   };
 
@@ -303,7 +332,10 @@ export const ProjectReportForm = () => {
   return (
     <>
       <div className=" w-full  max-w-2xl">
-        <div className="p-4 "><h1 className="text-2xl font-bold "> Create Project Report</h1></div>
+        <div className="p-4 "><h1 className="text-2xl font-bold ">
+           {/* Create Project Report */}
+           {isEditMode ? "Edit Project Report" : "Create Project Report"}
+           </h1></div>
         <Card className="w-full max-w-2xl">
           <CardHeader className="space-y-4">
             <div className="space-y-2">
