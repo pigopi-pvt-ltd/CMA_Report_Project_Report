@@ -2,20 +2,74 @@ import { NextResponse } from "next/server"
 import PDFDocument from "pdfkit"
 import path from "path"
 import { requireAuth } from "@/lib/requireAuth"
-import ProjectReportModel from "@/db/models/projectReportModel";
+import CmaReport from "@/db/models/cmaReportModel";
 import dbConnect from "@/db/dbConnect"
-import { drawLoanCalculation, drawPromoterTable, drawDepreciationSchedules, drawLoanTable, drawMeansOfFinance, drawProjectCostSummary, drawBusinessTable, drawSalesRevenueTable, drawProfitabilityStatement, drawCalculationOfDSCR, drawEBIDTAAnalysis, drawReturnOnInvestment, drawBreakEvenSales, drawComputationOfMPBF, drawImportantRatios, drawSensitivityAnalysis, drawProjectedBalanceSheet,drawBreakEvenAnalysis,drawCashFlowStatement,drawFinancialPosition,drawAFPTable,drawFinalAssumption, drawAssumptionsTable, drawLoanInterestTables } from "@/helpers/projectReportpdfSections";
+import {
+  drawLoanCalculation,
+  drawPromoterTable,
+  drawDepreciationSchedules,
+  drawLoanTable,
+  drawMeansOfFinance,
+  drawProjectCostSummary,
+  drawBusinessTable,
+  drawSalesRevenueTable,
+  drawProfitabilityStatement,
+  drawCalculationOfDSCR,
+  drawEBIDTAAnalysis,
+  drawReturnOnInvestment,
+  drawBreakEvenSales,
+  drawComputationOfMPBF,
+  drawImportantRatios,
+  drawSensitivityAnalysis,
+  drawProjectedBalanceSheet,
+  drawBreakEvenAnalysis,
+  drawCashFlowStatement,
+  drawFinancialPosition,
+  drawAFPTable,
+  drawFinalAssumption,
+  drawAssumptionsTable,
+  drawCalculationOfInterestOnTermLoan,
+  drawLoanInterestTables,
+  drawPurchaseCostStatement,
+  drawGeneralExpensesTable,
+} from "@/helpers/projectReportpdfSections";
+import { drawFlexibleTable, TableRow } from "@/helpers/pdfTable";
+import { calculateRevenue } from "@/lib/services/revenue.service";
 
 const drawHeader = (doc: any, text: string, fontBoldPath: string) => {
-  doc.fontSize(22).fillColor("#4154F1").font(fontBoldPath).text(text, { align: "center" });
+  drawCenteredHeader(doc, text, fontBoldPath);
+};
+
+function drawCenteredHeader(doc: any, text: string, fontPath: string) {
+  // Save current position
+  const currentY = doc.y;
+
+  // Calculate the usable page width (excluding margins)
+  const leftMargin = doc.page.margins.left;
+  const rightMargin = doc.page.margins.right;
+  const usableWidth = doc.page.width - leftMargin - rightMargin;
+
+  // Reset x position to the left margin to ensure proper centering
+  doc.x = leftMargin;
+
+  // Set font properties
+  doc.fontSize(22).fillColor("#4154F1").font(fontPath);
+
+  // Draw the centered text across the full usable width
+  doc.text(text, 0, currentY, {
+    width: usableWidth,
+    align: "center"
+  });
+
+  // Move down a bit after the text
   doc.moveDown(0.5);
-  const y = doc.y;
-  const leftX = doc.page.margins.left;
-  const rightX = doc.page.width - doc.page.margins.right;
 
-  doc.strokeColor("#4154F1").lineWidth(2).moveTo(leftX, y).lineTo(rightX, y).stroke();
+  // Draw the underline spanning from left margin to right margin
+  const lineY = doc.y;
+  doc.strokeColor("#4154F1").lineWidth(2).moveTo(leftMargin, lineY).lineTo(doc.page.width - rightMargin, lineY).stroke();
+
+  // Reset color and move down
   doc.fillColor("#000000").moveDown(1);
-
 }
 
 const toLabel = (key: string) => key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
@@ -50,7 +104,7 @@ export async function POST(request: Request) {
     const { projectId } = await request.json()
     if (!projectId) return NextResponse.json({ message: "Id required" }, { status: 400 });
 
-    const projectData = await ProjectReportModel.findOne({ userId: session.user.id, _id: projectId });
+    const projectData = await CmaReport.findOne({ userId: session.user.id, _id: projectId });
     if (!projectData) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
     // --- FONT PATHS ---
@@ -66,131 +120,144 @@ export async function POST(request: Request) {
     });
 
     // --- Header ---
-    drawHeader(doc, "CMA REport AT A GLANCE", fontBoldPath)
+    drawHeader(doc, "CMA REPORT AT A GLANCE", fontBoldPath)
 
     const leftX = doc.page.margins.left;
-
-
     const fonts = { fontPath, fontBoldPath };
-    // 1. Promoter
-    drawPromoterTable(doc, projectData.personalDetails, fonts);
-    doc.moveDown(1);
 
-    // 2. Business
-    drawBusinessTable(doc, projectData, fonts, leftX);
+    // Ensure we have a plain object
+    const rawData = projectData.toObject({ flattenMaps: true });
 
-    // 3. Loan (New Page)
+    // FALLBACK: If revenueData is missing (due to previous schema issue), re-calculate it on the fly
+    if (!rawData.revenueData || rawData.revenueData.length === 0) {
+      rawData.revenueData = calculateRevenue(
+        rawData.revenueDetails?.salesRevenue || 0,
+        rawData.revenueDetails?.salesType || "monthly",
+        rawData.revenueDetails?.yearlyGrowthRate || 0,
+        rawData.loanPeriod || 5
+      );
+    }
+
+    // --- PAGE 1: AT A GLANCE & DETAILS ---
+    // Combined section to save pages
+    drawPromoterTable(doc, rawData.personalDetails || {}, fonts);
+    doc.moveDown(0.5);
+    drawBusinessTable(doc, rawData, fonts, leftX);
     doc.addPage();
-    drawLoanTable(doc, projectData, formatRupees, fonts);
+    doc.moveDown(0.5);
+    drawLoanTable(doc, rawData, formatRupees, fonts);
 
-    // Sales and Revenue Table
-    doc.addPage()
-    drawSalesRevenueTable(doc, projectData, formatRupees, fonts);
-    doc.moveDown(2);
-
-    // 4. Project Cost
+    // --- PAGE 2: SALES & PRODUCTION ---
     doc.addPage();
-    drawHeader(doc, "PROJECT COST", fontBoldPath)
-    drawProjectCostSummary(doc, projectData, formatRupees, toLabel, fonts);
-    doc.moveDown(1);
-    drawMeansOfFinance(doc, projectData.loanDetails, formatRupees, fonts);
+    drawHeader(doc, "SALES, REVENUE & PRODUCTION", fontBoldPath)
+    drawSalesRevenueTable(doc, rawData, formatRupees, fonts);
 
+    // if (rawData.revenueData && rawData.revenueData.length > 0) {
+    //   doc.moveDown(1);
+    //   doc.font(fontBoldPath).fontSize(12).fillColor("#b91c1c").text("EXPECTED YEARLY REVENUE PROJECTIONS", { underline: true });
+    //   doc.moveDown(0.5);
+    //   const revRows: TableRow[] = [
+    //     [
+    //       { text: "YEAR", width: 100, bold: true, color: "#333" },
+    //       { text: "ESTIMATED/PROJECTED SALES", width: 300, bold: true, color: "#333", align: "right" }
+    //     ],
+    //     ...rawData.revenueData.map((r: any) => [
+    //       { text: `FY ${r.year || 'N/A'}-${((r.year || 0) + 1) % 100}`, width: 100 },
+    //       { text: formatRupees(r.totalRevenue || 0), width: 300, align: "right" }
+    //     ])
+    //   ];
+    //   drawFlexibleTable(doc, revRows, fonts);
+    // }
 
-    // 6. Depreciation
-    drawDepreciationSchedules(doc, projectData.depreciationSchedule, formatRupees, fonts, leftX);
-
-    // 7. Profitability Statement
+    // --- PAGE 3: PROJECT COST & ASSETS ---
     doc.addPage();
-    drawHeader(doc, " PROJECT PROFITABILITY STATEMENT", fontBoldPath)
-    drawProfitabilityStatement(doc, projectData, formatInMillions, fonts);
+    drawHeader(doc, "PROJECT COST & ASSETS", fontBoldPath)
+    drawProjectCostSummary(doc, rawData, formatRupees, toLabel, fonts);
+    doc.moveDown(0.5);
+    drawMeansOfFinance(doc, rawData.loanDetails, formatRupees, fonts);
+    doc.addPage();
+    doc.moveDown(0.5);
+    drawDepreciationSchedules(doc, rawData.depreciationSchedule || [], formatRupees, fonts, leftX);
 
-    //Calculation Of DSCR
+    // --- PAGE 4: PROFITABILITY & PERFORMANCE ---
     doc.addPage();
-    drawHeader(doc, "CALCULATION OF DEBT SERVICE COVERAGE RATIO (DSCR)", fontBoldPath)
-    drawCalculationOfDSCR(doc, projectData, formatInMillions, fonts);
+    drawHeader(doc, "PROFITABILITY & PERFORMANCE", fontBoldPath)
+    drawProfitabilityStatement(doc, rawData, formatInMillions, fonts);
+    doc.moveDown(0.5);
+    doc.addPage();
+    drawCenteredHeader(doc, "DSCR CALCULATION", fontBoldPath);
+    doc.moveDown(0.5);
+    drawCalculationOfDSCR(doc, rawData, formatInMillions, fonts);
+    doc.moveDown(0.5);
+    doc.addPage();
+    drawCenteredHeader(doc, "EBITDA ANALYSIS", fontBoldPath);
+    doc.moveDown(0.5);
+    drawEBIDTAAnalysis(doc, rawData, formatInMillions, fonts);
 
-    //BIDTA Analysis Page
+    // --- PAGE 5: ROI, BEP & INTEREST ---
     doc.addPage();
-    drawHeader(doc, "EBIDTA ANALYSIS", fontBoldPath);
-    drawEBIDTAAnalysis(doc, projectData, formatInMillions, fonts);
+    drawHeader(doc, "ROI, BEP & INTEREST ANALYSIS", fontBoldPath);
+    drawReturnOnInvestment(doc, rawData, formatInMillions, fonts);
+    doc.moveDown(0.5);
+    doc.addPage();
+    drawHeader(doc, "BREAK EVEN SALES", fontBoldPath)
+    drawBreakEvenSales(doc, rawData, formatRupees, fonts)
+    doc.moveDown(0.5);
+    drawCalculationOfInterestOnTermLoan(doc, rawData, formatInMillions, fonts)
 
-    //Return on Investment (ROI) Analysis
+    // --- PAGE 6: BANK FINANCE (MPBF) & RATIOS ---
     doc.addPage();
-    drawHeader(doc, "RETURN ON INVESTMENT (ROI) ANALYSIS", fontBoldPath);
-    drawReturnOnInvestment(doc, projectData, formatRupees, fonts);
-
-    //--------- breakEvenAnalysis--------------
-    doc.addPage();
-    drawHeader(doc, "BREAK EVEN SALSE", fontBoldPath)
-    drawBreakEvenSales(doc, projectData, formatRupees, fonts)
-    //---------Loan Interest Table Detail-------
-    doc.addPage();
-    drawHeader(doc, "Loan Interest Table Detail", fontBoldPath)
-    drawLoanInterestTables(doc, projectData, formatRupees, fonts)
-    //---------Computation of MPBF-------
-    doc.addPage();
-    drawHeader(doc, "Computation of Maximum Permissible Bank Finance (MPBF)", fontBoldPath);
-    drawComputationOfMPBF(doc, projectData, formatRupees, fonts);
-
-    //------------drawImportantRatios----------
+    drawHeader(doc, "BANK FINANCE (MPBF) & RATIOS", fontBoldPath);
+    drawComputationOfMPBF(doc, rawData, formatInMillions, fonts);
+    doc.moveDown(0.5);
     doc.addPage();
     drawHeader(doc, "CALCULATION OF SOME IMPORTANT RATIOS", fontBoldPath);
-    drawImportantRatios(doc, projectData, formatRupees, fonts);
+    drawImportantRatios(doc, rawData, formatRupees, fonts);
 
-
-    //-------------drawSensitivityAnalysis
+    // --- PAGE 7: SENSITIVITY & BALANCE SHEET ---
     doc.addPage();
-    drawHeader(doc, "SENSITIVITY ANALYSIS", fontBoldPath);
-    drawSensitivityAnalysis(doc, projectData, formatRupees, fonts);
-    //----------------drawProjectedBalanceSheet-------------
+    drawHeader(doc, "SENSITIVITY & BALANCE SHEET", fontBoldPath);
+    drawSensitivityAnalysis(doc, rawData, formatInMillions, fonts);
+    doc.moveDown(0.5);
     doc.addPage();
     drawHeader(doc, "PROJECTED BALANCE SHEET", fontBoldPath);
-    drawProjectedBalanceSheet(doc, projectData, formatRupees, fonts);
+    drawProjectedBalanceSheet(doc, rawData, formatRupees, fonts);
 
-    //------------BreakEvenAnalysis------------------
+    // --- PAGE 8: CASH FLOW & POSITION ---
     doc.addPage();
-    drawHeader(doc, "BREAK EVEN ANALYSIS", fontBoldPath);
-    drawBreakEvenAnalysis(doc, projectData, formatRupees, fonts);
+    drawHeader(doc, "CASH FLOW & POSITION", fontBoldPath);
+    drawCashFlowStatement(doc, rawData, formatRupees, fonts);
+    doc.moveDown(0.5);
+    doc.addPage();
+    doc.moveDown(0.5);
+     drawAFPTable(doc, rawData, formatRupees, fonts);
 
-    //--------------drawCashFlowStatement
+    // --- PAGE 9: AFP & ASSUMPTIONS ---
     doc.addPage();
-    drawHeader(doc, "CASH FLOW STATEMENT", fontBoldPath);
-    drawCashFlowStatement(doc, projectData, formatRupees, fonts);
+    drawHeader(doc, "ASSUMPTIONS", fontBoldPath);
+    doc.moveDown(0.5);
+    drawAssumptionsTable(doc, rawData, fonts)
 
+    // --- PAGE 10: LOAN REPAYMENT SCHEDULE ---
     doc.addPage();
-    drawHeader(doc,"Financial Position",fontBoldPath);
-    drawFinancialPosition(doc,projectData,formatRupees,fonts);
-    doc.x = leftX
-    drawHeader(doc,"AFP",fontBoldPath);
-    drawAFPTable(doc,projectData,formatRupees, fonts);
-  //-------------Final Assumption-------------
-    doc.addPage();
-    drawHeader(doc, "ASSSUMPTION", fontBoldPath)
-    drawFinalAssumption(doc, projectData, formatRupees, fonts, leftX)
-    //-----------Assumption-----------
-    doc.addPage();
-    drawHeader(doc, "ASSSUMPTION", fontBoldPath)
-    drawAssumptionsTable(doc, projectData, fonts)
-    
-
-    //-------------LoanCalculation-------------
-    doc.addPage();
-    drawHeader(doc, "Loan Calculation", fontBoldPath)
-    drawLoanCalculation(doc, projectData, formatRupees, fonts)
-
+    drawHeader(doc, "LOAN REPAYMENT SCHEDULE", fontBoldPath)
+    drawLoanCalculation(doc, rawData, formatRupees, fonts)
 
     doc.end();
     const pdfBuffer = await pdfDone;
 
+    const sanitizedName = (projectData.businessName || "Report").replace(/[^a-z0-9]/gi, '_');
+
     return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": 'attachment; filename="Business_Report.pdf"',
+        "Content-Disposition": `attachment; filename="CMA_Report_${sanitizedName}.pdf"`,
       },
     });
 
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "PDF Error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("PDF_GENERATION_ERROR:", error);
+    return NextResponse.json({ message: "PDF Error", details: error.message }, { status: 500 });
   }
 }
+

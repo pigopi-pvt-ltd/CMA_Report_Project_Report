@@ -16,14 +16,24 @@ const Step2 = ({ currentStep, form }: Props) => {
       <StepHeaderSection title="Business Planning" description="What type of business are you planning to start?" />
 
       {/* Business Type(businessType) */}
-       <Controller
+      <Controller
         name="businessType"
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Business Type</FieldLabel>
-            <Input {...field} placeholder="e.g. Grocery Shop" />
-            {fieldState.error && <FieldError errors={[fieldState.error]} />}
+            <FieldLabel htmlFor="businessType">Business Type</FieldLabel>
+            <Input
+              {...field}
+              id="businessType"
+              aria-invalid={fieldState.invalid}
+              placeholder="e.g., Snacks Making, Grocery Shop, Soap Manufacturing, Pickles manufacturing, Dairy Farm, etc."
+              autoComplete="off"
+              disabled={false}
+            />
+            <FieldDescription></FieldDescription>
+            {fieldState.invalid && (
+              <FieldError errors={[fieldState.error]} />
+            )}
           </Field>
         )}
       />

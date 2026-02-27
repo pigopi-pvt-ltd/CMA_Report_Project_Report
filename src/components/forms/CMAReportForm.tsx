@@ -18,8 +18,9 @@ import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { Field } from '../ui/field';
-import {cmaReportSchema, cmaReportType } from "@/Schemas/cmaReportSchema";
+import { cmaReportSchema, cmaReportType } from "@/Schemas/cmaReportSchema";
 import Step1 from "./cma-form-steps/Step1";
 import Step2 from "./cma-form-steps/Step2";
 import Step3 from "./cma-form-steps/Step3";
@@ -141,6 +142,8 @@ export const CMAReportForm = () => {
     },
   ];
 
+  const router = useRouter();
+
   const [currentStep, setCurrentStep] = useState(0);
 
   const currentForm = steps[currentStep];
@@ -201,6 +204,7 @@ export const CMAReportForm = () => {
       productName: "",
       salesType: undefined as any,
       salesRevenue: 0,
+      yearlyGrowthRate: 5, // Minimum 5% as per validation
     },
     // step 8
     loanPeriod: 5,
@@ -253,33 +257,39 @@ export const CMAReportForm = () => {
   const onSubmit = async (values: cmaReportType) => {
     try {
 
-      const report = await axios.post("/api/cma-report", values)
+      const reportResponse = await axios.post("/api/cma-report", values)
+      const reportId = reportResponse.data.data._id;
 
-      //  console.log(report)
+      toast.success("CMA Report Created Successfully");
 
-      // const response = await axios.post("/api/download-report",
-      //   {
-      //     projectId: report.data.data._id
-      //   },
-      //   {
-      //     responseType: "blob", // 👈 CRITICAL
-      //   })
+      // 📥 DOWNLOAD PDF
+      const pdfResponse = await axios.post("/api/download-cma-report",
+        {
+          projectId: reportId
+        },
+        {
+          responseType: "blob",
+        })
 
-      // const blob = new Blob([response.data], {
-      //   type: "application/pdf",
-      // })
-      // const url = window.URL.createObjectURL(blob)
+      const blob = new Blob([pdfResponse.data], {
+        type: "application/pdf",
+      })
+      const url = window.URL.createObjectURL(blob)
 
-      // const a = document.createElement("a")
-      // a.href = url
-      // a.download = "cma-report.pdf"
-      // document.body.appendChild(a)
-      // a.click()
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `CMA_Report_${values.businessName}.pdf`
+      document.body.appendChild(a)
+      a.click()
 
-      // a.remove()
-      // window.URL.revokeObjectURL(url)
-      // toast.success(response.data.data.message);
+      a.remove()
+      window.URL.revokeObjectURL(url)
+
+      // 🏎️ REDIRECT
+      router.push("/dashboard?tab=cma");
+
     } catch (error: any) {
+      console.error(error);
       toast.error("Error Creating Report")
     }
 
@@ -323,71 +333,71 @@ export const CMAReportForm = () => {
 
   return (
     <>
-   <div className=" w-full  max-w-2xl">
-     <div className="p-4 "><h1 className="text-2xl font-bold "> Create CMA Report</h1></div>
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="space-y-4">
-        <div className="space-y-2">
-            
-          <div className="flex items-center justify-between">
-            <CardTitle>{currentForm.title}</CardTitle>
-            <p className="text-muted-foreground text-xs">
-              Step {currentStep + 1} of {steps.length}
-            </p>
-          </div>
-          <CardDescription>{currentForm.description}</CardDescription>
-        </div>
-        <Progress value={progress} />
-      </CardHeader>
-      <CardContent>
-        <form id="multi-form" onSubmit={form.handleSubmit(onSubmit)}>
-          <AnimatePresence mode="wait" custom={currentStep}>
-            <motion.div
-              key={currentStep}
-              custom={currentStep}
-              variants={variants as any}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="w-full"
-            >
-              {renderCurrentStepContent()}
-            </motion.div>
-          </AnimatePresence>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Field className="justify-between" orientation="horizontal">
-          {currentStep > 0 && (
-            <Button className="cursor-pointer" type="button" variant="ghost" onClick={handleBackButton}>
-              <ChevronLeft /> Back
-            </Button>
-          )}
-          {!isLastStep && (
-            <Button
-              className="cursor-pointer"
-              type="button"
-              variant="secondary"
-              onClick={handleNextButton}
-            >
-              Next
-              <ChevronRight />
-            </Button>
-          )}
-          {isLastStep && (
-            <Button
-              className="cursor-pointer"
-              type="submit"
-              form="multi-form"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? <Spinner /> : "Submit"}
-            </Button>
-          )}
-        </Field>
-      </CardFooter>
-    </Card>
-   </div>
+      <div className=" w-full  max-w-2xl">
+        <div className="p-4 "><h1 className="text-2xl font-bold "> Create CMA Report</h1></div>
+        <Card className="w-full max-w-2xl">
+          <CardHeader className="space-y-4">
+            <div className="space-y-2">
+
+              <div className="flex items-center justify-between">
+                <CardTitle>{currentForm.title}</CardTitle>
+                <p className="text-muted-foreground text-xs">
+                  Step {currentStep + 1} of {steps.length}
+                </p>
+              </div>
+              <CardDescription>{currentForm.description}</CardDescription>
+            </div>
+            <Progress value={progress} />
+          </CardHeader>
+          <CardContent>
+            <form id="multi-form" onSubmit={form.handleSubmit(onSubmit)}>
+              <AnimatePresence mode="wait" custom={currentStep}>
+                <motion.div
+                  key={currentStep}
+                  custom={currentStep}
+                  variants={variants as any}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="w-full"
+                >
+                  {renderCurrentStepContent()}
+                </motion.div>
+              </AnimatePresence>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <Field className="justify-between" orientation="horizontal">
+              {currentStep > 0 && (
+                <Button className="cursor-pointer" type="button" variant="ghost" onClick={handleBackButton}>
+                  <ChevronLeft /> Back
+                </Button>
+              )}
+              {!isLastStep && (
+                <Button
+                  className="cursor-pointer"
+                  type="button"
+                  variant="secondary"
+                  onClick={handleNextButton}
+                >
+                  Next
+                  <ChevronRight />
+                </Button>
+              )}
+              {isLastStep && (
+                <Button
+                  className="cursor-pointer"
+                  type="submit"
+                  form="multi-form"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? <Spinner /> : "Submit"}
+                </Button>
+              )}
+            </Field>
+          </CardFooter>
+        </Card>
+      </div>
     </>
   );
 };
