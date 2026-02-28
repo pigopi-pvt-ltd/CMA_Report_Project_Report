@@ -4,6 +4,7 @@ import { TextEffect } from '@/components/ui/text-effect'
 import Image from 'next/image'
 import Link from 'next/link'
 import StatsSection from './stats-section'
+import { HeroHeader } from './header'
 
 const transitionVariants = {
   item: {
@@ -28,7 +29,7 @@ const transitionVariants = {
 export default function HeroSection() {
   return (
     <>
-      {/* <HeroHeader /> */}
+      <HeroHeader />
       <main className="overflow-hidden">
         {/* Spotlight for dark mode */}
         {/* <div
@@ -100,7 +101,7 @@ export default function HeroSection() {
                       className="rounded-xl px-5 text-base">
                       {/*<Link href="/create-project-report">
                         <span className="text-nowrap">Create Project Report</span>
-                       </Link> */}
+                      </Link> */}
                     </Button>
                   </div>
                   <Button
