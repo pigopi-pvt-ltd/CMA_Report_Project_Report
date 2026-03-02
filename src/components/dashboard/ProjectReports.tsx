@@ -1,18 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 
 import {
   AlertDialog,
@@ -23,9 +16,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import {
   FolderOpen,
@@ -54,6 +44,8 @@ export default function ProjectReports({
 }: {
   reports: ProjectReport[];
 }) {
+  const router = useRouter();
+
   /* ================= PAGINATION ================= */
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -70,10 +62,6 @@ export default function ProjectReports({
   /* ================= DELETE STATE ================= */
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  /* ================= EDIT STATE ================= */
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-
   /* ================= HANDLERS ================= */
 
   const confirmDelete = async () => {
@@ -81,18 +69,7 @@ export default function ProjectReports({
 
     await axios.delete(`/api/delete-report?id=${deleteId}`);
     setDeleteId(null);
-    window.location.reload(); // simple for now
-  };
-
-  const saveEdit = async () => {
-    if (!editId || !editName.trim()) return;
-
-    await axios.put(`/api/edit-report?id=${editId}`, {
-      businessName: editName,
-    });
-
-    setEditId(null);
-    window.location.reload();
+    window.location.reload(); 
   };
 
   const handleDownload = async (reportId: string) => {
@@ -223,10 +200,7 @@ export default function ProjectReports({
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => {
-                            setEditId(report.id);
-                            setEditName(report.name);
-                          }}
+                          onClick={() => router.push(`/edit-project-report/${report.id}`)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -270,30 +244,6 @@ export default function ProjectReports({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* EDIT DIALOG */}
-      <Dialog open={!!editId} onOpenChange={() => setEditId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Business Name</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-2">
-            <Label>Business Name</Label>
-            <Input
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setEditId(null)}>
-              Cancel
-            </Button>
-            <Button onClick={saveEdit}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
