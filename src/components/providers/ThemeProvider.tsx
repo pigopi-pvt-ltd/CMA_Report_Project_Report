@@ -5,7 +5,8 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {children}
-      <AnimatedThemeToggler className='fixed top-4 right-4 z-10' />
+      <AnimatedThemeToggler className='fixed top-4 right-4 z-50 pointer-events-auto' />
+      {/* <AnimatedThemeToggler className='fixed top-4 right-4 z-10' /> */}
     </>
   )
 }
