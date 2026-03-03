@@ -28,8 +28,8 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   try {
     const [projectRes, cmaRes] = await Promise.all([
-      axios.get("/api/get-report", { withCredentials: true }),
-      axios.get("/api/get-cma-reports", { withCredentials: true })
+      axios.get("/api/unified-reports?type=project", { withCredentials: true }),
+      axios.get("/api/unified-reports?type=cma", { withCredentials: true })
     ]);
     projectReports = projectRes.data.data || [];
     cmaReports = cmaRes.data.data || [];

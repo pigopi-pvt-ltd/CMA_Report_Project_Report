@@ -68,17 +68,19 @@ function CheckboxInput({
           : (`monthlyExpenses.${name}` as const)
       } control={form.control}
       render={({ field, fieldState }) => {
-        const isChecked = typeof field.value === "number";
-
+        // Simple fix: Treat empty string as inactive, any number (including 0) as active
+        const isFieldActive = field.value !== undefined && field.value !== null && field.value !== "";
+        const displayValue = isFieldActive ? field.value : "";
+        
         return (
           <Field orientation="horizontal" data-invalid={fieldState.invalid}>
             <Checkbox
-              checked={isChecked}
+              checked={isFieldActive}
               onCheckedChange={(checked) => {
                 if (!checked) {
-                  field.onChange(undefined);
+                  field.onChange(""); // Uncheck = empty string (inactive)
                 } else {
-                  field.onChange(0);
+                  field.onChange(0); // Check = zero to show input field and make it active
                 }
               }}
             />
@@ -86,15 +88,15 @@ function CheckboxInput({
             <FieldContent>
               <FieldLabel>{label}</FieldLabel>
 
-              {isChecked && (
+              {isFieldActive && (
                 <Input
                   type="number"
-                  min={0}
                   placeholder="Enter amount"
-                  value={field.value}
+                  value={displayValue}
                   onChange={(e) =>
-                    field.onChange(Number(e.target.value))
+                    field.onChange(e.target.value === "" ? "" : Number(e.target.value))
                   }
+                  className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                 />
               )}
 

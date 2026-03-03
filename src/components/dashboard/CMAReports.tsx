@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   FolderOpen,
   ArrowDown,
@@ -55,8 +56,11 @@ export default function CMAReports({
   const handleDownload = async (reportId: string, name: string) => {
     try {
       setIsDownloading(reportId);
-      const response = await axios.post("/api/download-cma-report",
-        { projectId: reportId },
+      const response = await axios.post("/api/unified-reports/download",
+        {
+          projectId: reportId,
+          reportType: 'cma'
+        },
         { responseType: "blob" }
       );
 
@@ -101,11 +105,12 @@ export default function CMAReports({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [fullEditReport, setFullEditReport] = useState<any>(null);
 
   const confirmDelete = async () => {
     if (!deleteId) return;
     try {
-      await axios.delete(`/api/delete-cma-report?id=${deleteId}`);
+      await axios.delete(`/api/unified-reports/delete?id=${deleteId}&type=cma`);
       toast.success("Report deleted");
       window.location.reload();
     } catch (error) {
@@ -116,17 +121,17 @@ export default function CMAReports({
   };
 
   const saveEdit = async () => {
-    if (!editId || !editName.trim()) return;
+    if (!editId) return;
     try {
-      await axios.put(`/api/edit-cma-report?id=${editId}`, {
-        businessName: editName,
-      });
-      toast.success("Report name updated");
+      // Update the report with the full data
+      await axios.put(`/api/unified-reports/edit?id=${editId}&type=cma`, fullEditReport);
+      toast.success("Report updated successfully");
       window.location.reload();
     } catch (error) {
       toast.error("Failed to update report");
     } finally {
       setEditId(null);
+      setFullEditReport(null);
     }
   };
 
@@ -240,16 +245,15 @@ export default function CMAReports({
                       </td>
 
                       <td className="px-4 py-3 flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => {
-                            setEditId(report.id);
-                            setEditName(report.name);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                        <Link href={`/edit-report/${report.id}?type=cma`}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            title="Edit Report"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Button
                           size="sm"
                           variant="destructive"

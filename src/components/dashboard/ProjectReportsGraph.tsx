@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
-  BarChart,
+  ComposedChart,
   Bar,
   Line,
   XAxis,
@@ -13,110 +13,99 @@ import {
   Cell,
 } from "recharts";
 
-type GraphItem = {
-  month: string;
-  count: number;
-};
+const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-// 🔑 Fixed 12 months
-const ALL_MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-// 🎨 Bar colors
-const COLORS = [
-  "#0ea5e9",
-  "#84cc16",
-  "#22d3ee",
-  "#a855f7",
-  "#facc15",
-  "#f97316",
-];
-
-export default function ProjectReportsGraph({
-  graphData,
-}: {
-  graphData: GraphItem[];
-}) {
-  // 0 → Jan–Jun | 1 → Jul–Dec
+export default function ProjectReportsGraph({ graphData }: { graphData: any[] }) {
   const [page, setPage] = useState(0);
 
-  // 🔹 Normalize backend data → ensure all 12 months
-  const fullData = useMemo(() => {
-    const map = new Map(graphData.map(d => [d.month, d.count]));
+  const visibleData = useMemo(() => {
+    const map = new Map((graphData || []).map((d: any) => [d.month, d.count]));
+    const currentMonths = ALL_MONTHS.slice(page * 6, page * 6 + 6);
 
-    return ALL_MONTHS.map((month, index) => {
+    const data = currentMonths.map((month) => {
       const value = map.get(month) ?? 0;
-
-      return {
-        month,
-        value,
-        trend: value === 0 ? 0 : value + Math.max(1, value * 0.08),
-      };
+      return { month, value, trend: value }; // Exact value for trend
     });
-  }, [graphData]);
 
-  // 🔹 Show only 6 months per page
-  const visibleData = fullData.slice(page * 6, page * 6 + 6);
+    return [
+      { month: "", value: null, trend: data[0].trend, isDummy: true },
+      ...data,
+      { month: " ", value: null, trend: data[data.length - 1].trend, isDummy: true }
+    ];
+  }, [graphData, page]);
 
   return (
-    <div className="w-[420px]">
-      {/* 🔘 Pagination */}
-      <div className="flex items-center justify-between mb-2">
-        <button
-          onClick={() => setPage(0)}
-          disabled={page === 0}
-          className="text-gray-400 disabled:opacity-30"
-        >
-          ◀
-        </button>
-
-        <span className="text-sm font-medium text-gray-600">
+    <div className="w-[420px] bg-transparent">
+      <div className="flex justify-between items-center mb-4 px-4">
+        <button onClick={() => setPage(0)} disabled={page === 0} className="text-gray-400 disabled:opacity-10 text-primary">◀</button>
+        <span className="text-sm font-bold text-red-600 dark:text-gray-400">
           {page === 0 ? "Jan – Jun" : "Jul – Dec"}
         </span>
-
-        <button
-          onClick={() => setPage(1)}
-          disabled={page === 1}
-          className="text-gray-400 disabled:opacity-30"
-        >
-          ▶
-        </button>
+        <button onClick={() => setPage(1)} disabled={page === 1} className="text-gray-400 disabled:opacity-10 text-primary">▶</button>
       </div>
 
-      {/* 📊 Chart */}
-      <div className="h-[150px]">
+      <div className="h-[140px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={visibleData}>
-            <CartesianGrid stroke="#e5e7eb" vertical={false} />
-            <XAxis dataKey="month" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
+          <ComposedChart 
+            data={visibleData}
+            margin={{ top: 10, right: 0, left: -25, bottom: 0 }}
+          >
+            <CartesianGrid strokeOpacity={0.1} vertical={false} strokeDasharray="3 3" />
+            
+            <XAxis 
+              dataKey="month" 
+              axisLine={false}
+              tickLine={false}
+              interval={0}
+              tick={{ fill: 'currentColor', fontSize: 12, className: 'text-gray-500' }}
+            />
+            
+            
+            <YAxis 
+              axisLine={false}
+              tickLine={false}
+              allowDecimals={false}
+              domain={[0, 'dataMax + 1']} 
+              tick={{ fill: 'currentColor', fontSize: 12, className: 'text-gray-500' }}
+            />
+            
+            <Tooltip 
+              cursor={{ fill: 'rgba(0,0,0,0.05)' }} 
+              content={({ active, payload }) => {
+                if (active && payload && payload.length && !payload[0].payload.isDummy) {
+                  return (
+                    <div className="bg-slate-800 text-white px-3 py-1 rounded shadow-lg text-xs border border-slate-700">
+                      <p className="font-semibold">{`${payload[0].payload.month}: ${payload[0].value} Reports`}</p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
 
-            {/* 🔵 Bars */}
-            <Bar
-              dataKey="value"
-              radius={[6, 6, 0, 0]}
-              isAnimationActive
-            >
-              {visibleData.map((_, index) => (
-                <Cell
-                  key={index}
-                  fill={COLORS[index]}
+            <Bar dataKey="value" barSize={35} radius={[4, 4, 0, 0]}>
+              {visibleData.map((entry: any, index: number) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.isDummy ? "transparent" : "#84cc16"} 
                 />
               ))}
             </Bar>
 
-            {/* 🔴 Trend Line */}
             <Line
               type="monotone"
               dataKey="trend"
-              stroke="#ef4444"
-              strokeWidth={2}
-              dot={{ r: 5 }}
+              stroke="#ef4444" 
+              strokeWidth={2.5}
+              dot={(props: any) => {
+                const { cx, cy, payload } = props;
+                if (payload.isDummy) return null;
+                return (
+                  <circle key={cx} cx={cx} cy={cy} r={5} fill="#fff" stroke="#ef4444" strokeWidth={2} />
+                );
+              }}
             />
-          </BarChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
