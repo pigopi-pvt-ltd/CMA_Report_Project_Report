@@ -1,22 +1,30 @@
 'use client'
 import Link from 'next/link'
-import { Logo } from '@/components/landing-page-sections/hero-section/logo'
+// import { Logo } from '@/components/landing-page-sections/hero-section/logo'
 import { Menu, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useScroll } from 'motion/react'
 
 const menuItems = [
-    { name: 'Features', href: '#link' },
-    { name: 'Solution', href: '#link' },
-    { name: 'Pricing', href: '#link' },
-    { name: 'About', href: '#link' },
+    { name: 'Product', href: '#' },
+    { name: 'Developers', href: '#' },
+    { name: 'Pricing', href: '#' },
+    { name: 'Docs', href: '#' },
 ]
 
 export const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false)
     const [scrolled, setScrolled] = React.useState(false)
+    
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+        const token = localStorage.getItem('token'); 
+        if (token) setIsLoggedIn(true);
+    }, [])
 
     const { scrollYProgress } = useScroll()
 
@@ -28,78 +36,130 @@ export const HeroHeader = () => {
     }, [scrollYProgress])
 
     return (
-        <header>
+        <>
             <nav
-                data-state={menuState && 'active'}
-                className={cn('fixed z-20 w-full border-b transition-colors duration-150', scrolled && 'bg-background/50 backdrop-blur-3xl')}>
-                <div className="mx-auto max-w-5xl px-6 transition-all duration-300">
-                    <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
-                        <div className="flex w-full items-center justify-between gap-12 lg:w-auto">
-                            <Link
-                                href="/"
-                                aria-label="home"
-                                className="flex items-center space-x-2">
-                                <Logo />
+                className={cn(
+                    'fixed top-0 left-0 right-0 w-full transition-all duration-300 pointer-events-auto',
+                    scrolled 
+                        ? 'z-50 bg-background/95 backdrop-blur-3xl border-b border-border shadow-md' 
+                        : 'z-20 bg-transparent border-transparent'
+                )}
+            >
+                <div className="mx-auto max-w-7xl px-6 pointer-events-auto">
+                    <div className="relative flex items-center justify-between py-4 pr-16 lg:pr-20 pointer-events-auto">
+                        
+                        {/* 1. LEFT EXTREME: Logo */}
+                        <div className="flex-1 flex items-center justify-start pointer-events-auto">
+                            <Link href="/" className="flex items-center gap-2 cursor-pointer pointer-events-auto">
+                                {/* <Logo /> */}
+                                <span className="font-bold text-lg tracking-tight">CMA</span>
                             </Link>
+                        </div>
 
+                        {/* 2. EXACT CENTER: Menu Links */}
+                        <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-sm font-medium pointer-events-auto">
+                            {menuItems.map((item, index) => (
+                                <Link 
+                                    key={index} 
+                                    href={item.href} 
+                                    className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer pointer-events-auto"
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* 3. RIGHT EXTREME */}
+                        <div className="flex-1 flex items-center justify-end gap-3 pointer-events-auto">
+                            <div className="hidden lg:flex items-center gap-3 pointer-events-auto">
+                                {mounted && (
+                                    isLoggedIn ? (
+                                        <Link 
+                                            href="/dashboard"
+                                            className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-purple-600 hover:bg-purple-700 !text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            <Link 
+                                                href="/sign-in"
+                                                // className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer pointer-events-auto"
+                                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-purple-600 hover:bg-purple-700 !text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                            >
+                                                Sign in
+                                            </Link>
+                                            <Link 
+                                                href="/sign-up"
+                                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-purple-600 hover:bg-purple-700 !text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                            >
+                                                Start your project
+                                            </Link>
+                                        </>
+                                    )
+                                )}
+                            </div>
+
+                            {/* Mobile Menu Toggle */}
                             <button
                                 onClick={() => setMenuState(!menuState)}
-                                aria-label={menuState == true ? 'Close Menu' : 'Open Menu'}
-                                className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden">
-                                <Menu className="in-data-[state=active]:rotate-180 in-data-[state=active]:scale-0 in-data-[state=active]:opacity-0 m-auto size-6 duration-200" />
-                                <X className="in-data-[state=active]:rotate-0 in-data-[state=active]:scale-100 in-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 -rotate-180 scale-0 opacity-0 duration-200" />
+                                className="lg:hidden p-2 text-foreground cursor-pointer pointer-events-auto"
+                            >
+                                {menuState ? <X className="size-6" /> : <Menu className="size-6" />}
                             </button>
-
-                            <div className="hidden lg:block">
-                                <ul className="flex gap-8 text-sm">
-                                    {menuItems.map((item, index) => (
-                                        <li key={index}>
-                                            <Link
-                                                href={item.href}
-                                                className="text-muted-foreground hover:text-accent-foreground block duration-150">
-                                                <span>{item.name}</span>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
                         </div>
 
-                        <div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
-                            <div className="lg:hidden">
-                                <ul className="space-y-6 text-base">
-                                    {menuItems.map((item, index) => (
-                                        <li key={index}>
-                                            <Link
-                                                href={item.href}
-                                                className="text-muted-foreground hover:text-accent-foreground block duration-150">
-                                                <span>{item.name}</span>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    size="sm">
-                                    <Link href="#">
-                                        <span>Login</span>
-                                    </Link>
-                                </Button>
-                                <Button
-                                    asChild
-                                    size="sm">
-                                    <Link href="#">
-                                        <span>Sign Up</span>
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
                     </div>
                 </div>
+
+                {/* MOBILE MENU DROPDOWN */}
+                {menuState && (
+                    <div className="lg:hidden absolute top-full left-0 w-full bg-background/80 backdrop-blur-md border-b border-border shadow-lg px-6 py-6 flex flex-col gap-6 animate-in slide-in-from-top-2 pointer-events-auto">
+                        <div className="flex flex-col gap-4 text-base font-medium pointer-events-auto">
+                            {menuItems.map((item, index) => (
+                                <Link 
+                                    key={index} 
+                                    href={item.href} 
+                                    onClick={() => setMenuState(false)} 
+                                    className="text-muted-foreground hover:text-foreground cursor-pointer pointer-events-auto"
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+                        </div>
+                        <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                            {mounted && (
+                                isLoggedIn ? (
+                                    <Link 
+                                        href="/dashboard"
+                                        className="inline-flex w-full items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link 
+                                            href="/sign-in"
+                                            // className="inline-flex w-full items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer pointer-events-auto"
+                                            className="inline-flex w-full items-center justify-center rounded-md text-sm font-semibold h-10 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                        >
+                                            Sign in
+                                        </Link>
+                                        <Link 
+                                            href="/sign-up"
+                                            className="inline-flex w-full items-center justify-center rounded-md text-sm font-semibold h-10 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                        >
+                                            Start your project
+                                        </Link>
+                                    </>
+                                )
+                            )}
+                        </div>
+                    </div>
+                )}
             </nav>
-        </header>
+            {/* Navbar spacing helper */}
+            <div className="h-16" />
+        </>
     )
 }

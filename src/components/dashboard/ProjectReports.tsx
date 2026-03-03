@@ -1,20 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 
 import {
   AlertDialog,
@@ -26,9 +19,6 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import {
   FolderOpen,
@@ -57,6 +47,8 @@ export default function ProjectReports({
 }: {
   reports: ProjectReport[];
 }) {
+  const router = useRouter();
+
   /* ================= PAGINATION ================= */
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -72,15 +64,19 @@ export default function ProjectReports({
   /* ================= DELETE STATE ================= */
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+<<<<<<< HEAD
   /* ================= EDIT STATE ================= */
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [fullEditReport, setFullEditReport] = useState<any | null>(null);
 
+=======
+>>>>>>> 9972eb7e342a27c03a4e1301bef5c99fe2fbf699
   /* ================= HANDLERS ================= */
 
   const confirmDelete = async () => {
     if (!deleteId) return;
+<<<<<<< HEAD
     try {
       await axios.delete(`/api/unified-reports/delete?id=${deleteId}&type=project`);
       setDeleteId(null);
@@ -108,6 +104,13 @@ export default function ProjectReports({
     toast.error("Required fields missing in this report's data");
   }
 };
+=======
+
+    await axios.delete(`/api/delete-report?id=${deleteId}`);
+    setDeleteId(null);
+    window.location.reload(); 
+  };
+>>>>>>> 9972eb7e342a27c03a4e1301bef5c99fe2fbf699
 
   const handleDownload = async (reportId: string) => {
     try {
@@ -203,6 +206,7 @@ export default function ProjectReports({
                       <td className="px-4 py-3 font-medium">{report.name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{report.createdAt}</td>
                       <td className="px-4 py-3 flex justify-end gap-2">
+<<<<<<< HEAD
                         {/* Corrected Edit Link for Projects */}
                         <Link href={`/edit-report/${report.id}?type=project`}>
                           <Button size="sm" variant="secondary">
@@ -210,6 +214,21 @@ export default function ProjectReports({
                           </Button>
                         </Link>
                         <Button size="sm" variant="destructive" onClick={() => setDeleteId(report.id)}>
+=======
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => router.push(`/edit-project-report/${report.id}`)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setDeleteId(report.id)}
+                        >
+>>>>>>> 9972eb7e342a27c03a4e1301bef5c99fe2fbf699
                           <Trash className="h-4 w-4" />
                         </Button>
                       </td>
@@ -238,6 +257,7 @@ export default function ProjectReports({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+<<<<<<< HEAD
 
       {/* EDIT DIALOG */}
       <Dialog open={!!editId} onOpenChange={() => setEditId(null)}>
@@ -255,6 +275,8 @@ export default function ProjectReports({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+=======
+>>>>>>> 9972eb7e342a27c03a4e1301bef5c99fe2fbf699
     </div>
   );
 }
