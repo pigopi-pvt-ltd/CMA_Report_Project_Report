@@ -25,8 +25,11 @@ export async function generateProjectReport(data: any) {
   const DEFAULT_GROWTH_RATE = 0.10;
 
   const interestRate = (data.assumptions?.particulars?.interestRateTermLoan || DEFAULT_INTEREST_RATE) / 100;
+  const yearlyGrowthRateValue = data.revenueDetails?.yearlyGrowthRate;
   const yearlyGrowthRate =
-    (data.revenueDetails?.yearlyGrowthRate ?? DEFAULT_GROWTH_RATE * 100) / 100;
+    (yearlyGrowthRateValue !== undefined && yearlyGrowthRateValue !== null && yearlyGrowthRateValue !== '' && !isNaN(Number(yearlyGrowthRateValue)))
+      ? Number(yearlyGrowthRateValue) / 100
+      : DEFAULT_GROWTH_RATE;
 
   const businessReq = data.businessRequirements ?? {};
   const monthlyExpenses = data.monthlyExpenses ?? {};
@@ -52,7 +55,7 @@ export async function generateProjectReport(data: any) {
 
   // REVENUE
   const revenueData = calculateRevenue(
-    revenueDetails.salesRevenue,
+    Number(revenueDetails.salesRevenue) || 0,
     revenueDetails.salesType,
     yearlyGrowthRate,
     loanPeriod
@@ -258,6 +261,41 @@ export async function generateProjectReport(data: any) {
     };
   });
 
+  // Generate finalAssumption data
+  const finalAssumption = {
+    loanDurationYearsCount: loanPeriod,
+    averageDebtServiceCoverageRatio: averageDSCR,
+    
+    // Revenue from sales summary (based on profitability data)
+    revenueFromSalesSummary: profitabilityStatement.map((profit: any) => ({
+      year: profit.year,
+      grossReceipts: profit.totalA || 0
+    })),
+    
+    // Total expenses summary
+    totalExpensesSummary: profitabilityStatement.map((profit: any) => ({
+      year: profit.year,
+      totalExpenditure: profit.totalB || 0
+    })),
+    
+    // Taxation provision summary
+    taxationProvisionSummary: profitabilityStatement.map((profit: any) => ({
+      year: profit.year,
+      taxAmount: profit.provisionForTaxation || 0
+    })),
+    
+    // Financial assumptions
+    financialAssumptions: {
+      incrementInGrossReceipts: data.assumptions?.particulars?.projectedIncrementReceipts || "135%",
+      incrementInExpenditure: data.assumptions?.particulars?.projectedIncrementExpenditure || "112%"
+    },
+    
+    // Workforce details
+    workforceDetails: {
+      employmentPotentialCount: "10 Above" // This could be made dynamic based on business requirements
+    }
+  };
+
   return {
     loanDetails: {
       fixedCapitalInvested: capital.fixedCapitalInvested,
@@ -272,8 +310,8 @@ export async function generateProjectReport(data: any) {
     revenueDetails: {
       productName: revenueDetails.productName,
       salesType: revenueDetails.salesType,
-      salesRevenue: revenueDetails.salesRevenue,
-      totalSalesRevenueAnually: revenueDetails.salesType === "monthly" ? revenueDetails.salesRevenue * 12 : revenueDetails.salesRevenue,
+      salesRevenue: Number(revenueDetails.salesRevenue) || 0,
+      totalSalesRevenueAnually: revenueDetails.salesType === "monthly" ? (Number(revenueDetails.salesRevenue) || 0) * 12 : (Number(revenueDetails.salesRevenue) || 0),
       yearlyGrowthRate: yearlyGrowthRate
     },
 
@@ -302,6 +340,7 @@ export async function generateProjectReport(data: any) {
     mpbfAnalysis,
     swotAnalysis,
     actionPlan,
+    finalAssumption, // Add the newly generated finalAssumption
     targetMarket: [
       {
         srNo: 1,

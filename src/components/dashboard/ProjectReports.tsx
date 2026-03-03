@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
 
 import {
   AlertDialog,
@@ -16,6 +18,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 import {
   FolderOpen,
@@ -55,56 +58,75 @@ export default function ProjectReports({
   const endIndex = Math.min(startIndex + rowsPerPage, totalReports);
   const visibleReports = reports.slice(startIndex, endIndex);
 
-  const totalPages = Math.ceil(totalReports / rowsPerPage);
   const hasPrev = page > 0;
-  const hasNext = page < totalPages - 1;
+  const hasNext = page < Math.ceil(totalReports / rowsPerPage) - 1;
 
   /* ================= DELETE STATE ================= */
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  /* ================= EDIT STATE ================= */
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [fullEditReport, setFullEditReport] = useState<any | null>(null);
 
   /* ================= HANDLERS ================= */
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-
-    await axios.delete(`/api/delete-report?id=${deleteId}`);
-    setDeleteId(null);
-    window.location.reload(); 
+    try {
+      await axios.delete(`/api/unified-reports/delete?id=${deleteId}&type=project`);
+      setDeleteId(null);
+      window.location.reload();
+    } catch (err) {
+      console.error("Delete error", err);
+    }
   };
+
+  const saveEdit = async () => {
+  if (!editId || !fullEditReport) return; 
+  
+  try {
+    const payload = {
+      ...fullEditReport,      
+      name: editName,         
+      businessName: editName  
+    };
+
+    await axios.put(`/api/unified-reports/edit?id=${editId}&type=project`, payload);
+    toast.success("Updated!");
+    window.location.reload();
+  } catch (err) {
+    // Agar ab bhi error aaye, toh iska matlab fullEditReport mein wo required fields missing hain
+    toast.error("Required fields missing in this report's data");
+  }
+};
 
   const handleDownload = async (reportId: string) => {
-    const response = await axios.post(
-      "/api/download-project-report",
-      { projectId: reportId },
-      { responseType: "blob" }
-    );
-
-    const blob = new Blob([response.data], {
-      type: "application/pdf",
-    });
-
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "project-report.pdf";
-    document.body.appendChild(a);
-    a.click();
-
-    a.remove();
-    window.URL.revokeObjectURL(url);
+    try {
+      const response = await axios.post(
+        "/api/unified-reports/download",
+        { projectId: reportId, reportType: 'project' },
+        { responseType: "blob" }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "project-report.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error("Download error", err);
+    }
   };
 
-  /* ================= EFFECT ================= */
   useEffect(() => {
     setPage(0);
   }, [reports, rowsPerPage]);
 
-  /* ================= JSX ================= */
-
   return (
     <div className="p-1 w-full">
       <Card className="w-full bg-card">
-        {/* HEADER */}
         <CardHeader className="pt-2 pb-2 -mt-5">
           <CardTitle className="grid grid-cols-[20%_45%_35%] items-center w-full text-md">
             <div className="flex items-center gap-2">
@@ -114,6 +136,7 @@ export default function ProjectReports({
 
             <div className="flex justify-center items-center gap-3">
               <DashboardSearch />
+              {/* Fixed: href instead of undefined activeTab */}
               <DashboardCreateReportButton href="/create-project-report" />
             </div>
 
@@ -128,32 +151,16 @@ export default function ProjectReports({
                   <option value={5}>5</option>
                   <option value={10}>10</option>
                   <option value={25}>25</option>
-                  <option value={100}>100</option>
                 </select>
               </div>
-
               <div>
-                {totalReports === 0
-                  ? "0 of 0"
-                  : `${startIndex + 1}–${endIndex} of ${totalReports}`}
+                {totalReports === 0 ? "0 of 0" : `${startIndex + 1}–${endIndex} of ${totalReports}`}
               </div>
-
               <div className="flex items-center gap-1">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  disabled={!hasPrev}
-                  onClick={() => setPage(page - 1)}
-                >
+                <Button size="icon" variant="ghost" disabled={!hasPrev} onClick={() => setPage(page - 1)}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  disabled={!hasNext}
-                  onClick={() => setPage(page + 1)}
-                >
+                <Button size="icon" variant="ghost" disabled={!hasNext} onClick={() => setPage(page + 1)}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -161,7 +168,6 @@ export default function ProjectReports({
           </CardTitle>
         </CardHeader>
 
-        {/* TABLE */}
         <CardContent className="pt-2">
           <div className="overflow-x-auto -mt-10">
             <table className="w-full text-sm">
@@ -173,7 +179,6 @@ export default function ProjectReports({
                   <th className="px-4 py-3 text-right">ACTIONS</th>
                 </tr>
               </thead>
-
               <tbody>
                 {visibleReports.length > 0 ? (
                   visibleReports.map((report) => (
@@ -187,29 +192,16 @@ export default function ProjectReports({
                           <ArrowDown className="h-5 w-5 text-white" />
                         </Button>
                       </td>
-
-                      <td className="px-4 py-3 font-medium">
-                        {report.name}
-                      </td>
-
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {report.createdAt}
-                      </td>
-
+                      <td className="px-4 py-3 font-medium">{report.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{report.createdAt}</td>
                       <td className="px-4 py-3 flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => router.push(`/edit-project-report/${report.id}`)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setDeleteId(report.id)}
-                        >
+                        {/* Corrected Edit Link for Projects */}
+                        <Link href={`/edit-report/${report.id}?type=project`}>
+                          <Button size="sm" variant="secondary">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button size="sm" variant="destructive" onClick={() => setDeleteId(report.id)}>
                           <Trash className="h-4 w-4" />
                         </Button>
                       </td>
@@ -217,9 +209,7 @@ export default function ProjectReports({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="py-10 text-center">
-                      No Project reports found.
-                    </td>
+                    <td colSpan={4} className="py-10 text-center">No Project reports found.</td>
                   </tr>
                 )}
               </tbody>
@@ -232,15 +222,11 @@ export default function ProjectReports({
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Are you sure you want to delete this report?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this report?</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

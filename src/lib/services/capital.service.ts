@@ -3,10 +3,10 @@
 export function calculateCapital(businessReq: Record<string, number | undefined>) {
   
   const fixedCapitalInvested = Object.entries(businessReq)
-    .filter(([key, value]) => key !== "workingExpenses" && typeof value === "number")
-    .reduce((sum, [, value]) => sum + (value || 0), 0);
+    .filter(([key, value]) => key !== "workingExpenses" && (typeof value === "number" || typeof value === "string"))
+    .reduce((sum, [, value]) => sum + (Number(value) || 0), 0);
 
-  const workingCapitalInvested = businessReq.workingExpenses || 0;
+  const workingCapitalInvested = Number(businessReq.workingExpenses) || 0;
 
   const totalProjectCost = fixedCapitalInvested + workingCapitalInvested;
 

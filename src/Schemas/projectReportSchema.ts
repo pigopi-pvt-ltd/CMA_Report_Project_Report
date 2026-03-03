@@ -108,19 +108,19 @@ export const monthlyExpensesKeyEnum = z.enum([
 // Schemas
 export const businessRequirementsSchema = z.record(
   businessRequirementsKeyEnum,
-  z.number().nonnegative().optional()
+  z.union([z.number().nonnegative(), z.string()]).optional()
 ).optional();
 
 export const monthlyExpensesSchema = z.record(
   monthlyExpensesKeyEnum,
-  z.number().nonnegative().optional()
+  z.union([z.number().nonnegative(), z.string()]).optional()
 ).optional();
 
 export const personalDetailsSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),
-  mobile: z.string().min(10),
-  businessMobile: z.string().min(10),
+  mobile: z.string().regex(/^\+91[6-9]\d{9}$/, "Mobile number must be a valid Indian number starting with +91 followed by exactly 10 digits (starting with 6-9)"),
+  businessMobile: z.string().regex(/^\+91[6-9]\d{9}$/, "Business mobile number must be a valid Indian number starting with +91 followed by exactly 10 digits (starting with 6-9)"),
   personalAddress: z.string().min(1),
   businessAddress: z.string().min(1),
   gender: genderEnum,
@@ -140,8 +140,8 @@ export const businessDetailsSchema = z.object({
 export const salesRevenueDetailsSchema = z.object({
   productName: z.string().min(1),
   salesType: salesTypeEnum,
-  salesRevenue: z.number().min(0),
-  yearlyGrowthRate: z.number().min(5, "Growth rate must be at least 5%"),
+  salesRevenue: z.union([z.number().nonnegative(), z.string()]).optional(),
+  yearlyGrowthRate: z.union([z.number().min(5, "Growth rate must be at least 5%"), z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 5, "Growth rate must be at least 5%")]).optional(),
 });
 
 
@@ -149,10 +149,9 @@ export const salesRevenueDetailsSchema = z.object({
 
 export const projectReportSchema = z.object({
   // step 1
-  businessName: z.string().min(1, "Legal Business Name is required")
-    .max(255, "Legal Business Name must be at most 255 characters"),
+  businessName: z.string().min(1, "Legal Business Name is required"),
   // step 2
-  businessType: z.string().min(1, "Legal Business Type is required").max(255, "Legal business type must be at most 255 characters"),
+  businessType: z.string().min(1, "Legal Business Type is required"),
   // step 3
   industryType: industryTypeEnum,
   // step 4

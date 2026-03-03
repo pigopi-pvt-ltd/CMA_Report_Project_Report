@@ -34,6 +34,57 @@ type PhoneInputProps = Omit<
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
  React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
   ({ className, onChange, onBlur, value, ...props }, ref) => {
+   // Set default country to India
+   const defaultCountry = props.defaultCountry || "IN";
+     
+   // Ensure value starts with +91 if it's an Indian number and only has 10 digits
+   const adjustedValue = React.useMemo(() => {
+     if (value && typeof value === 'string') {
+       // If it's just 10 digits, prepend +91
+       if (/^\d{10}$/.test(value)) {
+         return `+91${value}`;
+       }
+       // If it starts with 6-9 and has 10 digits, prepend +91
+       if (/^[6-9]\d{9}$/.test(value)) {
+         return `+91${value}`;
+       }
+       // If it starts with 91 and has 10 digits after, prepend +
+       if (/^91[6-9]\d{9}$/.test(value)) {
+         return `+${value}`;
+       }
+     }
+     // If value is empty/undefined and default country is IN, return +91
+     if (!value && defaultCountry === 'IN') {
+       return '+91';
+     }
+     return value;
+   }, [value]);
+     
+   // Limit input to 10 digits after country code for India
+   const handleInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+     let inputValue = e.target.value;
+     // If it's an Indian number (+91), ensure only 10 digits after country code
+     if (inputValue.startsWith('+91')) {
+       const withoutPrefix = inputValue.substring(3); // Remove '+91'
+       const digitsOnly = withoutPrefix.replace(/[\D]/g, ''); // Keep only digits
+       if (digitsOnly.length > 10) {
+         // Limit to 10 digits
+         const limitedDigits = digitsOnly.substring(0, 10);
+         e.target.value = `+91${limitedDigits}`;
+       }
+     } else if (!inputValue.startsWith('+91') && defaultCountry === 'IN') {
+       // If user starts typing without +91 and default is India, ensure +91 prefix
+       const digitsOnly = inputValue.replace(/[\D]/g, ''); // Keep only digits
+       if (digitsOnly.length <= 10) {
+         e.target.value = `+91${digitsOnly}`;
+       } else {
+         // If more than 10 digits, limit to 10
+         const limitedDigits = digitsOnly.substring(0, 10);
+         e.target.value = `+91${limitedDigits}`;
+       }
+     }
+   }, [defaultCountry]);
+     
    return (
     <RPNInput.default
      ref={ref}
@@ -42,11 +93,13 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
      countrySelectComponent={CountrySelect}
      inputComponent={InputComponent}
      smartCaret={false}
-     value={value ?? undefined} // Use nullish coalescing instead of ||
+     defaultCountry={defaultCountry}
+     value={adjustedValue ?? undefined}
      onChange={(val) => {
       onChange?.(val ?? ("" as RPNInput.Value));
      }}
      onBlur={onBlur}
+     onInput={handleInputChange}
      {...props}
     />
    );
@@ -57,9 +110,10 @@ PhoneInput.displayName = "PhoneInput";
 const InputComponent = React.forwardRef<
  HTMLInputElement,
  React.ComponentProps<"input">
->(({ className, ...props }, ref) => (
+>(({ className, onInput, ...props }, ref) => (
  <Input
   className={cn("rounded-e-lg rounded-s-none", className)}
+  onInput={onInput}
   {...props}
   ref={ref}
  />

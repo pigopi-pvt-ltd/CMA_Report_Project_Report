@@ -1,11 +1,10 @@
-import { ProjectReportForm } from '@/components/forms/ProjectReportForm'
+"use client";
+import { UnifiedReportForm } from "@/components/forms/UnifiedReportForm";
 
-const CreateProjectReportPage = () => {
- return (
-  <div className="flex w-full min-h-screen items-center justify-center font-sans p-10">
-   <ProjectReportForm />
-  </div>
- )
+export default function CreateProjectPage() {
+  return (
+    <div className="p-10 flex justify-center">
+      <UnifiedReportForm type="project" />
+    </div>
+  );
 }
-
-export default CreateProjectReportPage

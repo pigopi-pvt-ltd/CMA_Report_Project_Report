@@ -108,7 +108,7 @@ const cmaReportSchema = new Schema<ICmaReport>(
     loanPeriod: { type: Number, required: true, min: 5, max: 10 },
 
     personalDetails: {
-      fullName: String, email: String, mobile: String, businessMobile: String,
+      fullName: String, email: String, mobile: { type: String, match: /^\+91[6-9]\d{9}$/ }, businessMobile: { type: String, match: /^\+91[6-9]\d{9}$/ },
       personalAddress: String, businessAddress: String, gender: String, category: String,
       educationQualification: String, workExperience: String
     },

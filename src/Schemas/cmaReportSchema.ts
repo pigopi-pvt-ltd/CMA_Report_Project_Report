@@ -57,8 +57,8 @@ export const businessStartDateEnum = z.enum([
 export const personalDetailsSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),
-  mobile: z.string().min(10),
-  businessMobile: z.string().min(10),
+  mobile: z.string().regex(/^\+91[6-9]\d{9}$/, "Mobile number must be a valid Indian number starting with +91 followed by exactly 10 digits (starting with 6-9)"),
+  businessMobile: z.string().regex(/^\+91[6-9]\d{9}$/, "Business mobile number must be a valid Indian number starting with +91 followed by exactly 10 digits (starting with 6-9)"),
   personalAddress: z.string().min(1),
   businessAddress: z.string().min(1),
   gender: genderEnum,
@@ -77,8 +77,8 @@ export const businessDetailsSchema = z.object({
 export const salesRevenueDetailsSchema = z.object({
   productName: z.string().min(1),
   salesType: salesTypeEnum,
-  salesRevenue: z.number().min(0),
-  yearlyGrowthRate: z.number().min(5, "Growth rate must be at least 5%"),
+  salesRevenue: z.union([z.number().nonnegative(), z.string()]).optional(),
+  yearlyGrowthRate: z.union([z.number().min(5, "Growth rate must be at least 5%"), z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 5, "Growth rate must be at least 5%")]).optional(),
 });
 
 // ✅ FINAL CMA SCHEMA
@@ -92,8 +92,8 @@ export const cmaReportSchema = z.object({
   loanType: loanTypeEnum,
 
   // STEP 5–6
-  businessRequirements: z.record(z.string(), z.number().optional()).optional(),
-  monthlyExpenses: z.record(z.string(), z.number().optional()).optional(),
+  businessRequirements: z.record(z.string(), z.union([z.number(), z.string()]).optional()).optional(),
+  monthlyExpenses: z.record(z.string(), z.union([z.number(), z.string()]).optional()).optional(),
 
   // STEP 7–8
   revenueDetails: salesRevenueDetailsSchema,

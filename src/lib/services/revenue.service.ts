@@ -1,15 +1,16 @@
 export function calculateRevenue(
-  salesRevenue: number,
+  salesRevenue: number | string | undefined,
   salesType: string,
   yearlyGrowthRate: number,
   loanPeriod: number
 ) {
   const result: any[] = [];
 
-  let annualRevenue =
+  const annualRevenueInitial =
     salesType === "monthly"
-      ? salesRevenue * 12
-      : salesRevenue;
+      ? Number(salesRevenue) * 12
+      : Number(salesRevenue);
+  let annualRevenue = annualRevenueInitial || 0;
 
   const startYear = new Date().getFullYear();
 
@@ -20,7 +21,7 @@ export function calculateRevenue(
     });
 
     annualRevenue =
-      annualRevenue * (1 + yearlyGrowthRate);
+      Number(annualRevenue) * (1 + yearlyGrowthRate);
   }
 
   return result;

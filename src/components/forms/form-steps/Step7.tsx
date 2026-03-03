@@ -110,6 +110,7 @@ const Step7 = ({ currentStep, form }: Props) => {
                   e.target.value === "" ? undefined : Number(e.target.value)
                 )
               }
+              className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
             />
             <FieldDescription></FieldDescription>
             {fieldState.invalid && (
@@ -144,6 +145,7 @@ const Step7 = ({ currentStep, form }: Props) => {
                   e.target.value === "" ? "" : Number(e.target.value)
                 )
               }
+              className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
             />
             <FieldDescription>Minimum 5% growth is expected.</FieldDescription>
 

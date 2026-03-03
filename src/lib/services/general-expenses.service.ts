@@ -6,7 +6,7 @@ export function calculateGeneralExpenses(
 
   const yearlyTotal =
     Object.values(monthlyExpenses || {}).reduce(
-      (sum, val) => sum + (val || 0),
+      (sum, val) => sum + (Number(val) || 0),
       0
     ) * 12;
 

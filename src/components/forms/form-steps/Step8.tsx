@@ -23,7 +23,7 @@ const Step8 = ({ currentStep, form }: Props) => {
               Loan Period (Years)
             </FieldLabel>
             <Input
-              id="salesRevenue"
+              id="loanPeriod"
               type="number"
               placeholder="Enter Loan Duration (5-10 Years)"
               autoComplete="off"
@@ -34,6 +34,7 @@ const Step8 = ({ currentStep, form }: Props) => {
                   e.target.value === "" ? undefined : Number(e.target.value)
                 )
               }
+              className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
             />
 
             <FieldDescription>

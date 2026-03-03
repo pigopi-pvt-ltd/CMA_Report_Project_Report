@@ -572,8 +572,8 @@ const ProjectReportSchema = new Schema<ProjectData>(
     personalDetails: {
       fullName: { type: String, required: true },
       email: { type: String, required: true },
-      mobile: { type: String, required: true },
-      businessMobile: { type: String, required: true },
+      mobile: { type: String, required: true, match: /^\+91[6-9]\d{9}$/ },
+      businessMobile: { type: String, required: true, match: /^\+91[6-9]\d{9}$/ },
       personalAddress: { type: String, required: true },
       businessAddress: { type: String, required: true },
       gender: {
