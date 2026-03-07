@@ -4,11 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,7 +16,6 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-
 import {
   FolderOpen,
   ArrowDown,
@@ -32,97 +28,64 @@ import {
 import DashboardSearch from "./DashboardSearch";
 import DashboardCreateReportButton from "./DashboardCreateReportButton";
 
-/* ================= TYPES ================= */
-
 type ProjectReport = {
   id: string;
   name: string;
   createdAt: string;
 };
 
-/* ================= COMPONENT ================= */
-
-export default function ProjectReports({
-  reports,
-}: {
-  reports: ProjectReport[];
-}) {
-  const router = useRouter();
-
-  /* ================= PAGINATION ================= */
+export default function ProjectReports({ reports }: { reports: ProjectReport[] }) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const totalReports = reports.length;
+  // Filter reports based on search query
+  const filteredReports = reports.filter((report) =>
+    report.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalReports = filteredReports.length;
   const startIndex = page * rowsPerPage;
   const endIndex = Math.min(startIndex + rowsPerPage, totalReports);
-  const visibleReports = reports.slice(startIndex, endIndex);
+  const visibleReports = filteredReports.slice(startIndex, endIndex);
 
   const hasPrev = page > 0;
   const hasNext = page < Math.ceil(totalReports / rowsPerPage) - 1;
-
-  /* ================= DELETE STATE ================= */
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  /* ================= EDIT STATE ================= */
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [fullEditReport, setFullEditReport] = useState<any | null>(null);
-
-  /* ================= HANDLERS ================= */
 
   const confirmDelete = async () => {
     if (!deleteId) return;
     try {
       await axios.delete(`/api/unified-reports/delete?id=${deleteId}&type=project`);
-      setDeleteId(null);
+      toast.success("Project report deleted!");
       window.location.reload();
     } catch (err) {
-      console.error("Delete error", err);
+      toast.error("Delete failed");
     }
   };
-
-  const saveEdit = async () => {
-  if (!editId || !fullEditReport) return; 
-  
-  try {
-    const payload = {
-      ...fullEditReport,      
-      name: editName,         
-      businessName: editName  
-    };
-
-    await axios.put(`/api/unified-reports/edit?id=${editId}&type=project`, payload);
-    toast.success("Updated!");
-    window.location.reload();
-  } catch (err) {
-    // Agar ab bhi error aaye, toh iska matlab fullEditReport mein wo required fields missing hain
-    toast.error("Required fields missing in this report's data");
-  }
-};
 
   const handleDownload = async (reportId: string) => {
     try {
       const response = await axios.post(
         "/api/unified-reports/download",
-        { projectId: reportId, reportType: 'project' },
+        { projectId: reportId, reportType: "project" },
         { responseType: "blob" }
       );
       const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
       const a = document.createElement("a");
       a.href = url;
-      a.download = "project-report.pdf";
+      a.download = `Project_Report_${reportId}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
     } catch (err) {
-      console.error("Download error", err);
+      toast.error("Download error");
     }
   };
 
   useEffect(() => {
     setPage(0);
-  }, [reports, rowsPerPage]);
+  }, [searchQuery, rowsPerPage]);
 
   return (
     <div className="p-1 w-full">
@@ -131,31 +94,28 @@ export default function ProjectReports({
           <CardTitle className="grid grid-cols-[20%_45%_35%] items-center w-full text-md">
             <div className="flex items-center gap-2">
               <FolderOpen className="h-5 w-5 text-muted-foreground" />
-              <span className="font-semibold">PROJECT REPORTS</span>
+              <span className="font-semibold uppercase">Project Reports</span>
             </div>
 
             <div className="flex justify-center items-center gap-3">
-              <DashboardSearch />
-              {/* Fixed: href instead of undefined activeTab */}
+              <DashboardSearch value={searchQuery} onChange={setSearchQuery} />
               <DashboardCreateReportButton href="/create-project-report" />
             </div>
 
             <div className="flex items-center justify-end gap-4 px-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <span>Rows per page:</span>
+                <span>Rows:</span>
                 <select
                   value={rowsPerPage}
                   onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                  className="border rounded px-2 py-1 text-sm bg-background"
+                  className="border rounded px-1 py-1 bg-background"
                 >
                   <option value={5}>5</option>
                   <option value={10}>10</option>
                   <option value={25}>25</option>
                 </select>
               </div>
-              <div>
-                {totalReports === 0 ? "0 of 0" : `${startIndex + 1}–${endIndex} of ${totalReports}`}
-              </div>
+              <div>{totalReports === 0 ? "0 of 0" : `${startIndex + 1}–${endIndex} of ${totalReports}`}</div>
               <div className="flex items-center gap-1">
                 <Button size="icon" variant="ghost" disabled={!hasPrev} onClick={() => setPage(page - 1)}>
                   <ChevronLeft className="h-4 w-4" />
@@ -173,7 +133,7 @@ export default function ProjectReports({
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/40">
                 <tr>
-                  <th className="px-4 py-3"></th>
+                  <th className="px-4 py-3 w-16"></th>
                   <th className="px-4 py-3 text-left">REPORT NAME</th>
                   <th className="px-4 py-3 text-left">CREATED DATE</th>
                   <th className="px-4 py-3 text-right">ACTIONS</th>
@@ -182,26 +142,21 @@ export default function ProjectReports({
               <tbody>
                 {visibleReports.length > 0 ? (
                   visibleReports.map((report) => (
-                    <tr key={report.id} className="border-b">
+                    <tr key={report.id} className="border-b hover:bg-muted/20 transition-colors">
                       <td className="px-4 py-3">
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 p-2"
-                          onClick={() => handleDownload(report.id)}
-                        >
-                          <ArrowDown className="h-5 w-5 text-white" />
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8 w-8 p-0" onClick={() => handleDownload(report.id)}>
+                          <ArrowDown className="h-4 w-4 text-white" />
                         </Button>
                       </td>
                       <td className="px-4 py-3 font-medium">{report.name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{report.createdAt}</td>
                       <td className="px-4 py-3 flex justify-end gap-2">
-                        {/* Corrected Edit Link for Projects */}
                         <Link href={`/edit-report/${report.id}?type=project`}>
-                          <Button size="sm" variant="secondary">
+                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button size="sm" variant="destructive" onClick={() => setDeleteId(report.id)}>
+                        <Button size="sm" variant="destructive" className="h-8 w-8 p-0" onClick={() => setDeleteId(report.id)}>
                           <Trash className="h-4 w-4" />
                         </Button>
                       </td>
@@ -209,7 +164,9 @@ export default function ProjectReports({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="py-10 text-center">No Project reports found.</td>
+                    <td colSpan={4} className="py-10 text-center text-muted-foreground">
+                      No matching reports found.
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -218,7 +175,6 @@ export default function ProjectReports({
         </CardContent>
       </Card>
 
-      {/* DELETE DIALOG */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -226,7 +182,7 @@ export default function ProjectReports({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

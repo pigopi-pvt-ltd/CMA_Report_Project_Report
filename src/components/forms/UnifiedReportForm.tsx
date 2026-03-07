@@ -103,7 +103,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 businessStartDate: ""
             }
         },
-        mode: "onChange",
+        mode: "onSubmit",
     });
 
     // 3. Load Data for Edit Mode
@@ -162,7 +162,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
     const onSubmit = async (values: any) => {
         try {
             let response;
-            
+
             if (isEditMode) {
                 // For edit mode, use PUT to update existing report
                 response = await axios.put(`/api/unified-reports/edit?id=${reportId}&type=${type}`, values);
@@ -172,7 +172,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 response = await axios.post("/api/unified-reports", { ...values, type });
                 toast.success("Report created successfully!");
             }
-            
+
             router.push(type === 'cma' ? "/dashboard?tab=cma" : "/dashboard");
         } catch (error: any) {
             console.error("Submit error:", error);
@@ -210,16 +210,16 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                                 exit="exit"
                             >
                                 {/* All Steps share the same form instance */}
-                                <Step1 currentStep={currentStep} form={form} />
-                                <Step2 currentStep={currentStep} form={form} />
-                                <Step3 currentStep={currentStep} form={form} />
-                                <Step4 currentStep={currentStep} form={form} />
-                                <Step5 currentStep={currentStep} form={form} />
-                                <Step6 currentStep={currentStep} form={form} />
-                                <Step7 currentStep={currentStep} form={form} />
-                                <Step8 currentStep={currentStep} form={form} />
-                                <Step9 currentStep={currentStep} form={form} />
-                                <Step10 currentStep={currentStep} form={form} />
+                                {currentStep === 0 && <Step1 currentStep={currentStep} form={form} />}
+                                {currentStep === 1 && <Step2 currentStep={currentStep} form={form} />}
+                                {currentStep === 2 && <Step3 currentStep={currentStep} form={form} />}
+                                {currentStep === 3 && <Step4 currentStep={currentStep} form={form} />}
+                                {currentStep === 4 && <Step5 currentStep={currentStep} form={form} />}
+                                {currentStep === 5 && <Step6 currentStep={currentStep} form={form} />}
+                                {currentStep === 6 && <Step7 currentStep={currentStep} form={form} />}
+                                {currentStep === 7 && <Step8 currentStep={currentStep} form={form} />}
+                                {currentStep === 8 && <Step9 currentStep={currentStep} form={form} />}
+                                {currentStep === 9 && <Step10 currentStep={currentStep} form={form} />}
                             </motion.div>
                         </AnimatePresence>
                     </form>
