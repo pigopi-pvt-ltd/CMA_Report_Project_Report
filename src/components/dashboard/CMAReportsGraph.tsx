@@ -15,6 +15,15 @@ import {
 
 const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const BAR_COLORS = [
+  "#3b82f6", // Blue
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#6366f1", // Indigo
+  "#8b5cf6", // Violet
+  "#ec4899"  // Pink
+];
+
 export default function ProjectReportsGraph({ graphData }: { graphData: any[] }) {
   const [page, setPage] = useState(0);
 
@@ -24,13 +33,14 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
 
     const data = currentMonths.map((month) => {
       const value = map.get(month) ?? 0;
-      return { month, value, trend: value }; // Exact value for trend
+      return { month, value, trend: value };
     });
 
+    // **Trend 0 kiya taaki line base se touch ho**
     return [
-      { month: "", value: null, trend: data[0].trend, isDummy: true },
+      { month: "", value: null, trend: 0, isDummy: true },
       ...data,
-      { month: " ", value: null, trend: data[data.length - 1].trend, isDummy: true }
+      { month: " ", value: null, trend: 0, isDummy: true }
     ];
   }, [graphData, page]);
 
@@ -60,7 +70,6 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
               tick={{ fill: 'currentColor', fontSize: 12, className: 'text-gray-500' }}
             />
             
-            
             <YAxis 
               axisLine={false}
               tickLine={false}
@@ -70,7 +79,7 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
             />
             
             <Tooltip 
-              cursor={{ fill: 'rgba(0,0,0,0.05)' }} 
+              cursor={{ fill: 'rgba(16, 15, 15, 0.05)' }} 
               content={({ active, payload }) => {
                 if (active && payload && payload.length && !payload[0].payload.isDummy) {
                   return (
@@ -84,16 +93,20 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
             />
 
             <Bar dataKey="value" barSize={35} radius={[4, 4, 0, 0]}>
-              {visibleData.map((entry: any, index: number) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.isDummy ? "transparent" : "#84cc16"} 
-                />
-              ))}
+              {visibleData.map((entry: any, index: number) => {
+                if (entry.isDummy) return <Cell key={`cell-${index}`} fill="transparent" />;
+                const colorIndex = (index - 1) % BAR_COLORS.length;
+                return (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={BAR_COLORS[colorIndex]} 
+                  />
+                );
+              })}
             </Bar>
 
             <Line
-              type="monotone"
+              type="linear" // **Sharp transitions ke liye linear use kiya**
               dataKey="trend"
               stroke="#ef4444" 
               strokeWidth={2.5}

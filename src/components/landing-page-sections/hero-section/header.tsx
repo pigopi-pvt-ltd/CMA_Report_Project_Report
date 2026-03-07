@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils'
 import { useScroll } from 'motion/react'
 
 const menuItems = [
-    { name: 'Product', href: '#' },
-    { name: 'Developers', href: '#' },
-    { name: 'Pricing', href: '#' },
-    { name: 'Docs', href: '#' },
+    // { name: 'Product', href: '#' },
+    // { name: 'Developers', href: '#' },
+    { name: 'Pricing', href: '/' },
+    { name: 'Docs', href: '/' },
 ]
 
 export const HeroHeader = () => {
@@ -52,7 +52,7 @@ export const HeroHeader = () => {
                         <div className="flex-1 flex items-center justify-start pointer-events-auto">
                             <Link href="/" className="flex items-center gap-2 cursor-pointer pointer-events-auto">
                                 {/* <Logo /> */}
-                                <span className="font-bold text-lg tracking-tight">CMA</span>
+                                <img src="/incpLogo.png" alt="CMA Logo" className="h-10 w-auto pointer-events-auto" />
                             </Link>
                         </div>
 

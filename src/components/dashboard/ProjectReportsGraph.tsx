@@ -15,6 +15,15 @@ import {
 
 const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const BAR_COLORS = [
+  "#3b82f6", // Blue
+  "#10b981", // Green
+  "#f59e0b", // Orange
+  "#8b5cf6", // Purple
+  "#06b6d4", // Cyan
+  "#f43f5e"  // Rose
+];
+
 export default function ProjectReportsGraph({ graphData }: { graphData: any[] }) {
   const [page, setPage] = useState(0);
 
@@ -24,13 +33,14 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
 
     const data = currentMonths.map((month) => {
       const value = map.get(month) ?? 0;
-      return { month, value, trend: value }; // Exact value for trend
+      return { month, value, trend: value }; 
     });
 
+    // Trend 0 rakha hai taaki base se touch rahe
     return [
-      { month: "", value: null, trend: data[0].trend, isDummy: true },
+      { month: "", value: null, trend: 0, isDummy: true }, 
       ...data,
-      { month: " ", value: null, trend: data[data.length - 1].trend, isDummy: true }
+      { month: " ", value: null, trend: 0, isDummy: true }
     ];
   }, [graphData, page]);
 
@@ -60,7 +70,6 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
               tick={{ fill: 'currentColor', fontSize: 12, className: 'text-gray-500' }}
             />
             
-            
             <YAxis 
               axisLine={false}
               tickLine={false}
@@ -84,18 +93,21 @@ export default function ProjectReportsGraph({ graphData }: { graphData: any[] })
             />
 
             <Bar dataKey="value" barSize={35} radius={[4, 4, 0, 0]}>
-              {visibleData.map((entry: any, index: number) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.isDummy ? "transparent" : "#84cc16"} 
-                />
-              ))}
+              {visibleData.map((entry: any, index: number) => {
+                if (entry.isDummy) return <Cell key={`cell-${index}`} fill="transparent" />;
+                return (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={BAR_COLORS[(index - 1) % BAR_COLORS.length]} 
+                  />
+                );
+              })}
             </Bar>
 
             <Line
-              type="monotone"
+              type="linear" // <-- YAHAN CHANGE KIYA: 'monotone' se 'linear' kar diya
               dataKey="trend"
-              stroke="#ef4444" 
+              stroke="#ef4444"
               strokeWidth={2.5}
               dot={(props: any) => {
                 const { cx, cy, payload } = props;

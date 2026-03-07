@@ -69,8 +69,10 @@ function CheckboxInput({
       } control={form.control}
       render={({ field, fieldState }) => {
         // Simple fix: Treat empty string as inactive, any number (including 0) as active
-        const isFieldActive = field.value !== undefined && field.value !== null && field.value !== "";
-        const displayValue = isFieldActive ? field.value : "";
+       const isFieldActive = field.value !== undefined && field.value !== null;
+        
+        // Input mein dikhane ke liye value
+        const displayValue = field.value === undefined || field.value === null ? "" : field.value;
         
         return (
           <Field orientation="horizontal" data-invalid={fieldState.invalid}>
@@ -78,9 +80,9 @@ function CheckboxInput({
               checked={isFieldActive}
               onCheckedChange={(checked) => {
                 if (!checked) {
-                  field.onChange(""); // Uncheck = empty string (inactive)
+                  field.onChange(undefined); // Uncheck = empty string (inactive)
                 } else {
-                  field.onChange(0); // Check = zero to show input field and make it active
+                  field.onChange(""); // Check = zero to show input field and make it active
                 }
               }}
             />
