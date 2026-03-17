@@ -43,59 +43,70 @@ function DashboardContent() {
     if (tab === "project") setActiveTab("project");
   }, [searchParams]);
 
-  // Loading state
+// Loading State
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Loading dashboard...
+      <div className="flex items-center justify-center h-screen bg-muted/10">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-muted-foreground font-medium animate-pulse">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex">
+    <div className="flex w-full h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       {/* <AppSidebar /> */}
 
-      {/* Main Content */}
-      <div className="flex-1 p-1">
-        {/* Header */}
-        <div className="p-3 mt-3">
-          <h1 className="text-3xl font-bold text-foreground">
-            REPORTS DASHBOARD
-          </h1>
-        </div>
+      {/*  Main Content */}
+      <div className="flex-1 h-full overflow-y-auto bg-muted/10 pb-12">
+        <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
+          
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground uppercase">
+              Reports Dashboard
+            </h1>
+          </div>
 
-        {/* Tabs + Graph + KPI */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-4">
           {/* Tabs */}
-          <DashboardTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/40 pb-4">
+            <DashboardTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+          </div>
 
-          {/* Graph */}
-          {activeTab === "project" && (
-            <ProjectReportsGraph graphData={data.projectGraph} />
-          )}
 
-          {activeTab === "cma" && (
-            <CMAReportsGraph graphData={data.cmaGraph} />
-          )}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Graph */}
+            <div className="xl:col-span-2 flex flex-col h-full rounded-2xl shadow-sm border border-border/50 overflow-hidden bg-card">
+              {activeTab === "project" && (
+                <ProjectReportsGraph graphData={data.projectGraph} />
+              )}
+              {activeTab === "cma" && (
+                <CMAReportsGraph graphData={data.cmaGraph} />
+              )}
+            </div>
 
-          {/* KPI */}
-          <ReportsKPI kpi={data.kpi} />
-        </div>
+            {/* KPI */}
+            <div className="xl:col-span-1 flex flex-col h-full">
+              <ReportsKPI kpi={data.kpi} />
+            </div>
+          </div>
 
-        {/* Tables */}
-        <div className="mt-0 px-4">
-          {activeTab === "project" && (
-            <ProjectReports reports={data.projectReports} />
-          )}
+          {/* Tables */}
+          <div className="w-full rounded-2xl shadow-sm border border-border/50 overflow-hidden bg-card mt-4">
+            {activeTab === "project" && (
+              <ProjectReports reports={data.projectReports} />
+            )}
+            {activeTab === "cma" && (
+              <CMAReports reports={data.cmaReports} />
+            )}
+          </div>
 
-          {activeTab === "cma" && (
-            <CMAReports reports={data.cmaReports} />
-          )}
         </div>
       </div>
     </div>
@@ -104,7 +115,13 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading dashboard...</div>}>
+    <Suspense 
+      fallback={
+        <div className="flex items-center justify-center h-screen bg-muted/10">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );

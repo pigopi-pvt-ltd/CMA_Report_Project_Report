@@ -1,15 +1,12 @@
 'use client'
 import Link from 'next/link'
-// import { Logo } from '@/components/landing-page-sections/hero-section/logo'
 import { Menu, X } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useScroll } from 'motion/react'
 
 const menuItems = [
-    // { name: 'Product', href: '#' },
-    // { name: 'Developers', href: '#' },
-    { name: 'Pricing', href: '/' },
+    { name: 'Pricing', href: '/pricing' },
     { name: 'Docs', href: '/' },
 ]
 
@@ -41,42 +38,42 @@ export const HeroHeader = () => {
                 className={cn(
                     'fixed top-0 left-0 right-0 w-full transition-all duration-300 pointer-events-auto',
                     scrolled 
-                        ? 'z-50 bg-background/95 backdrop-blur-3xl border-b border-border shadow-md' 
-                        : 'z-20 bg-transparent border-transparent'
+                        ? 'z-50 bg-background/80 backdrop-blur-3xl border-b border-border shadow-md' 
+                        : 'z-10 bg-background/95 backdrop-blur-3xl border-b border-border shadow-sm'
                 )}
             >
                 <div className="mx-auto max-w-7xl px-6 pointer-events-auto">
-                    <div className="relative flex items-center justify-between py-4 pr-16 lg:pr-20 pointer-events-auto">
+                    <div className="relative flex items-center py-4 pointer-events-auto justify-between">
                         
-                        {/* 1. LEFT EXTREME: Logo */}
-                        <div className="flex-1 flex items-center justify-start pointer-events-auto">
-                            <Link href="/" className="flex items-center gap-2 cursor-pointer pointer-events-auto">
-                                {/* <Logo /> */}
+                        {/* LEFT SECTION: Logo */}
+                        <div className="flex items-center gap-12 pointer-events-auto">
+                            
+                            {/* Logo */}
+                            <Link href="/" className="flex items-center gap-2 cursor-pointer pointer-events-auto shrink-0 transition-transform hover:scale-105">
                                 <img src="/incpLogo.png" alt="CMA Logo" className="h-10 w-auto pointer-events-auto" />
                             </Link>
+
+                            <div className="hidden lg:flex items-center gap-8 text-base font-semibold pointer-events-auto mt-1">
+                                {menuItems.map((item, index) => (
+                                    <Link 
+                                        key={index} 
+                                        href={item.href} 
+                                        className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer pointer-events-auto"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* 2. EXACT CENTER: Menu Links */}
-                        <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-sm font-medium pointer-events-auto">
-                            {menuItems.map((item, index) => (
-                                <Link 
-                                    key={index} 
-                                    href={item.href} 
-                                    className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer pointer-events-auto"
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
-                        </div>
-
-                        {/* 3. RIGHT EXTREME */}
-                        <div className="flex-1 flex items-center justify-end gap-3 pointer-events-auto">
+                        {/* RIGHT SECTION: Action Buttons (Dashboard, Login, etc) */}
+                        <div className="flex items-center gap-4 pointer-events-auto">
                             <div className="hidden lg:flex items-center gap-3 pointer-events-auto">
                                 {mounted && (
                                     isLoggedIn ? (
                                         <Link 
                                             href="/dashboard"
-                                            className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-purple-600 hover:bg-purple-700 !text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                            className="inline-flex items-center justify-center rounded-lg text-base font-semibold h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all cursor-pointer pointer-events-auto hover:-translate-y-0.5"
                                         >
                                             Dashboard
                                         </Link>
@@ -84,16 +81,15 @@ export const HeroHeader = () => {
                                         <>
                                             <Link 
                                                 href="/sign-in"
-                                                // className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer pointer-events-auto"
-                                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-purple-600 hover:bg-purple-700 !text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                                className="inline-flex items-center justify-center rounded-lg text-base font-semibold h-10 px-5 bg-secondary hover:bg-secondary/80 text-secondary-foreground shadow-sm transition-all cursor-pointer pointer-events-auto hover:-translate-y-0.5"
                                             >
                                                 Sign in
                                             </Link>
                                             <Link 
                                                 href="/sign-up"
-                                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-purple-600 hover:bg-purple-700 !text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                                className="inline-flex items-center justify-center rounded-lg text-base font-semibold h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all cursor-pointer pointer-events-auto hover:-translate-y-0.5"
                                             >
-                                                Start your project
+                                                Sign up
                                             </Link>
                                         </>
                                     )
@@ -103,7 +99,7 @@ export const HeroHeader = () => {
                             {/* Mobile Menu Toggle */}
                             <button
                                 onClick={() => setMenuState(!menuState)}
-                                className="lg:hidden p-2 text-foreground cursor-pointer pointer-events-auto"
+                                className="lg:hidden p-2 text-foreground cursor-pointer pointer-events-auto ml-auto transition-transform hover:scale-110"
                             >
                                 {menuState ? <X className="size-6" /> : <Menu className="size-6" />}
                             </button>
@@ -114,8 +110,8 @@ export const HeroHeader = () => {
 
                 {/* MOBILE MENU DROPDOWN */}
                 {menuState && (
-                    <div className="lg:hidden absolute top-full left-0 w-full bg-background/80 backdrop-blur-md border-b border-border shadow-lg px-6 py-6 flex flex-col gap-6 animate-in slide-in-from-top-2 pointer-events-auto">
-                        <div className="flex flex-col gap-4 text-base font-medium pointer-events-auto">
+                    <div className="lg:hidden absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-border shadow-2xl px-6 py-8 flex flex-col gap-6 animate-in slide-in-from-top-2 pointer-events-auto">
+                        <div className="flex flex-col gap-6 text-lg font-semibold pointer-events-auto">
                             {menuItems.map((item, index) => (
                                 <Link 
                                     key={index} 
@@ -127,12 +123,12 @@ export const HeroHeader = () => {
                                 </Link>
                             ))}
                         </div>
-                        <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                        <div className="flex flex-col gap-3 pt-6 border-t border-border/50">
                             {mounted && (
                                 isLoggedIn ? (
                                     <Link 
                                         href="/dashboard"
-                                        className="inline-flex w-full items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white dark:text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                        className="inline-flex w-full items-center justify-center rounded-lg text-base font-semibold h-12 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-colors cursor-pointer pointer-events-auto"
                                     >
                                         Dashboard
                                     </Link>
@@ -140,14 +136,13 @@ export const HeroHeader = () => {
                                     <>
                                         <Link 
                                             href="/sign-in"
-                                            // className="inline-flex w-full items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer pointer-events-auto"
-                                            className="inline-flex w-full items-center justify-center rounded-md text-sm font-semibold h-10 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                            className="inline-flex w-full items-center justify-center rounded-lg text-base font-semibold h-12 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground shadow-sm transition-colors cursor-pointer pointer-events-auto"
                                         >
                                             Sign in
                                         </Link>
                                         <Link 
                                             href="/sign-up"
-                                            className="inline-flex w-full items-center justify-center rounded-md text-sm font-semibold h-10 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors cursor-pointer pointer-events-auto"
+                                            className="inline-flex w-full items-center justify-center rounded-lg text-base font-semibold h-12 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-colors cursor-pointer pointer-events-auto"
                                         >
                                             Start your project
                                         </Link>
@@ -159,7 +154,7 @@ export const HeroHeader = () => {
                 )}
             </nav>
             {/* Navbar spacing helper */}
-            <div className="h-16" />
+            <div className="h-20" />
         </>
     )
 }

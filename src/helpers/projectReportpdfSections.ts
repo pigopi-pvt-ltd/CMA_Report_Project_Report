@@ -321,11 +321,17 @@ export const drawCostStatement = (doc: any, projectData: any, formatRupees: Func
  */
 export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupees: Function, fonts: any, leftX: number) => {
   schedule.forEach((yearData: any, index: number) => {
+    
+    // Only these three lines to set pagination
+    if (index === 0 && doc.y > 600) doc.addPage(); // If page is already filled then start from next page
+    else if (index === 3) doc.addPage(); // As soon as get to 4th table start from new page
+
     doc.moveDown(1);
+    doc.x = leftX;
     doc.font(fonts.fontBoldPath).fontSize(10).fillColor("#b91c1c").text(`YEAR ${index + 1} DEPRECIATION`, { underline: true });
     doc.moveDown(0.5);
-
-    const deprRows: TableRow[] = [
+    
+    const deprRows: TableRow[] = [ // To save from TypeScript errors, will refine types later
       [
         { text: "Assets", width: 140, color: "#b91c1c", bold: true, fontSize: 8 },
         { text: "Opening Balance", width: 85, color: "#b91c1c", bold: true, fontSize: 8, align: "center" },
@@ -342,7 +348,7 @@ export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupee
         { text: formatRupees(asset.total), width: 80, fontSize: 8, color: "#b91c1c", align: "center", bold: true },
         { text: asset.rate.toFixed(2), width: 40, fontSize: 8, align: "center" },
         { text: formatRupees(asset.depreciationAmount), width: 75, fontSize: 8, align: "center" },
-        { text: formatRupees(asset.closingBalance), width: 70, fontSize: 8, align: "center" },
+          { text: formatRupees(asset.closingBalance), width: 70, fontSize: 8, align: "center" },
       ]),
       [{ text: "TOTAL", width: 140, bold: true, fontSize: 8 }, { text: "", width: 85 }, { text: "", width: 60 }, { text: "", width: 80 }, { text: "", width: 40 }, { text: formatRupees(yearData.totalDepreciationForYear), width: 75, bold: true, fontSize: 8, align: "center" }, { text: "", width: 70 }]
     ];
@@ -356,7 +362,7 @@ export const drawDepreciationSchedules = (doc: any, schedule: any[], formatRupee
     doc.moveDown(0.5);
     
     drawFlexibleTable(doc, deprRows, { ...fonts });
-    doc.moveDown(2);
+    doc.moveDown(2); // Add some space after each table
     doc.x = leftX;
   });
 };

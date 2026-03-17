@@ -1,5 +1,6 @@
 import HeroSection from '@/components/landing-page-sections/hero-section/hero-section'
 import UsageSection from '@/components/landing-page-sections/usage-section'
+import { Footer } from '@/components/landing-page-sections/footer'
 
 const HomePage = () => {
   return (
@@ -7,6 +8,7 @@ const HomePage = () => {
     <div className='flex flex-col w-full'>
       <HeroSection />
       <UsageSection />
+      <Footer />
     </div>
   )
 }

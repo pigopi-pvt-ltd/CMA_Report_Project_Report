@@ -87,21 +87,21 @@ export default function UsageSection() {
     ]
 
     return (
-        <section className="py-16 md:py-32">
-            <div className="mx-auto max-w-5xl px-6">
+        <section className="py-20 md:py-32">
+            <div className="mx-auto max-w-6xl px-6">
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.6 }}
-                    className="mx-auto max-w-2xl space-y-6 text-center mb-12 md:mb-20"
+                    className="mx-auto max-w-3xl space-y-6 text-center mb-16 md:mb-24"
                 >
-                    <h1 className="text-center text-4xl font-semibold lg:text-5xl">Who can use it?</h1>
-                    <p className="text-muted-foreground text-lg">Especially for Mudra | PMEGP | MSME | Business Loans and subsidy schemes</p>
+                    <h1 className="text-center text-5xl font-extrabold tracking-tight lg:text-6xl">Who can use it?</h1>
+                    <p className="text-muted-foreground text-xl md:text-2xl mt-4">Especially for Mudra | PMEGP | MSME | Business Loans and subsidy schemes</p>
                 </motion.div>
 
                 <motion.div 
-                    className="grid gap-6 sm:grid-cols-2"
+                    className="grid gap-8 sm:grid-cols-2"
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
@@ -113,21 +113,20 @@ export default function UsageSection() {
                             variants={cardVariants}
                             whileHover={{ y: -5 }}
                         >
-                            <Card className="flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:border-primary/30 group bg-card">
-                                <CardHeader>
-                                    <CardTitle className="font-medium text-xl group-hover:text-primary transition-colors">{category.title}</CardTitle>
+                            <Card className="flex flex-col h-full transition-all duration-300 hover:shadow-2xl hover:border-primary/40 group bg-card overflow-hidden">
+                                <CardHeader className="bg-muted/30 pb-6">
+                                    <CardTitle className="font-bold text-2xl group-hover:text-primary transition-colors">{category.title}</CardTitle>
                                 </CardHeader>
 
-                                <CardContent className="space-y-4">
-                                    <hr className="border-dashed opacity-50" />
+                                <CardContent className="pt-6">
 
-                                    <ul className="list-outside space-y-3 text-sm">
+                                    <ul className="list-outside space-y-4 text-base font-medium text-muted-foreground">
                                         {category.items.map((item, index) => (
                                             <li
                                                 key={index}
-                                                className="flex items-center gap-2">
-                                                <Check className="size-3 text-primary" />
-                                                {item}
+                                                className="flex items-start gap-3 group/item">
+                                                <Check className="size-5 text-primary mt-0.5 shrink-0 transition-transform group-hover/item:scale-110" />
+                                                <span className="leading-snug">{item}</span>
                                             </li>
                                         ))}
                                     </ul>

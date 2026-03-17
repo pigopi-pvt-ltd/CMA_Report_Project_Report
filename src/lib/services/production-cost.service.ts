@@ -7,6 +7,15 @@ export function calculateProductionCost(
 ) {
     let purchaseYear = new Date().getFullYear();
     const purchaseCostStatement: any[] = [];
+    
+    // The "Smart Filter" - Double Division Catcher
+    let actualGrowthRate = Number(yearlyGrowthRate);
+    if (actualGrowthRate > 0 && actualGrowthRate < 0.01) {
+        actualGrowthRate = actualGrowthRate * 100;
+    } else if (actualGrowthRate >= 1) {
+        actualGrowthRate = actualGrowthRate / 100;
+    }
+
     let currentGrowthFactor = 1;
 
     // Get base raw material cost from requirements if available
@@ -22,8 +31,8 @@ export function calculateProductionCost(
 
     for (let i = 0; i < loanPeriod; i++) {
         const currentYearSales = costStatement[i].netSales;
-        if (i > 0) {
-            currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
+                if (i > 0) {
+            currentGrowthFactor = currentGrowthFactor * (1 + actualGrowthRate);
         }
 
         // Logic: If user provided base cost, use it and grow it. 

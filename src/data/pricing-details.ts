@@ -90,7 +90,7 @@ const pricingDetails = [
         id: 3,
         cardTitle: "PREMIUM PLAN",
         cardDescription: "Our CA team will prepare a customized 25-page report tailored to back requirements for seamless loan approval",
-        price: 399,
+        price: 999,
         isCMAReportIncluded: true,
         isMostPopular: false,
         checkListDetails: [
