@@ -8,11 +8,21 @@ export function calculateProfitability(
   yearlyGrowthRate: number
 ) {
   const profitabilityStatement: any[] = [];
+  
+  // The "Double Division" Catcher (Same as Revenue file)
+  let actualGrowthRate = Number(yearlyGrowthRate);
+  if (actualGrowthRate > 0 && actualGrowthRate < 0.01) {
+    actualGrowthRate = actualGrowthRate * 100;
+  } else if (actualGrowthRate >= 1) {
+    actualGrowthRate = actualGrowthRate / 100;
+  }
+
   let currentGrowthFactor = 1;
 
   for (let i = 0; i < costStatement.length; i++) {
     if (i > 0) {
-      currentGrowthFactor = currentGrowthFactor * (1 + yearlyGrowthRate);
+      // now it will correctly apply the growth factor year on year, so if user enters 10% growth, it will be 1.1 for first year, then 1.21 for second year, and so on.
+      currentGrowthFactor = currentGrowthFactor * (1 + actualGrowthRate);
     }
 
     const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * currentGrowthFactor);

@@ -42,20 +42,23 @@ export default function SignUpForm() {
   }
 
   return (
-    <Card className="w-full max-w-3xl h-full bg-card shadow-lg border-border rounded-[6px]">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center text-foreground">CONTACT US</CardTitle>
+    <Card className="w-full max-w-3xl mx-auto my-4 bg-card shadow-md border border-border/50 rounded-2xl overflow-hidden">
+      <CardHeader className="space-y-2 pt-8 pb-6 border-b border-border/30 bg-muted/5">
+        <CardTitle className="text-3xl font-extrabold text-center text-foreground tracking-tight">
+          CONTACT US
+        </CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4">
+      
+      <CardContent className="p-6 md:p-8">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="grid grid-cols-2 gap-6 mb-2"
+            className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-7 mb-2"
           >
             <InputFormField
-              wrapperClassName="col-span-2"
-              className="py-6 px-3 rounded-[4px]"
-              labelClassName="font-medium"
+              wrapperClassName="col-span-1 md:col-span-2"
+              className="h-12 px-4 rounded-xl bg-muted/10 border-border/50 focus-visible:bg-background transition-colors text-base"
+              labelClassName="text-sm font-semibold text-foreground/80 tracking-wide mb-1"
               control={form.control}
               name="name"
               label="FULL NAME"
@@ -64,8 +67,8 @@ export default function SignUpForm() {
 
             <InputFormField
               control={form.control}
-              className="py-6 px-3 rounded-[4px]"
-              labelClassName="font-medium"
+              className="h-12 px-4 rounded-xl bg-muted/10 border-border/50 focus-visible:bg-background transition-colors text-base"
+              labelClassName="text-sm font-semibold text-foreground/80 tracking-wide mb-1"
               name="email"
               label="EMAIL"
               placeholder="name@example.com"
@@ -73,17 +76,17 @@ export default function SignUpForm() {
 
             <InputFormField
               control={form.control}
-              className="py-6 px-3 rounded-[4px]"
-              labelClassName="font-medium"
+              className="h-12 px-4 rounded-xl bg-muted/10 border-border/50 focus-visible:bg-background transition-colors text-base"
+              labelClassName="text-sm font-semibold text-foreground/80 tracking-wide mb-1"
               name="phoneNumber"
               label="PHONE NUMBER"
               placeholder="8329493953"
             />
 
             <InputFormField
-              wrapperClassName="col-span-2"
-              className="py-6 px-3 rounded-[4px]"
-              labelClassName="font-medium"
+              wrapperClassName="col-span-1 md:col-span-2"
+              className="min-h-[120px] p-4 rounded-xl bg-muted/10 border-border/50 focus-visible:bg-background transition-colors text-base resize-y"
+              labelClassName="text-sm font-semibold text-foreground/80 tracking-wide mb-1"
               control={form.control}
               name="message"
               label="MESSAGE"
@@ -94,11 +97,11 @@ export default function SignUpForm() {
             <Button
               type="submit"
               variant="default"
-              className="rounded-[4px] col-span-2 w-full py-6 font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
+              className="col-span-1 md:col-span-2 w-full h-12 rounded-xl font-bold text-base bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:-translate-y-0.5 transition-all cursor-pointer mt-2"
               disabled={isLoading}
             >
-              {isLoading && <Loader2 className="animate-spin" />}
-              Submit
+              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+              Send Message
             </Button>
           </form>
         </Form>

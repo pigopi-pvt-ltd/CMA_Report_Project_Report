@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from '../../ui/field';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { Input } from '../../ui/input';
@@ -11,9 +12,17 @@ type Props = {
 }
 
 const Step10 = ({ currentStep, form }: Props) => {
+
+  // As soon as the user navigates to Step 10, it clear any validation errors related to businessDetails.
+  useEffect(() => {
+    if (currentStep === 9) {
+      form.clearErrors("businessDetails");
+    }
+  }, [currentStep, form]);
+
   return (
     <FieldGroup className={`${currentStep === 9 ? "flex! flex-col gap-4" : "hidden!"}`}>
-    <StepHeaderSection title="Business Details" description="Provide your business details to help us understand your business better and tailor our services to your needs" />
+      <StepHeaderSection title="Business Details" description="Provide your business details to help us understand your business better and tailor our services to your needs" />
       <Controller
         name="businessDetails.businessName"
         control={form.control}
