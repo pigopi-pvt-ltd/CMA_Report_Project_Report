@@ -26,7 +26,7 @@ export default function HeroSection() {
         </div>
 
         <section>
-          <div className="relative pt-24 pb-12">
+          <div className="relative pt-20 pb-12">
             <div className="absolute inset-0 -z-10 size-full pointer-events-none [foreground:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"></div>
             
             <div className="mx-auto max-w-6xl px-6">
