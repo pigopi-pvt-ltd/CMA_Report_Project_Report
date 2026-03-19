@@ -42,7 +42,7 @@ export default function SignUpForm() {
   }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto my-4 bg-card shadow-md border border-border/50 rounded-2xl overflow-hidden">
+    <Card className="w-full max-w-3xl mx-auto mt-[-40] bg-card shadow-md border border-border/50 rounded-2xl overflow-hidden">
       <CardHeader className="space-y-2 pt-8 pb-6 border-b border-border/30 bg-muted/5">
         <CardTitle className="text-3xl font-extrabold text-center text-foreground tracking-tight">
           CONTACT US
@@ -62,7 +62,7 @@ export default function SignUpForm() {
               control={form.control}
               name="name"
               label="FULL NAME"
-              placeholder="John Doe"
+              placeholder="Your full name"
             />
 
             <InputFormField
@@ -90,7 +90,7 @@ export default function SignUpForm() {
               control={form.control}
               name="message"
               label="MESSAGE"
-              placeholder="eg. Lorem ipsum doler sit"
+              placeholder="Enter your message here...."
               type="textarea"
             />
 
