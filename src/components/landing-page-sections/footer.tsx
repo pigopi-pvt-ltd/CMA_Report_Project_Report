@@ -82,7 +82,7 @@ export const Footer = () => {
 
                 <div className="border-t border-border pt-8 mt-6 flex flex-col md:flex-row items-center justify-between gap-4 mb-2">
                     <p className="text-muted-foreground text-sm font-medium text-center md:text-left">
-                        © 2026 CMA Platform. All rights reserved.
+                        © 2026 Incorplus Venture. All rights reserved.
                     </p>
                     
                     <div className="flex gap-8 text-sm font-medium text-muted-foreground">
@@ -94,10 +94,14 @@ export const Footer = () => {
                         href="https://www.pigo-pi.com/" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="group inline-block transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                        className="group flex items-center gap-1.5 relative transition-all duration-300 hover:z-20"
                     >
-                        <span className="text-[11px] uppercase font-extrabold opacity-90 group-hover:opacity-100 transition-opacity duration-300 tracking-[0.3em] bg-gradient-to-r from-yellow-400 via-rose-500 to-purple-600 bg-clip-text text-transparent">
-                            POWERED BY PIGOPI
+                        <span className="text-[10px] uppercase tracking-widest font-bold opacity-70 transition-opacity duration-300 group-hover:opacity-100 text-foreground">
+                            POWERED BY
+                        </span>
+            
+                        <span className="font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-rose-500 to-purple-600 text-[13px] opacity-80 transition-opacity duration-300 group-hover:opacity-100">
+                            PigoPi
                         </span>
                     </a>
                 </div>

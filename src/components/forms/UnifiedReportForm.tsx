@@ -149,13 +149,22 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
         const isValid = await form.trigger(currentFields as any);
         if (isValid) {
             setDirection(1);
+            if (currentStep < 9) {
+                const nextFields = stepsConfig[currentStep + 1].fields;
+                form.clearErrors(nextFields as any);
+            }
             setCurrentStep((prev) => prev + 1);
         }
     };
 
+    // Back Button Logic with Dashboard Redirect on Step 1
     const handleBackButton = () => {
-        setDirection(-1);
-        setCurrentStep((prev) => prev - 1);
+        if (currentStep === 0) {
+            router.push("/dashboard");
+        } else {
+            setDirection(-1);
+            setCurrentStep((prev) => prev - 1);
+        }
     };
 
     // 5. Submit Logic
@@ -199,7 +208,18 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                     <Progress value={progress} />
                 </CardHeader>
                 <CardContent className="overflow-hidden">
-                    <form id="multi-form" onSubmit={form.handleSubmit(onSubmit)}>
+                    <form
+                        id="multi-form"
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+                                e.preventDefault();
+                                if (currentStep < 9) {
+                                    handleNextButton();
+                                }
+                            }
+                        }}
+                    >
                         <AnimatePresence mode="wait" custom={direction}>
                             <motion.div
                                 key={currentStep}
@@ -226,8 +246,12 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 </CardContent>
                 <CardFooter>
                     <Field className="justify-between" orientation="horizontal">
-                        <Button type="button" variant="ghost" onClick={handleBackButton} disabled={currentStep === 0}>
-                            <ChevronLeft /> Back
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={handleBackButton}
+                        >
+                            <ChevronLeft /> {currentStep === 0 ? "Back to Dashboard" : "Back"}
                         </Button>
                         {currentStep < 9 ? (
                             <Button type="button" variant="secondary" onClick={handleNextButton}>
