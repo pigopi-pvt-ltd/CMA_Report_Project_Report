@@ -1,21 +1,143 @@
 import { drawFlexibleTable, TableRow } from "@/helpers/pdfTable";
 import { AlignCenter } from "lucide-react";
 
+// /**
+//  * SECTION 1: PROMOTER DETAILS
+//  */
+// export const drawPromoterTable = (doc: any, data: any, fonts: any) => {
+//   const d = data || {};
+//   const rows: TableRow[] = [
+//     [{ text: "Full Name", width: 250, bold: true }, { text: d.fullName || "N/A", width: 300 }],
+//     [{ text: "Email", width: 250, bold: true }, { text: d.email || "N/A", width: 300 }],
+//     [{ text: "Address", width: 250, bold: true }, { text: d.personalAddress || "N/A", width: 300 }],
+//     // [{ text: "Designation", width: 250, bold: true }, { text: "Promoter/Proprietor", width: 300 }],
+//     [{ text: "Mobile", width: 250, bold: true }, { text: d.mobile || "N/A", width: 300 }],
+//     [{ text: "Category", width: 250, bold: true }, { text: String(d.category || "N/A").toUpperCase(), width: 300 }],
+//     [{ text: "Education", width: 250, bold: true }, { text: d.educationQualification || "N/A", width: 300 }],
+//     [{ text: "Experience", width: 250, bold: true }, { text: d.workExperience || "N/A", width: 300 }],
+//     [{ text: "Gender", width: 250, bold: true }, { text: d.gender || "N/A", width: 300 }],
+//   ];
+//   drawFlexibleTable(doc, rows, { title: "PROMOTER'S DETAILS", ...fonts });
+// };
+
+// /**
+//  * SECTION 2: BUSINESS DETAILS
+//  */
+// export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX: any) => {
+//   const bDetails = projectData.businessDetails || {};
+//   const pDetails = projectData.personalDetails || {};
+//   const rows: TableRow[] = [
+//     [{ text: "Business Name", width: 250, bold: true }, { text: bDetails.businessName || "N/A", width: 300 }],
+//     [{ text: "Business Type", width: 250, bold: true }, { text: projectData.businessType || "N/A", width: 300 }],
+//     [{ text: "Business Industry", width: 250, bold: true }, { text: projectData.industryType || "N/A", width: 300 }],
+//     [{ text: "Constitution", width: 250, bold: true }, { text: bDetails.legalConstitution || "N/A", width: 300 }],
+//     [{ text: "Employment Potential", width: 250, bold: true }, { text: bDetails.employmentPotential || "N/A", width: 300 }],
+//     [{ text: "Contact Number", width: 250, bold: true }, { text: pDetails.businessMobile || "N/A", width: 300 }],
+//     [{ text: "Business Start Date", width: 250, bold: true }, { text: bDetails.businessStartDate || "N/A", width: 300 }]
+//   ];
+//   doc.x = leftX
+//   drawFlexibleTable(doc, rows, { title: "BUSINESS DETAILS", ...fonts });
+// };
+
+// /**
+//  * SECTION 3: LOAN DETAILS
+//  */
+// export const drawLoanTable = (doc: any, projectData: any, formatRupees: Function, fonts: any) => {
+//   const lDetails = projectData.loanDetails || {};
+//   const rows: TableRow[] = [
+//     [{ text: "Fixed Capital To Be Invested", width: 250, bold: true }, { text: formatRupees(lDetails.fixedCapitalInvested || 0), width: 300 }],
+//     [{ text: "Working Capital To Be Invested", width: 250, bold: true }, { text: formatRupees(lDetails.workingCapitalInvested || 0), width: 300 }],
+//     [{ text: "Total Project Cost", width: 250, bold: true }, { text: formatRupees(lDetails.totalProjectCost || 0), width: 300 }],
+//     [{ text: "Term Loan", width: 250, bold: true }, { text: formatRupees(lDetails.termLoan || 0), width: 300 }],
+//     [{ text: "Working Capital Loan", width: 250, bold: true }, { text: formatRupees(lDetails.workingCapitalLoan || 0), width: 300 }],
+//     [{ text: "Total Loan Amount", width: 250, bold: true }, { text: formatRupees(lDetails.totalLoanAmountNeeded || 0), width: 300 }],
+//     [{ text: "Loan Period", width: 250, bold: true }, { text: `${projectData.loanPeriod || 5} Years`, width: 300 }],
+//     [{ text: "Type Loan Needed", width: 250, bold: true }, { text: projectData.loanType || "N/A", width: 300 }],
+//     [{ text: "Average DSCR", width: 250, bold: true }, { text: (lDetails.averageDSCR || 1.65).toFixed(2), width: 300 }],
+//   ];
+//   drawFlexibleTable(doc, rows, { title: "LOAN DETAILS", ...fonts });
+// };
+
+
+
+//mapper for ease of understanding in PDF Report
+const experienceMapper: Record<string, string> = {
+  "0to2": "0 - 2 Years",
+  "2to3": "2 - 3 Years",
+  "3to5": "3 - 5 Years",
+  "5+": "5+ Years",
+};
+
+const educationMapper: Record<string, string> = {
+  "8fail": "8th Failed",
+  "8pass": "8th Pass",
+  "10pass": "10th Pass",
+  "12pass": "12th Pass",
+  "graduate": "Graduate",
+  "postGraduate": "Post Graduate",
+  "phd": "Ph.D.",
+};
+
+const constitutionMapper: Record<string, string> = {
+  "proprietorship": "Proprietorship",
+  "partnership": "Partnership",
+  "privateltd": "Private Limited",
+  "llp": "Limited Liability Partnership (LLP)",
+  "others": "Others",
+};
+
+const employmentMapper: Record<string, string> = {
+  "0to2": "0 - 2 Employees",
+  "2to5": "2 - 5 Employees",
+  "5to10": "5 - 10 Employees",
+  "10+": "10+ Employees",
+};
+
+const startDateMapper: Record<string, string> = {
+  "notStarted": "Not Started Yet",
+  "6monthsAgo": "6 Months Ago",
+  "6to12monthsAgo": "6 to 12 Months Ago",
+  "2to3yearsAgo": "2 to 3 Years Ago",
+};
+
+const industryMapper: Record<string, string> = {
+  "manufacturing": "Manufacturing",
+  "service": "Service",
+  "trading": "Trading",
+  "agriculture": "Agriculture",
+};
+
+const loanTypeMapper: Record<string, string> = {
+  "mudra": "Mudra",
+  "pmegp": "PMEGP",
+  "msme": "MSME",
+  "others": "Others",
+};
+
+const categoryMapper: Record<string, string> = {
+  "general": "General",
+  "obc": "OBC",
+  "sc": "SC",
+  "st": "ST",
+};
+
+
 /**
  * SECTION 1: PROMOTER DETAILS
  */
 export const drawPromoterTable = (doc: any, data: any, fonts: any) => {
-  const d = data || {};
+  const formattedGender = data?.gender ? data.gender.charAt(0).toUpperCase() + data.gender.slice(1) : "N/A";
+  
   const rows: TableRow[] = [
-    [{ text: "Full Name", width: 250, bold: true }, { text: d.fullName || "N/A", width: 300 }],
-    [{ text: "Email", width: 250, bold: true }, { text: d.email || "N/A", width: 300 }],
-    [{ text: "Address", width: 250, bold: true }, { text: d.personalAddress || "N/A", width: 300 }],
-    [{ text: "Designation", width: 250, bold: true }, { text: "Promoter/Proprietor", width: 300 }],
-    [{ text: "Mobile", width: 250, bold: true }, { text: d.mobile || "N/A", width: 300 }],
-    [{ text: "Category", width: 250, bold: true }, { text: String(d.category || "N/A").toUpperCase(), width: 300 }],
-    [{ text: "Education", width: 250, bold: true }, { text: d.educationQualification || "N/A", width: 300 }],
-    [{ text: "Experience", width: 250, bold: true }, { text: d.workExperience || "N/A", width: 300 }],
-    [{ text: "Gender", width: 250, bold: true }, { text: d.gender || "N/A", width: 300 }],
+    [{ text: "Full Name", width: 250, bold: true }, { text: data?.fullName || "N/A", width: 300 }],
+    [{ text: "Email", width: 250, bold: true }, { text: data?.email || "N/A", width: 300 }],
+    [{ text: "Address", width: 250, bold: true }, { text: data?.personalAddress || "N/A", width: 300 }],
+    // [{ text: "Designation", width: 250, bold: true }, { text: "Proprietor / Director / Partner", width: 300 }],
+    [{ text: "Mobile", width: 250, bold: true }, { text: data?.mobile || "N/A", width: 300 }],
+    [{ text: "Category", width: 250, bold: true }, { text: categoryMapper[data?.category] || (data?.category ? data.category.toUpperCase() : "N/A"), width: 300 }],
+    [{ text: "Education", width: 250, bold: true }, { text: educationMapper[data?.educationQualification] || data?.educationQualification || "N/A", width: 300 }],
+    [{ text: "Experience", width: 250, bold: true }, { text: experienceMapper[data?.workExperience] || data?.workExperience || "N/A", width: 300 }],
+    [{ text: "Gender", width: 250, bold: true }, { text: formattedGender, width: 300 }],
   ];
   drawFlexibleTable(doc, rows, { title: "PROMOTER'S DETAILS", ...fonts });
 };
@@ -23,17 +145,20 @@ export const drawPromoterTable = (doc: any, data: any, fonts: any) => {
 /**
  * SECTION 2: BUSINESS DETAILS
  */
-export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX: any) => {
-  const bDetails = projectData.businessDetails || {};
-  const pDetails = projectData.personalDetails || {};
+export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX?: any) => {
+  const bDetails = projectData?.businessDetails || {};
+  const pDetails = projectData?.personalDetails || {};
+  
+  const empPotential = bDetails.employementPotential || bDetails.employmentPotential;
+
   const rows: TableRow[] = [
     [{ text: "Business Name", width: 250, bold: true }, { text: bDetails.businessName || "N/A", width: 300 }],
-    [{ text: "Business Type", width: 250, bold: true }, { text: projectData.businessType || "N/A", width: 300 }],
-    [{ text: "Business Industry", width: 250, bold: true }, { text: projectData.industryType || "N/A", width: 300 }],
-    [{ text: "Constitution", width: 250, bold: true }, { text: bDetails.legalConstitution || "N/A", width: 300 }],
-    [{ text: "Employment Potential", width: 250, bold: true }, { text: bDetails.employmentPotential || "N/A", width: 300 }],
+    [{ text: "Business Type", width: 250, bold: true }, { text: projectData?.businessType || "N/A", width: 300 }],
+    [{ text: "Business Industry", width: 250, bold: true }, { text: industryMapper[projectData?.industryType] || projectData?.industryType || "N/A", width: 300 }],
+    [{ text: "Constitution", width: 250, bold: true }, { text: constitutionMapper[bDetails.legalConstitution] || bDetails.legalConstitution || "N/A", width: 300 }],
+    [{ text: "Employment Potential", width: 250, bold: true }, { text: employmentMapper[empPotential] || empPotential || "N/A", width: 300 }],
     [{ text: "Contact Number", width: 250, bold: true }, { text: pDetails.businessMobile || "N/A", width: 300 }],
-    [{ text: "Business Start Date", width: 250, bold: true }, { text: bDetails.businessStartDate || "N/A", width: 300 }]
+    [{ text: "Business Start Date", width: 250, bold: true }, { text: startDateMapper[bDetails.businessStartDate] || bDetails.businessStartDate || "N/A", width: 300 }]
   ];
   doc.x = leftX
   drawFlexibleTable(doc, rows, { title: "BUSINESS DETAILS", ...fonts });
@@ -43,17 +168,17 @@ export const drawBusinessTable = (doc: any, projectData: any, fonts: any, leftX:
  * SECTION 3: LOAN DETAILS
  */
 export const drawLoanTable = (doc: any, projectData: any, formatRupees: Function, fonts: any) => {
-  const lDetails = projectData.loanDetails || {};
+  const lDetails = projectData?.loanDetails || {};
   const rows: TableRow[] = [
-    [{ text: "Fixed Capital To Be Invested", width: 250, bold: true }, { text: formatRupees(lDetails.fixedCapitalInvested || 0), width: 300 }],
-    [{ text: "Working Capital To Be Invested", width: 250, bold: true }, { text: formatRupees(lDetails.workingCapitalInvested || 0), width: 300 }],
-    [{ text: "Total Project Cost", width: 250, bold: true }, { text: formatRupees(lDetails.totalProjectCost || 0), width: 300 }],
-    [{ text: "Term Loan", width: 250, bold: true }, { text: formatRupees(lDetails.termLoan || 0), width: 300 }],
-    [{ text: "Working Capital Loan", width: 250, bold: true }, { text: formatRupees(lDetails.workingCapitalLoan || 0), width: 300 }],
-    [{ text: "Total Loan Amount", width: 250, bold: true }, { text: formatRupees(lDetails.totalLoanAmountNeeded || 0), width: 300 }],
-    [{ text: "Loan Period", width: 250, bold: true }, { text: `${projectData.loanPeriod || 5} Years`, width: 300 }],
-    [{ text: "Type Loan Needed", width: 250, bold: true }, { text: projectData.loanType || "N/A", width: 300 }],
-    [{ text: "Average DSCR", width: 250, bold: true }, { text: (lDetails.averageDSCR || 1.65).toFixed(2), width: 300 }],
+    [{ text: "Fixed Capital To Be Invested", width: 250, bold: true }, { text: formatRupees(lDetails.fixedCapitalInvested), width: 300 }],
+    [{ text: "Working Capital To Be Invested", width: 250, bold: true }, { text: formatRupees(lDetails.workingCapitalInvested), width: 300 }],
+    [{ text: "Total Project Cost", width: 250, bold: true }, { text: formatRupees(lDetails.totalProjectCost), width: 300 }],
+    [{ text: "Term Loan", width: 250, bold: true }, { text: formatRupees(lDetails.termLoan), width: 300 }],
+    [{ text: "Working Capital Loan", width: 250, bold: true }, { text: formatRupees(lDetails.workingCapitalLoan), width: 300 }],
+    [{ text: "Total Loan Amount", width: 250, bold: true }, { text: formatRupees(lDetails.totalLoanAmountNeeded), width: 300 }],
+    [{ text: "Loan Period", width: 250, bold: true }, { text: `${projectData?.loanPeriod || 0} Years`, width: 300 }],
+    [{ text: "Type Loan Needed", width: 250, bold: true }, { text: loanTypeMapper[projectData?.loanType] || projectData?.loanType || "N/A", width: 300 }],
+    [{ text: "Average DSCR", width: 250, bold: true }, { text: "1.65", width: 300 }],
   ];
   drawFlexibleTable(doc, rows, { title: "LOAN DETAILS", ...fonts });
 };

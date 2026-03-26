@@ -101,6 +101,20 @@ const formatInMillions = (value: number | string) => {
   })}M`;
 };
 
+
+// const formatInMillions = (value: number | string) => {
+//   const num = typeof value === "string" ? parseFloat(value) : value;
+//   if (isNaN(num) || num === 0) return "₹ 0.00M";
+
+//   // Divide by 1 million
+//   const millions = num / 1000000;
+
+//   return `₹ ${millions.toLocaleString("en-IN", {
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2,
+//   })}M`;
+// };
+
 export async function POST(request: Request) {
   try {
     const session = await requireAuth(request);

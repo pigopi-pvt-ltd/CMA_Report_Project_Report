@@ -26,6 +26,7 @@ export function calculateProfitability(
     }
 
     const calcAnn = (val: number | undefined) => Math.round((val || 0) * 12 * currentGrowthFactor);
+    // const calcAnn = (val: number | undefined) => Math.round((val || 0) * currentGrowthFactor);
     const totalA = costStatement[i].totalGrossIncome || 0;
 
     const yearExp = {

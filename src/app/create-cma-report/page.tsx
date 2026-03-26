@@ -1,14 +1,13 @@
 "use client";
 
-import { UnifiedReportForm } from '@/components/forms/UnifiedReportForm'; // Change import here
+import { UnifiedReportForm } from '@/components/forms/UnifiedReportForm'; 
 
 const CreateCMAReportPage = () => {
   return (
-    <div className="flex w-full min-h-screen items-center justify-center font-sans p-10">
-      {/* Passing type="cma" tells the master form to act as a CMA form.
-          Since no reportId is passed, it remains in 'Create Mode'.
-      */}
-      <UnifiedReportForm type="cma" />
+    <div className="flex-1 h-screen overflow-y-auto bg-muted/5 px-4 py-10 md:px-10 flex flex-col">
+      <div className="my-auto w-full shrink-0">
+        <UnifiedReportForm type="cma" />
+      </div>
     </div>
   )
 }

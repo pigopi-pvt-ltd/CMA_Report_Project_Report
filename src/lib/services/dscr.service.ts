@@ -26,6 +26,12 @@ export function calculateDSCR(
 
     const dscrRatio = totalDebtService === 0 ? 0 : Number((totalCashAccrual / totalDebtService).toFixed(2));
 
+    // Y = Repayment + Interest
+    // const installmentOfTermLoan = repayment + profit.interestOnTermLoan;
+    // const totalDebtService = installmentOfTermLoan + profit.interestOnWorkingCapital;
+
+    // const dscrRatio = totalDebtService === 0 ? 0 : Number((totalCashAccrual / totalDebtService).toFixed(2));
+
     totalDSCRSum += dscrRatio;
 
     dscrStatement.push({

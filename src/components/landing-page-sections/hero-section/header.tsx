@@ -79,12 +79,12 @@ export const HeroHeader = () => {
                     <div className="relative flex items-center justify-between pointer-events-auto">
                         
                         {/* LEFT SECTION: Logo AND Menu Links combined */}
-                        <div className="flex items-center gap-12 pointer-events-auto">
+                        <div className="flex items-center gap-20 pointer-events-auto">
                             <Link href="/" className="flex items-center gap-2 cursor-pointer pointer-events-auto shrink-0 transition-transform hover:scale-105">
                             <img src="/incpLogo.png" alt="CMA Logo" className="h-10 w-auto pointer-events-auto" />
                             </Link>
 
-                            <div className="hidden lg:flex items-center gap-8 text-lg font-semibold pointer-events-auto mt-1">
+                            <div className="hidden lg:flex items-center gap-18 text-xl font-semibold pointer-events-auto mt-1">
                                 {menuItems.map((item, index) => (
                                     <Link 
                                         key={index} 
@@ -99,7 +99,7 @@ export const HeroHeader = () => {
 
                         {/* RIGHT SECTION: Action Buttons */}
                         <div className="flex items-center gap-4 pointer-events-auto">
-                            <div className="hidden lg:flex items-center gap-4 pointer-events-auto">
+                            <div className="hidden lg:flex items-center gap-12 pointer-events-auto">
                                 {!isAuthLoading && (
                                     isLoggedIn ? (
                                         <>
