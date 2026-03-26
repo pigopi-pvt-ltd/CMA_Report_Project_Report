@@ -13,7 +13,7 @@ type Props = {
 const Step8 = ({ currentStep, form }: Props) => {
   return (
     <FieldGroup className={`${currentStep === 7 ? "flex! flex-col gap-4" : "hidden"}`}>
-      <StepHeaderSection title="Loan Period" description="Choose the loan period that best suits your business needs and repayment capacity" />
+        <StepHeaderSection title="Loan Period" description="Choose the loan period that best suits your business needs and repayment capacity" />
       <Controller
         name="loanPeriod"
         control={form.control}
@@ -28,12 +28,11 @@ const Step8 = ({ currentStep, form }: Props) => {
               placeholder="Enter Loan Duration (5-10 Years)"
               autoComplete="off"
               aria-invalid={fieldState.invalid}
-              value={field.value ?? ""}
-              onChange={(e) =>
-                field.onChange(
-                  e.target.value === "" ? undefined : Number(e.target.value)
-                )
-              }
+              value={field.value ?? ""} 
+              onChange={(e) => {
+                const val = e.target.value;
+                field.onChange(val === "" ? "" : Number(val));
+              }}
               className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
             />
 

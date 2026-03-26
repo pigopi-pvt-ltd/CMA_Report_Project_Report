@@ -48,17 +48,37 @@ export default function HeroSection() {
                       <Link href="/sign-up">Start Free Trial</Link>
                     </Button>
                   </div>
-                  <Button key={2} asChild size="lg" variant="ghost" className="h-12 rounded-xl px-8 text-lg font-semibold border border-border hover:bg-muted w-full sm:w-auto">
+                  <Button 
+                    key={2} 
+                    asChild 
+                    size="lg" 
+                    variant="secondary" 
+                    className="inline-flex items-center justify-center h-12 rounded-xl px-8 text-lg font-semibold shadow-sm transition-all cursor-pointer pointer-events-auto hover:bg-secondary/50 hover: w-full sm:w-auto"
+                  >
                     <Link href="/pricing">View Pricing</Link>
                   </Button>
                 </AnimatedGroup>
               </div>
             </div>
             <AnimatedGroup variants={{ container: { visible: { transition: { staggerChildren: 0.05, delayChildren: 0.75 } } }, ...transitionVariants }}>
-              <div className="mask-b-from-55% relative -mr-56 mt-12 overflow-hidden px-2 sm:mr-0 sm:mt-16 md:mt-24">
-                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-2xl shadow-purple-900/20 ring-1">
-                  <Image className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block" src="/hero-section-display-dark.png" alt="app screen" width="2700" height="1440" />
-                  <Image className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden" src="/hero-section-display-dark.png" alt="app screen" width="2700" height="1440" />
+              <div className="relative mt-16 md:mt-24 px-2 sm:px-6 w-full max-w-[1200px] mx-auto group perspective-[1000px]">
+                <div className="relative mx-auto rounded-[2rem] border border-border/40 bg-background/50 p-2 md:p-4 shadow-2xl shadow-primary/10 backdrop-blur-sm transition-all duration-700 ease-out group-hover:shadow-primary/20 group-hover:-translate-y-2 ring-1 ring-white/10 dark:ring-white/5">
+                  <Image 
+                    className="relative hidden dark:block w-full rounded-xl md:rounded-2xl bg-muted/20 object-cover border border-border/20 shadow-inner" 
+                    src="/hero-section-display-dark.png" 
+                    alt="CMA App Dashboard Preview" 
+                    width={2700} 
+                    height={1440} 
+                    priority // so as to load the image immediately
+                  />
+                  <Image 
+                    className="relative block dark:hidden w-full rounded-xl md:rounded-2xl bg-muted/20 object-cover border border-border/20 shadow-inner" 
+                    src="/hero-section-display-dark.png" 
+                    alt="CMA App Dashboard Preview" 
+                    width={2700} 
+                    height={1440} 
+                    priority
+                  />
                 </div>
               </div>
             </AnimatedGroup>

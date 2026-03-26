@@ -28,7 +28,7 @@ interface CardDetail {
 
 function Pricing({ cardDetail }: { cardDetail: CardDetail[] }) {
   return (
-    <section className="flex-1 w-full h-full overflow-y-auto pb-24 pt-12 lg:pb-32 bg-muted/5">
+    <section className="flex-1 w-full h-full overflow-y-auto  pb-12 pt-12 bg-muted/5">
       <div className="container mx-auto px-6 md:px-10">
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-16 lg:mb-20 gap-5">
@@ -138,7 +138,7 @@ const PricingCard = (item: CardDetail) => {
             <PhoneCall className="ml-2 w-4 h-4 transition-transform group-hover:scale-110" />
           ) : (
             <MoveRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-)}
+          )}
         </Button>
       </CardFooter>
     </Card>

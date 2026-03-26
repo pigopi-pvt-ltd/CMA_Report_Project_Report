@@ -87,7 +87,7 @@ export default function UsageSection() {
     ]
 
     return (
-        <section className="py-20 md:py-32">
+        <section className="py-20 md:py-20">
             <div className="mx-auto max-w-6xl px-6">
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}

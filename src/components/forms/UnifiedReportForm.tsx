@@ -103,7 +103,8 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 businessStartDate: ""
             }
         },
-        mode: "onSubmit",
+        // mode: "onSubmit",
+        mode: "onChange",
     });
 
     // 3. Load Data for Edit Mode
@@ -111,7 +112,6 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
         if (reportId) {
             const fetchReportData = async () => {
                 try {
-                    // CHANGED: Using the unified edit endpoint for GET
                     const response = await axios.get(`/api/unified-reports/edit?id=${reportId}&type=${type}`);
                     if (response.data.data) {
                         form.reset(response.data.data);
@@ -157,11 +157,9 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
         }
     };
 
-    // Back Button Logic with Dashboard Redirect on Step 1
+    // Logic to go back in form steps 
     const handleBackButton = () => {
-        if (currentStep === 0) {
-            router.push("/dashboard");
-        } else {
+        if (currentStep > 0) {
             setDirection(-1);
             setCurrentStep((prev) => prev - 1);
         }
@@ -171,100 +169,115 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
     const onSubmit = async (values: any) => {
         try {
             let response;
-
             if (isEditMode) {
-                // For edit mode, use PUT to update existing report
                 response = await axios.put(`/api/unified-reports/edit?id=${reportId}&type=${type}`, values);
                 toast.success("Report updated successfully!");
             } else {
-                // For create mode, use POST to create new report
                 response = await axios.post("/api/unified-reports", { ...values, type });
                 toast.success("Report created successfully!");
             }
-
             router.push(type === 'cma' ? "/dashboard?tab=cma" : "/dashboard");
         } catch (error: any) {
             console.error("Submit error:", error);
             toast.error(isEditMode ? "Failed to update report" : "Failed to create report");
         }
     };
+    
     if (!dataLoaded) return <div className="flex justify-center p-20"><Spinner /> Loading Report Data...</div>;
 
     return (
-        <div className="w-full max-w-2xl">
-            <div className="p-4">
-                <h1 className="text-2xl font-bold capitalize">
-                    {isEditMode ? 'Edit' : 'Create'} {type} Report
-                </h1>
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[220px_1fr_220px] gap-6 lg:gap-8 items-start mb-20 mt-4 px-4 lg:px-0">
+            
+            <div className="flex justify-start lg:sticky lg:top-4">
+                <Button 
+                    onClick={() => router.push(type === 'cma' ? "/dashboard?tab=cma" : "/dashboard")}
+                    className="inline-flex items-center justify-center rounded-xl text-base font-semibold h-11 px-5 bg-primary hover:bg-primary/80 text-primary-foreground shadow-sm transition-all cursor-pointer pointer-events-auto hover:-translate-y-0.5 w-full lg:w-auto"
+                >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Back to Dashboard
+                </Button>
             </div>
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>Step {currentStep + 1}</CardTitle>
-                        <p className="text-xs text-muted-foreground">
-                            Step {currentStep + 1} of {stepsCount}
-                        </p>
-                    </div>
-                    <Progress value={progress} />
-                </CardHeader>
-                <CardContent className="overflow-hidden">
-                    <form
-                        id="multi-form"
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
-                                e.preventDefault();
-                                if (currentStep < 9) {
-                                    handleNextButton();
+
+
+            <div className="w-full max-w-2xl mx-auto">
+                <div className="p-4 pt-0">
+                    <h1 className="text-2xl font-bold capitalize">
+                        {isEditMode ? 'Edit' : 'Create'} {type} Report
+                    </h1>
+                </div>
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <CardTitle>Step {currentStep + 1}</CardTitle>
+                            <p className="text-xs text-muted-foreground">
+                                Step {currentStep + 1} of {stepsCount}
+                            </p>
+                        </div>
+                        <Progress value={progress} />
+                    </CardHeader>                    
+                    <CardContent className="overflow-hidden">
+                        <form
+                            id="multi-form"
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+                                    e.preventDefault();
+                                    if (currentStep < 9) {
+                                        handleNextButton();
+                                    }
                                 }
-                            }
-                        }}
-                    >
-                        <AnimatePresence mode="wait" custom={direction}>
-                            <motion.div
-                                key={currentStep}
-                                custom={direction}
-                                variants={variants}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                            >
-                                {/* All Steps share the same form instance */}
-                                {currentStep === 0 && <Step1 currentStep={currentStep} form={form} />}
-                                {currentStep === 1 && <Step2 currentStep={currentStep} form={form} />}
-                                {currentStep === 2 && <Step3 currentStep={currentStep} form={form} />}
-                                {currentStep === 3 && <Step4 currentStep={currentStep} form={form} />}
-                                {currentStep === 4 && <Step5 currentStep={currentStep} form={form} />}
-                                {currentStep === 5 && <Step6 currentStep={currentStep} form={form} />}
-                                {currentStep === 6 && <Step7 currentStep={currentStep} form={form} />}
-                                {currentStep === 7 && <Step8 currentStep={currentStep} form={form} />}
-                                {currentStep === 8 && <Step9 currentStep={currentStep} form={form} />}
-                                {currentStep === 9 && <Step10 currentStep={currentStep} form={form} />}
-                            </motion.div>
-                        </AnimatePresence>
-                    </form>
-                </CardContent>
-                <CardFooter>
-                    <Field className="justify-between" orientation="horizontal">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={handleBackButton}
+                            }}
                         >
-                            <ChevronLeft /> {currentStep === 0 ? "Back to Dashboard" : "Back"}
-                        </Button>
-                        {currentStep < 9 ? (
-                            <Button type="button" variant="secondary" onClick={handleNextButton}>
-                                Next <ChevronRight />
+                            <AnimatePresence mode="wait" custom={direction}>
+                                <motion.div
+                                    key={currentStep}
+                                    custom={direction}
+                                    variants={variants}
+                                    initial="initial"
+                                    animate="animate"
+                                    exit="exit"
+                                >
+                                    {/* All Steps share the same form instance */}
+                                    {currentStep === 0 && <Step1 currentStep={currentStep} form={form} />}
+                                    {currentStep === 1 && <Step2 currentStep={currentStep} form={form} />}
+                                    {currentStep === 2 && <Step3 currentStep={currentStep} form={form} />}
+                                    {currentStep === 3 && <Step4 currentStep={currentStep} form={form} />}
+                                    {currentStep === 4 && <Step5 currentStep={currentStep} form={form} />}
+                                    {currentStep === 5 && <Step6 currentStep={currentStep} form={form} />}
+                                    {currentStep === 6 && <Step7 currentStep={currentStep} form={form} />}
+                                    {currentStep === 7 && <Step8 currentStep={currentStep} form={form} />}
+                                    {currentStep === 8 && <Step9 currentStep={currentStep} form={form} />}
+                                    {currentStep === 9 && <Step10 currentStep={currentStep} form={form} />}
+                                </motion.div>
+                            </AnimatePresence>
+                        </form>
+                    </CardContent>
+                    <CardFooter>
+                        <Field className="justify-between" orientation="horizontal">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={handleBackButton}
+                                disabled={currentStep === 0}
+                            >
+                                <ChevronLeft /> Back
                             </Button>
-                        ) : (
-                            <Button type="submit" form="multi-form" disabled={form.formState.isSubmitting}>
-                                {form.formState.isSubmitting ? <Spinner /> : isEditMode ? "Update Report" : "Final Submit"}
-                            </Button>
-                        )}
-                    </Field>
-                </CardFooter>
-            </Card>
+                            
+                            {currentStep < 9 ? (
+                                <Button type="button" variant="secondary" onClick={handleNextButton}>
+                                    Next <ChevronRight />
+                                </Button>
+                            ) : (
+                                <Button type="submit" form="multi-form" disabled={form.formState.isSubmitting}>
+                                    {form.formState.isSubmitting ? <Spinner /> : isEditMode ? "Update Report" : "Final Submit"}
+                                </Button>
+                            )}
+                        </Field>
+                    </CardFooter>
+                </Card>
+            </div>
+            <div className="hidden lg:block" aria-hidden="true"></div>
+
         </div>
     );
 };
