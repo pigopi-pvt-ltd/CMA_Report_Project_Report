@@ -69,10 +69,11 @@ export const salesRevenueDetailsSchema = z.object({
   ]).optional(),
 });
 
-// ✅ FINAL CMA SCHEMA
+// FINAL CMA SCHEMA
 export const cmaReportSchema = z.object({
   businessName: z.string({ message: "Business Entity Name is required" }).min(1, "Please enter your complete legal business name"),
   businessType: z.string({ message: "Business Type is required" }).min(1, "Please enter your business type"),
+  businessSummary: z.string({ message: "Business Summary is required" }).min(20, "Please write at least 2-3 lines explaining your business plan"),
   industryType: industryTypeEnum,
   loanType: loanTypeEnum,
   businessRequirements: z.record(z.string(), z.union([z.number(), z.string()]).optional()).optional(),

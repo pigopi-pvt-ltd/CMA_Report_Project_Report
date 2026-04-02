@@ -52,7 +52,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
           <div className="absolute left-3 z-10 flex items-center gap-2 pointer-events-none shrink-0">
             <FlagComponent country="IN" countryName="India" />
             {/* <span className="text-sm font-medium text-foreground/80">+91</span> */}
-            <div className="h-4 w-[1px] bg-border mx-0.5"></div>
+            <div className="h-5 w-[1px] bg-border mx-0.5"></div>
           </div>
 
           <RPNInput.default
@@ -61,7 +61,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
             countrySelectComponent={() => null} // Dropdown Hide kiya
             inputComponent={InputComponent}
             numberInputProps={{
-              className: cn("pl-[80px] w-full", className)
+              className: cn("!pl-[60px] w-full", className)
             }}
             smartCaret={false}
             defaultCountry="IN"

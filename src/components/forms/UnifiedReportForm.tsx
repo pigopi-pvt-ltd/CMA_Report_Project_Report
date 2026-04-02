@@ -51,13 +51,13 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
     // 1. Identify Edit Mode
     const isEditMode = !!reportId;
 
-    // 2. Decide Schema based on report type
+        // 2. Decide Schema based on report type
     const currentSchema = type === 'cma' ? cmaReportSchema : projectReportSchema;
 
     // Configuration for field validation per step
     const stepsConfig = [
         { fields: ["businessName"] },
-        { fields: ["businessType"] },
+        { fields: ["businessType", "businessSummary"] },
         { fields: ["industryType"] },
         { fields: ["loanType"] },
         { fields: ["businessRequirements"] },
@@ -73,6 +73,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
         defaultValues: {
             businessName: "",
             businessType: "",
+            businessSummary: "",
             industryType: "",
             loanType: "",
             businessRequirements: {},
@@ -201,21 +202,32 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
 
             <div className="w-full max-w-2xl mx-auto">
                 <div className="p-4 pt-0">
-                    <h1 className="text-2xl font-bold capitalize">
+                    <h1 className="text-3xl font-extrabold capitalize tracking-tight">
                         {isEditMode ? 'Edit' : 'Create'} {type} Report
                     </h1>
-                </div>
-                <Card>
-                    <CardHeader>
+                </div>          
+                <Card className="shadow-lg border-border/40">
+                    <CardHeader className="bg-muted/5 border-b border-border/30 pb-5 pt-6">
                         <div className="flex items-center justify-between">
-                            <CardTitle>Step {currentStep + 1}</CardTitle>
-                            <p className="text-xs text-muted-foreground">
+                            <CardTitle className="text-2xl font-bold">Step {currentStep + 1}</CardTitle>
+                            <p className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
                                 Step {currentStep + 1} of {stepsCount}
                             </p>
                         </div>
-                        <Progress value={progress} />
-                    </CardHeader>                    
-                    <CardContent className="overflow-hidden">
+                        <Progress value={progress} className="h-2 mt-4" />
+                    </CardHeader>
+                    
+                    {/* Global overrides for Font Size, Padding, and Checkboxes */}
+                    <CardContent 
+                        className="overflow-hidden pt-8 pb-4 
+                        [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2
+                        [&_p.text-muted-foreground]:text-sm
+                        [&_label]:text-base [&_label]:font-semibold 
+                        [&_input]:text-base [&_input]:h-12 [&_input]:px-4 
+                        [&_[role=combobox]]:text-base [&_[role=combobox]]:h-12 [&_[role=combobox]]:px-4 
+                        [&_textarea]:text-base [&_textarea]:p-4
+                        [&_button[role=checkbox]]:w-5 [&_button[role=checkbox]]:h-5 [&_button[role=checkbox]]:rounded-4px"
+                    >
                         <form
                             id="multi-form"
                             onSubmit={form.handleSubmit(onSubmit)}
@@ -251,24 +263,25 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                                 </motion.div>
                             </AnimatePresence>
                         </form>
-                    </CardContent>
-                    <CardFooter>
-                        <Field className="justify-between" orientation="horizontal">
+                    </CardContent>                    
+                    <CardFooter className="pt-4 pb-6 px-6">
+                        <Field className="justify-between w-full" orientation="horizontal">
                             <Button
                                 type="button"
-                                variant="ghost"
+                                variant="outline"
                                 onClick={handleBackButton}
                                 disabled={currentStep === 0}
+                                className="h-11 px-6 font-semibold"
                             >
-                                <ChevronLeft /> Back
+                                <ChevronLeft className="w-4 h-4 mr-1" /> Back
                             </Button>
                             
                             {currentStep < 9 ? (
-                                <Button type="button" variant="secondary" onClick={handleNextButton}>
-                                    Next <ChevronRight />
+                                <Button type="button" variant="secondary" onClick={handleNextButton} className="h-11 px-8 font-semibold">
+                                    Next <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
                             ) : (
-                                <Button type="submit" form="multi-form" disabled={form.formState.isSubmitting}>
+                                <Button type="submit" form="multi-form" disabled={form.formState.isSubmitting} className="h-11 px-8 font-semibold">
                                     {form.formState.isSubmitting ? <Spinner /> : isEditMode ? "Update Report" : "Final Submit"}
                                 </Button>
                             )}
@@ -277,7 +290,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 </Card>
             </div>
             <div className="hidden lg:block" aria-hidden="true"></div>
-
+            
         </div>
     );
 };
