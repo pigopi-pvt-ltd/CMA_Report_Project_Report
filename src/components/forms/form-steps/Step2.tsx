@@ -11,7 +11,7 @@ type Props = {
 
 const Step2 = ({ currentStep, form }: Props) => {
   return (
-    <FieldGroup className={`${currentStep === 1 ? "flex! flex-col gap-4" : "hidden!"}`}>
+    <FieldGroup className={`${currentStep === 1 ? "flex flex-col gap-6" : "hidden"}`}>
       {/* Header */}
       <StepHeaderSection title="Business Planning" description="What type of business are you planning to start?" />
 
@@ -28,12 +28,28 @@ const Step2 = ({ currentStep, form }: Props) => {
               aria-invalid={fieldState.invalid}
               placeholder="e.g., Snacks Making, Grocery Shop, Soap Manufacturing, Pickles manufacturing, Dairy Farm, etc."
               autoComplete="off"
-              disabled={false}
             />
-            <FieldDescription></FieldDescription>
-            {fieldState.invalid && (
-              <FieldError errors={[fieldState.error]} />
-            )}
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+
+      {/* Executive Summary */}
+      <Controller
+        name="businessSummary"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="businessSummary">Executive Summary / Business Description</FieldLabel>
+            <textarea
+              {...field}
+              id="businessSummary"
+              aria-invalid={fieldState.invalid}
+              placeholder="Describe your business model, target market, and operational plan here..."
+              className="flex min-h-[200px] w-full rounded-md border border-input bg-transparent px-4 py-3 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:border-ring focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+            />
+            <FieldDescription>Provide a detailed summary of your project (will be printed in the report).</FieldDescription>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
         )}
       />

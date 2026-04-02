@@ -2133,3 +2133,393 @@ export const drawLoanInterestTables = (doc: any, projectData: any, formatrupee: 
 
 
 };
+
+// Cover Page
+export const drawCoverPage = (doc: any, reportType: string, projectData: any, fonts: any) => {
+  const bName = projectData?.businessName || "Your Business Name";
+  const address = projectData?.personalDetails?.businessAddress || "Complete Business Address";
+  
+  // Design Dimensions
+  const w = doc.page.width;
+  const h = doc.page.height;
+  
+  // Light Grey Background slash
+  doc.polygon([0, h*0.2], [w, h*0.6], [w, h*0.75], [0, h*0.35])
+     .fillColor('#e5e7eb') // Light Grey
+     .fill();
+
+  // Cyan/Light Blue Accent slash
+  doc.polygon([0, h*0.1], [w, h*0.5], [w, h*0.6], [0, h*0.2])
+     .fillColor('#06b6d4') // Cyan
+     .fill();
+
+  // Main Dark Blue Big Slash
+  doc.polygon([0, 0], [w, 0], [w, h*0.4], [0, h*0.8])
+     .fillColor('#1e3a8a') // Dark Navy Blue
+     .fill();
+
+  doc.font(fonts.fontBoldPath)
+     .fontSize(65)                 
+     .fillColor('white')
+     .strokeColor('white')         
+     .lineWidth(1.5)               
+     .text(`${reportType.toUpperCase()}`, 50, 130, { 
+         characterSpacing: 3,      
+         fill: true, 
+         stroke: true            
+     })
+     .text("REPORT", 50, 205, {   
+         characterSpacing: 3, 
+         fill: true, 
+         stroke: true 
+     });
+
+  // 3. Add Business Name and Address at the bottom right
+  doc.font(fonts.fontBoldPath)
+     .fontSize(32)               
+     .fillColor('#1e3a8a') 
+     .text(bName, 0, h - 220, { align: 'right', width: w - 50 });
+     
+  doc.font(fonts.fontPath)
+     .fontSize(14)                
+     .fillColor('#6b7280') 
+     .text(address, 0, h - 175, { align: 'right', width: w - 50 });
+};
+
+
+/**
+ * MULTI-PAGE EXECUTIVE SUMMARY, REVENUE MODEL & FINANCIAL DATA (WITH BOTTOM FIXED FORMULAS)
+ */
+export const drawExecutiveSummaryPage = (doc: any, projectData: any, fonts: any, formatRupees: Function) => {
+  // --- Data Extraction (Smart Dynamic Data) ---
+  const bName = projectData?.businessName || "The Enterprise";
+  const bType = projectData?.businessType || "Business";
+  const industry = projectData?.industryType || "industry";
+  const summaryText = projectData?.businessSummary || "A modern enterprise focused on delivering high-quality products and services to its target market.";
+  const product = projectData?.revenueDetails?.productName || "products/services";
+  
+  const empPotentialRaw = projectData?.businessDetails?.employementPotential || projectData?.businessDetails?.employmentPotential;
+  const employment = employmentMapper[empPotentialRaw] || empPotentialRaw || "a dedicated team";
+
+  // FINANCIAL DATA EXTRACTION 
+  const monthlySales = projectData?.revenueDetails?.salesRevenue || 0;
+  const pnlYear1 = projectData?.profitabilityStatement?.[0] || {};
+  
+  const annualSales = pnlYear1.totalA || projectData?.revenueDetails?.totalSalesRevenueAnually || (monthlySales * 12);
+  const netProfitYear1 = pnlYear1.profitAfterTax || 0;
+  const profitBeforeTaxYear1 = pnlYear1.profitBeforeTax || 0;
+  const taxYear1 = pnlYear1.provisionForTaxation || 0;
+
+  const expensesYear1 = annualSales - profitBeforeTaxYear1;
+
+  const loanDetails = projectData?.loanDetails || {};
+  const fixedCap = loanDetails.fixedCapitalInvested || 0;
+  const workingCap = loanDetails.workingCapitalInvested || 0;
+  const totalCost = loanDetails.totalProjectCost || 0;
+  const termLoan = loanDetails.termLoan || 0;
+  const wcLoan = loanDetails.workingCapitalLoan || 0;
+  const promoter = loanDetails.promotersContribution || 0;
+
+  const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+  const leftMargin = doc.page.margins.left;
+  
+  const notesBottomY = doc.page.height - 110; 
+
+  // HELPER: To match exact styling of the rest of the report headers
+  const drawPageHeader = (title: string) => {
+    doc.x = leftMargin;
+    doc.font(fonts.fontBoldPath).fontSize(22).fillColor("#4154F1");
+    doc.text(title, { align: "center" });
+    doc.moveDown(0.5);
+    doc.strokeColor("#4154F1").lineWidth(2).moveTo(leftMargin, doc.y).lineTo(doc.page.width - doc.page.margins.right, doc.y).stroke();
+    doc.fillColor("black").moveDown(1); // Reset to black for body
+  };
+
+  // ==========================================
+  // PAGE 1: EXECUTIVE SUMMARY & BUSINESS MODEL
+  // ==========================================
+  drawPageHeader("EXECUTIVE SUMMARY");
+
+  doc.font(fonts.fontBoldPath).fontSize(11).fillColor("black")
+     .text(`${bName} `, { align: "justify", continued: true })
+     .font(fonts.fontPath).text(`is a proposed micro-enterprise established with the objective of catering to the growing demand in the `, { continued: true })
+     .font(fonts.fontBoldPath).text(`${industryMapper[industry] || industry} `, { continued: true })
+     .font(fonts.fontPath).text(`sector. The venture is designed to tap into the rapidly expanding market for `, { continued: true })
+     .font(fonts.fontBoldPath).text(`${product}`, { continued: true })
+     .font(fonts.fontPath).text(`, providing high-quality solutions to its customer base. The business will operate as a specialized `, { continued: true })
+     .font(fonts.fontBoldPath).text(`${bType} `, { continued: true })
+     .font(fonts.fontPath).text(`unit.`);
+  doc.moveDown(1);
+
+  // User's Custom Summary
+  doc.font(fonts.fontPath).fontSize(11).text(summaryText, { align: "justify", lineGap: 5 });
+  doc.moveDown(1);
+
+  doc.font(fonts.fontPath).fontSize(11)
+     .text(`The project is proposed with a total investment of `, { align: "justify", continued: true })
+     .font(fonts.fontBoldPath).text(`${formatRupees(totalCost)}`, { continued: true })
+     .font(fonts.fontPath).text(`, aimed at promoting self-employment and supporting small-scale entrepreneurial ventures. The capital will be primarily utilized for infrastructure development, working capital requirements, and procurement of necessary equipment.`);
+  doc.moveDown(1);
+
+  doc.font(fonts.fontPath).fontSize(11).text(
+    `Financially, the project is highly viable with low operational risk and moderate initial investment, ensuring an early break-even. The business is expected to generate steady revenues and increasing profitability over time due to repeat customers, strategic local marketing, and high-margin product categories.`, 
+    { align: "justify", lineGap: 5 }
+  );
+  doc.moveDown(2);
+
+  // Business Model
+  doc.font(fonts.fontBoldPath).fontSize(14).fillColor("black").text("BUSINESS MODEL & OPERATIONS", { align: "left" });
+  doc.moveDown(0.5);
+  doc.font(fonts.fontPath).fontSize(11).text(
+    `The business model of ${bName} is designed as a multi-revenue structure combining direct sales, bulk supply, and value-added services. The model ensures steady cash flow and scalability with minimal risk.`, 
+    { align: "justify", lineGap: 5 }
+  );
+  doc.moveDown(1);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).text("1. Core Business Structure");
+  doc.font(fonts.fontPath).fontSize(11)
+     .text(`• Primary focus on the production and distribution of `, leftMargin + 15, doc.y, { width: pageWidth - 15, continued: true })
+     .font(fonts.fontBoldPath).text(`${product}`, { continued: true })
+     .font(fonts.fontPath).text(`.`);
+  doc.text(`• Maintaining sufficient stock for continuous supply to meet market demand.`, leftMargin + 15, doc.y, { width: pageWidth - 15 });
+  
+  doc.x = leftMargin; doc.moveDown(1);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).text("2. Target Market & Sales Channels");
+  doc.font(fonts.fontPath).fontSize(11).text(`• Direct sale to retail customers and walk-in clients.`, leftMargin + 15, doc.y, { width: pageWidth - 15 });
+  doc.text(`• Bulk supply (B2B) to local businesses, contractors, and institutions.`, leftMargin + 15, doc.y, { width: pageWidth - 15 });
+  
+  doc.x = leftMargin; doc.moveDown(2);
+
+  doc.font(fonts.fontBoldPath).fontSize(14).text("MARKET POTENTIAL", { align: "left" });
+  doc.moveDown(0.5);
+   
+  doc.font(fonts.fontPath).fontSize(11)
+     .text(`The sector is experiencing steady growth driven by increasing consumer awareness. `, { align: "justify", continued: true })
+     .font(fonts.fontBoldPath).text(`${bName} `, { continued: true })
+     .font(fonts.fontPath).text(`will adopt a customer-centric approach, focusing on quality and affordability. Furthermore, the project will generate direct employment opportunities for `, { continued: true })
+     .font(fonts.fontBoldPath).text(`${employment}`, { continued: true })
+     .font(fonts.fontPath).text(`, contributing positively to the local economy.`);
+
+
+  // ==========================================
+  // PAGE 2: REVENUE MODEL & PROFITABILITY
+  // ==========================================
+  doc.addPage();
+  drawPageHeader("REVENUE MODEL & PROJECTIONS");
+
+  doc.font(fonts.fontPath).fontSize(11).fillColor("black")
+     .text(`The revenue model is designed to ensure consistent cash flow and high profitability. The business will generate revenue primarily through the sale of `, { align: "justify", continued: true })
+     .font(fonts.fontBoldPath).text(`${product}`, { continued: true })
+     .font(fonts.fontPath).text(`.`);
+  doc.moveDown(1);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).text("1. Revenue Projections");
+  doc.font(fonts.fontPath).fontSize(11).text(`Based on market research and production capacity, the expected sales are highly promising.`, { lineGap: 5 });
+  doc.moveDown(0.5);
+  
+  // Table 1: Revenue
+  const revenueRows: TableRow[] = [
+    [{ text: "Revenue Stream", width: 300, bold: true }, { text: "Amount", width: 200, bold: true }],
+    [{ text: `Monthly Sales (${product})`, width: 300 }, { text: formatRupees(monthlySales), width: 200 }],
+    [{ text: "Total Annual Revenue (Year 1)", width: 300, bold: true }, { text: formatRupees(annualSales), width: 200, bold: true }]
+  ];
+  drawFlexibleTable(doc, revenueRows, { ...fonts, title: "" });
+  
+  doc.x = leftMargin;
+  doc.moveDown(1.5);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).fillColor("black").text("2. Profitability Analysis (Year 1 Estimate)");
+  doc.font(fonts.fontPath).fontSize(11).text(`The project demonstrates a healthy profit margin in its first year of operations.`, { lineGap: 5 });
+  doc.moveDown(0.5);
+
+  // DETAILED PROFITABILITY TABLE 
+  const profitRows: TableRow[] = [
+    [{ text: "Particulars", width: 300, bold: true }, { text: "Amount (Year 1)", width: 200, bold: true }],
+    [{ text: "Gross Annual Revenue", width: 300 }, { text: formatRupees(annualSales), width: 200 }],
+    [{ text: "Less: Operating Expenses, Interest & Depr.", width: 300 }, { text: formatRupees(expensesYear1), width: 200 }],
+    [{ text: "Profit Before Tax", width: 300, bold: true }, { text: formatRupees(profitBeforeTaxYear1), width: 200, bold: true }],
+    [{ text: "Less: Provision for Taxation", width: 300 }, { text: formatRupees(taxYear1), width: 200 }],
+    [{ text: "Net Profit (After Tax)", width: 300, bold: true }, { text: formatRupees(netProfitYear1), width: 200, bold: true }]
+  ];
+  drawFlexibleTable(doc, profitRows, { ...fonts, title: "" });
+  
+  doc.x = leftMargin; 
+  doc.moveDown(1.5);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).text("3. Revenue Growth Strategy");
+  doc.font(fonts.fontPath).fontSize(11).text(`• Gradual increase in production capacity to meet peak demands.`, leftMargin + 15, doc.y, { width: pageWidth - 15 });
+  doc.text(`• Adding online sales channels (WhatsApp, Social Media) for wider reach.`, leftMargin + 15, doc.y, { width: pageWidth - 15 });
+  doc.text(`• Securing bulk orders through corporate and institutional tie-ups.`, leftMargin + 15, doc.y, { width: pageWidth - 15 });
+  
+  doc.font(fonts.fontBoldPath).fontSize(8).fillColor("#000000");
+  doc.text("* Note on Financial Calculations:", leftMargin, notesBottomY);
+  doc.font(fonts.fontPath);
+  doc.moveDown(0.3);
+  doc.text("Gross Annual Revenue = Monthly Sales × 12 Months (Projected)", { bullet: true, align: "left" });
+  doc.text("Operating Expenses = Total cost including Raw Materials, Salary, Rent, Depreciation, and Loan Interest.", { bullet: true, align: "left" });
+  doc.text("Profit Before Tax (PBT) = Gross Annual Revenue - Operating Expenses", { bullet: true, align: "left" });
+  doc.text("Provision for Taxation = 30% of PBT (Applicable on positive profits)", { bullet: true, align: "left" });
+  doc.text("Net Profit = PBT - Provision for Taxation", { bullet: true, align: "left" });
+
+
+  // ==========================================
+  // PAGE 3: FINANCIAL DATA & COST UTILIZATION
+  // ==========================================
+  doc.addPage();
+  drawPageHeader("FINANCIAL DATA");
+
+  doc.font(fonts.fontPath).fontSize(11).fillColor("black")
+     .text(`This section presents the financial framework based on a total investment of `, { align: "justify", continued: true })
+     .font(fonts.fontBoldPath).text(`${formatRupees(totalCost)}`, { continued: true })
+     .font(fonts.fontPath).text(`. The projections are realistic and aligned with the operational scale of `, { continued: true })
+     .font(fonts.fontBoldPath).text(`${bName}`, { continued: true })
+     .font(fonts.fontPath).text(`.`);
+  doc.moveDown(1.5);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).text("1. Total Project Cost");
+  doc.font(fonts.fontPath).fontSize(11).text(`The capital is strategically divided into fixed infrastructure and working capital to ensure smooth setup.`, { lineGap: 5 });
+  doc.moveDown(0.5);
+
+  // Table 3: Project Cost
+  const costRows: TableRow[] = [
+    [{ text: "Particulars", width: 300, bold: true }, { text: "Amount", width: 200, bold: true }],
+    [{ text: "Fixed Capital (Machinery, Equipment, Setup)", width: 300 }, { text: formatRupees(fixedCap), width: 200 }],
+    [{ text: "Working Capital (Initial Reserve)", width: 300 }, { text: formatRupees(workingCap), width: 200 }],
+    [{ text: "Total Project Cost", width: 300, bold: true }, { text: formatRupees(totalCost), width: 200, bold: true }]
+  ];
+  drawFlexibleTable(doc, costRows, { ...fonts, title: "" });
+  
+  doc.x = leftMargin;
+  doc.moveDown(1.5);
+
+  doc.font(fonts.fontBoldPath).fontSize(12).fillColor("black").text("2. Means of Finance");
+  doc.moveDown(0.5);
+
+  // Table 4: Means of Finance
+  const financeRows: TableRow[] = [
+    [{ text: "Source of Fund", width: 300, bold: true }, { text: "Amount", width: 200, bold: true }],
+    [{ text: "Term Loan (Bank Finance)", width: 300 }, { text: formatRupees(termLoan), width: 200 }],
+    [{ text: "Working Capital Loan (Bank Finance)", width: 300 }, { text: formatRupees(wcLoan), width: 200 }],
+    [{ text: "Promoter's Contribution (Own Fund)", width: 300 }, { text: formatRupees(promoter), width: 200 }],
+    [{ text: "Total Funds", width: 300, bold: true }, { text: formatRupees(totalCost), width: 200, bold: true }]
+  ];
+  drawFlexibleTable(doc, financeRows, { ...fonts, title: "" });
+
+  doc.font(fonts.fontBoldPath).fontSize(8).fillColor("#000000");
+  doc.text("* Note on Project Funding & Costs:", leftMargin, notesBottomY);
+  doc.font(fonts.fontPath);
+  doc.moveDown(0.3);
+  doc.text("Total Project Cost = Fixed Capital (Infrastructure) + Working Capital (Daily Operations Margin)", { bullet: true, align: "left" });
+  doc.text("Promoter's Contribution = Business Owner's initial equity/margin invested in the project.", { bullet: true, align: "left" });
+  doc.text("Term Loan = Bank finance specifically designated for Fixed Capital assets.", { bullet: true, align: "left" });
+  doc.text("Working Capital Loan = Bank finance designated to support operational liquidity.", { bullet: true, align: "left" });
+  doc.text("Total Funds (Liabilities & Equity) mathematically equates to Total Project Cost (Assets).", { bullet: true, align: "left" });
+};
+
+/**
+ * TABLE OF CONTENTS
+ */
+export const drawTableOfContents = (doc: any, reportType: string, fonts: any) => {
+  const leftMargin = doc.page.margins.left;
+  const rightMargin = doc.page.width - doc.page.margins.right;
+  const pageWidth = rightMargin - leftMargin;
+
+  // Premium Blue Header
+  doc.x = leftMargin;
+  doc.font(fonts.fontBoldPath).fontSize(22).fillColor("#4154F1");
+  doc.text("TABLE OF CONTENTS", { align: "center" });
+  doc.moveDown(0.5);
+  doc.strokeColor("#4154F1").lineWidth(2).moveTo(leftMargin, doc.y).lineTo(rightMargin, doc.y).stroke();
+  doc.moveDown(1.5);
+
+  const cmaContents = [
+    { title: "EXECUTIVE SUMMARY", subs: [] },
+    { title: "REVENUE MODEL & PROJECTIONS", subs: [] },
+    { title: "FINANCIAL DATA", subs: [] },
+    { title: "CMA REPORT AT A GLANCE", subs: [] },
+    { title: "SALES, REVENUE & PRODUCTION", subs: [] },
+    { title: "PROJECT COST & ASSETS", subs: [] },
+    { title: "DEPRECIATION SCHEDULES", subs: [] },
+    { title: "PROFITABILITY & PERFORMANCE", subs: [] },
+    { title: "DSCR CALCULATION", subs: [] },
+    { title: "EBITDA ANALYSIS", subs: [] },
+    { title: "ROI, BEP & INTEREST ANALYSIS", subs: [] },
+    { title: "BREAK EVEN SALES", subs: [] },
+    { title: "BANK FINANCE (MPBF) & RATIOS", subs: [] },
+    { title: "CALCULATION OF SOME IMPORTANT RATIOS", subs: [] },
+    { title: "SENSITIVITY & BALANCE SHEET", subs: [] },
+    { title: "PROJECTED BALANCE SHEET", subs: [] },
+    { title: "CASH FLOW & POSITION", subs: [] },
+    { title: "ASSUMPTIONS", subs: [] },
+    { title: "LOAN REPAYMENT SCHEDULE", subs: [] }
+  ];
+
+  const projectContents = [
+    { title: "EXECUTIVE SUMMARY", subs: [] },
+    { title: "REVENUE MODEL & PROJECTIONS", subs: [] },
+    { title: "FINANCIAL DATA", subs: [] },
+    { title: "PROJECT AT A GLANCE", subs: [] },
+    { title: "PROJECT COST", subs: [] },
+    { title: "COST STATEMENT", subs: [] },
+    { title: "GENERAL, ADMINISTRATIVE & SELLING EXPENSES", subs: [] },
+    { title: "PROJECT PROFITABILITY STATEMENT", subs: [] },
+    { title: "DSCR CALCULATION", subs: [] },
+    { title: "SWOT ANALYSIS", subs: [] },
+    { title: "ACTION PLAN", subs: [] },
+    { title: "MARKET TARGET", subs: [] },
+    { title: "EBITDA ANALYSIS", subs: [] },
+    { title: "RETURN ON INVESTMENT ANALYSIS", subs: [] },
+    { title: "BREAK EVEN SALES", subs: [] },
+    { title: "LOAN INTEREST TABLE DETAIL", subs: [] },
+    { title: "COMPUTATION OF MAXIMUM PERMISIBLE BANK FINANCE", subs: [] },
+    { title: "CALCULATION OF SOME IMPORTANT RATIOS", subs: [] },
+    { title: "SENSITIVITY ANALYSIS", subs: [] },
+    { title: "PROJECTED BALANCE SHEET", subs: [] },
+    { title: "BREAK EVEN ANALYSIS", subs: [] },
+    { title: "CASH FLOW STATEMENT", subs: [] },
+    { title: "FINANCIAL POSITION", subs: [] },
+    { title: "AFP", subs: [] },
+    { title: "ASSUMPTION", subs: [] },
+    { title: "LOAN CALCULATION", subs: [] }
+  ];
+
+  const contents = reportType === 'cma' ? cmaContents : projectContents;
+
+  let indexCounter = 1;
+
+  contents.forEach((section) => {
+    // If content exceeds page limit, add a new page and repeat header
+    if (doc.y > doc.page.height - 100) {
+      doc.addPage();
+      doc.font(fonts.fontBoldPath).fontSize(22).fillColor("#4154F1");
+      doc.text("TABLE OF CONTENTS (Contd.)", { align: "center" });
+      doc.moveDown(0.5);
+      doc.strokeColor("#4154F1").lineWidth(2).moveTo(leftMargin, doc.y).lineTo(rightMargin, doc.y).stroke();
+      doc.moveDown(1.5);
+    }
+
+    const startY = doc.y;
+    
+    // Draw Main Heading (Left Aligned in Premium Dark Blue)
+    doc.font(fonts.fontBoldPath).fontSize(12).fillColor("#1e3a8a");
+    const titleText = `${indexCounter}.  ${section.title}`;
+    doc.text(titleText, leftMargin, startY);
+    
+    doc.moveDown(0.3);
+
+    if (section.subs && section.subs.length > 0) {
+      section.subs.forEach((sub: string) => {
+        doc.font(fonts.fontPath).fontSize(10.5).fillColor("#4b5563");
+        doc.text(`•  ${sub}`, leftMargin + 25, doc.y);
+        doc.moveDown(0.2);
+      });
+    }
+    
+    doc.moveDown(0.3);
+    doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(leftMargin, doc.y).lineTo(rightMargin, doc.y).stroke();
+    doc.moveDown(0.6);
+
+    indexCounter++;
+  });
+};

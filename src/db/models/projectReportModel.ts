@@ -442,6 +442,7 @@ export interface ProjectData extends Document {
   userId: Types.ObjectId;
   businessName: string;
   businessType: string;
+  businessSummary: string;   // added new field in interface
   industryType: "manufacturing" | "service" | "trading" | "agriculture";
   loanType: "mudra" | "pmegp" | "msme" | "others";
   businessRequirements: businessRequirementsMap;
@@ -504,6 +505,11 @@ const ProjectReportSchema = new Schema<ProjectData>(
       type: String,
       required: true,
       trim: true,
+    },
+
+    businessSummary: {   //added new field in schema
+      type: String,
+      default: "",
     },
 
     industryType: {

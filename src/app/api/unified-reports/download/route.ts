@@ -6,6 +6,9 @@ import CmaReport from "@/db/models/cmaReportModel";
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect";
 import {
+  drawCoverPage,      //added new line
+  drawExecutiveSummaryPage,      //added new line here
+  drawTableOfContents,      //added new line for table of contents
   drawLoanCalculation,
   drawPromoterTable,
   drawDepreciationSchedules,
@@ -104,15 +107,13 @@ const formatInMillions = (value: number | string) => {
 
 // const formatInMillions = (value: number | string) => {
 //   const num = typeof value === "string" ? parseFloat(value) : value;
-//   if (isNaN(num) || num === 0) return "₹ 0.00M";
+//   if (isNaN(num) || num === 0) return "₹ 0.00";
 
-//   // Divide by 1 million
-//   const millions = num / 1000000;
-
-//   return `₹ ${millions.toLocaleString("en-IN", {
+//   // Direct format using Indian numbering system (Lakhs, Crores) without dividing
+//   return `₹ ${num.toLocaleString("en-IN", {
 //     minimumFractionDigits: 2,
 //     maximumFractionDigits: 2,
-//   })}M`;
+//   })}`;
 // };
 
 export async function POST(request: Request) {
@@ -191,6 +192,15 @@ export async function POST(request: Request) {
     const fonts = { fontPath, fontBoldPath };
 
     if (reportType === 'cma') {
+      // Cover Page & Summary for CMA Report
+      drawCoverPage(doc, "CMA", rawData, fonts);
+      doc.addPage();
+      drawTableOfContents(doc, "cma", fonts);           // added for the purpose of table of contents
+      // drawExecutiveSummaryPage(doc, rawData, fonts);
+      doc.addPage();
+      drawExecutiveSummaryPage(doc, rawData, fonts, formatRupees);
+      doc.addPage(); 
+
       // CMA Report PDF generation
       drawHeader(doc, "CMA REPORT AT A GLANCE", fontBoldPath);
 
@@ -281,6 +291,15 @@ export async function POST(request: Request) {
       drawHeader(doc, "LOAN REPAYMENT SCHEDULE", fontBoldPath);
       drawLoanCalculation(doc, rawData, formatRupees, fonts);
     } else {
+      // Cover Page & Summary for Project Report
+      drawCoverPage(doc, "PROJECT", rawData, fonts);
+      doc.addPage();
+      drawTableOfContents(doc, "project", fonts);           // added for the purpose of table of contents
+      // drawExecutiveSummaryPage(doc, rawData, fonts);
+      doc.addPage();
+      drawExecutiveSummaryPage(doc, rawData, fonts, formatRupees);
+      doc.addPage();
+
       // Project Report PDF generation
       drawHeader(doc, "PROJECT AT A GLANCE", fontBoldPath);
 

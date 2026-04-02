@@ -8,6 +8,7 @@ export interface ICmaReport extends Document {
   userId: Types.ObjectId;
   businessName: string;
   businessType: string;
+  businessSummary: string;  // added new field in interface 
   industryType: "manufacturing" | "service" | "trading" | "agriculture";
   loanType: "mudra" | "pmegp" | "msme" | "others";
   loanPeriod: number;
@@ -103,6 +104,7 @@ const cmaReportSchema = new Schema<ICmaReport>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     businessName: { type: String, required: true },
     businessType: { type: String, required: true },
+    businessSummary: { type: String, default: "" },      // added new field in schema
     industryType: { type: String, enum: ["manufacturing", "service", "trading", "agriculture"], required: true },
     loanType: { type: String, enum: ["mudra", "pmegp", "msme", "others"], required: true },
     loanPeriod: { type: Number, required: true, min: 5, max: 10 },
