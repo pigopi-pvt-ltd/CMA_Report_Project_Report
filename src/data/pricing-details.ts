@@ -21,7 +21,7 @@ export const SAAS_PLANS: Record<string, PlanDetail> = {
     name: "Project Report Plan",
     cardTitle: "Project Report",
     cardDescription: "Ideal for businesses requiring professional detailed Project Reports accepted by all banks.",
-    price: 1,
+    price: 699,
     billingCycle: "month",
     isMostPopular: false,
     canCreateProjectReport: true,
