@@ -22,12 +22,7 @@ export const sidebarMenu = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Project Report", href: "/create-project-report", icon: FileText },
   { label: "CMA Report", href: "/create-cma-report", icon: FileText },
-   // {
-  //   label: "Billing",
-  //   href: "/billing",
-  //   icon: CreditCard,
-  // },
-  { label: "Billing", href: "#", icon: CreditCard },
+  { label: "Billing", href: "/billing", icon: CreditCard },
   { label: "Plans", href: "/pricing", icon: FileText },
   { label: "Support", href: "/support", icon: HelpCircle },
 ];

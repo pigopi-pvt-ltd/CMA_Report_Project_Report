@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/requireAuth";
 import CmaReport from "@/db/models/cmaReportModel";
 import ProjectReportModel from "@/db/models/projectReportModel";
 import dbConnect from "@/db/dbConnect";
+import { getUserSubscription } from "@/lib/services/subscription.service";
 import {
   drawCoverPage,      //added new line
   drawExecutiveSummaryPage,      //added new line here
@@ -128,6 +129,28 @@ export async function POST(request: Request) {
     let reportData;
     let reportTypeName;
     let rawData: any;
+
+    // Verify subscription access
+    const sub = await getUserSubscription(session.user.id);
+    if (!sub.hasActiveSubscription) {
+      return NextResponse.json(
+        {
+          message: "Active subscription required to download PDF reports",
+          code: "SUBSCRIPTION_REQUIRED",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (reportType === "cma" && !sub.canCreateCMAReport) {
+      return NextResponse.json(
+        {
+          message: "Please upgrade to the Project + CMA plan to download CMA reports",
+          code: "PLAN_UPGRADE_REQUIRED",
+        },
+        { status: 403 }
+      );
+    }
 
     if (reportType === 'cma') {
       reportData = await CmaReport.findOne({ userId: session.user.id, _id: projectId });

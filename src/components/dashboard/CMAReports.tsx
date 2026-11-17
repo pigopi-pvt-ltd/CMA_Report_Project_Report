@@ -52,8 +52,13 @@ export default function CMAReports({ reports }: { reports: CMAReport[] }) {
       link.click();
       link.remove();
       toast.success("Download started");
-    } catch (error) {
-      toast.error("Download failed");
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        toast.error("Active subscription (Project + CMA plan) required to download. Redirecting to plans...");
+        window.location.href = "/pricing";
+      } else {
+        toast.error("Download failed");
+      }
     } finally {
       setIsDownloading(null);
     }

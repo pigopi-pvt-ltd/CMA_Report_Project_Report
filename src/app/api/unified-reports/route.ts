@@ -4,6 +4,7 @@ import CmaReport from "@/db/models/cmaReportModel";
 import ProjectReportModel from "@/db/models/projectReportModel";
 import { NextResponse } from "next/server";
 import { generateProjectReport } from "@/lib/services/report-calculation.service";
+import { getUserSubscription } from "@/lib/services/subscription.service";
 
 export async function POST(request: Request) {
   try {
@@ -15,6 +16,42 @@ export async function POST(request: Request) {
 
     if (!type) {
       return NextResponse.json({ error: "Report type is required" }, { status: 400 });
+    }
+
+    // Check user subscription permissions
+    const sub = await getUserSubscription(session.user.id);
+    if (!sub.hasActiveSubscription) {
+      return NextResponse.json(
+        {
+          error: "Subscription Required",
+          message: "You need an active subscription plan to create reports.",
+          code: "SUBSCRIPTION_REQUIRED",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (type === "project" && !sub.canCreateProjectReport) {
+      return NextResponse.json(
+        {
+          error: "Upgrade Required",
+          message: "Your current plan does not allow creating Project Reports.",
+          code: "PLAN_UPGRADE_REQUIRED",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (type === "cma" && !sub.canCreateCMAReport) {
+      return NextResponse.json(
+        {
+          error: "Upgrade Required",
+          message:
+            "Your plan only includes Project Reports. Please upgrade to the Project + CMA Report plan (₹999/month) to create CMA Reports.",
+          code: "PLAN_UPGRADE_REQUIRED",
+        },
+        { status: 403 }
+      );
     }
 
     // Add userId to the report data

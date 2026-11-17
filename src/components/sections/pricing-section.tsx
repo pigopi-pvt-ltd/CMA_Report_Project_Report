@@ -1,152 +1,95 @@
 import Link from "next/link";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteContainer } from "@/components/sections/site-shell";
-
-type Plan = {
-  name: string;
-  price: string;
-  description: string;
-  bullets: string[];
-  highlight?: boolean;
-};
-
-const plans: Plan[] = [
-  {
-    name: "BASIC PLAN",
-    price: "₹399",
-    description:
-      "Get a basic 10-page report in minutes. Perfect for small business loans or single asset loans like vehicles and machinery.",
-    bullets: [
-      "Report accepted by all Banks in India",
-      "3 times edits",
-      "Up to 10 years of projections",
-      "Up to 10 pages",
-      "Project Cost Calculation",
-      "Depreciation Schedule",
-      "Profitability Calculation",
-      "Project Prospects",
-      "DSCR Calculation",
-      "Detailed Assumptions",
-      "CA certification is available at an additional charge",
-      "With “STARTUP GURUZ’ Branding in Footer",
-    ],
-  },
-  {
-    name: "ADVANCED PLAN",
-    price: "₹799",
-    description:
-      "Create a detailed 22 page report in minutes. Ideal for government loan schemes (Mudra, PMEGP, MSME) and business loans above ₹5 lakh.",
-    bullets: [
-      "Report accepted by all Banks in India",
-      "5 times edits",
-      "Up to 10 years of projections",
-      "Up to 22 pages",
-      "Project Cost Calculation",
-      "Depreciation Schedule",
-      "Profitability Calculation",
-      "Project Prospects",
-      "DSCR Calculation",
-      "Detailed Assumptions",
-      "SWOT Analysis",
-      "Target Market Analysis",
-      "EBITDA Analysis",
-      "ROI Calculation",
-      "Break-Even Sales",
-      "Repayment Schedule",
-      "MPBF Calculation",
-      "Important Ratios",
-      "Sensivity Analysis",
-      "Balance Sheet",
-      "Cash FLow Statement",
-      "Financial Report",
-      "Loan Calculation",
-      "CA certification is available at an additional charge",
-      "With “STARTUP GURUZ’ Branding in Footer",
-    ],
-    highlight: true,
-  },
-  {
-    name: "PREMIUM PLAN",
-    price: "₹999",
-    description:
-      "Our expert team will prepare a customized 25 page report tailored to bank requirements for seamless loan approval.",
-    bullets: [
-      "Report accepted by all Banks in India",
-      "10 times edits",
-      "Up to 10 years of projections",
-      "Up to 25 pages",
-      "Project Cost Calculation",
-      "Depreciation Schedule",
-      "Profitability Calculation",
-      "Project Prospects",
-      "DSCR Calculation",
-      "Detailed Assumptions",
-      "SWOT Analysis",
-      "Target Market Analysis",
-      "EBITDA Analysis",
-      "ROI Calculation",
-      "Break-Even Sales",
-      "Repayment Schedule",
-      "MPBF Calculation",
-      "Important Ratios",
-      "Sensivity Analysis",
-      "Balance Sheet",
-      "Cash FLow Statement",
-      "Financial Report",
-      "Loan Calculation",
-      "Break-Even Sales Analysis",
-      "Sensivity Calculation",
-      "CMA Report Builder",
-      "CA certification is available at an additional charge",
-      "Without “STARTUP GURUZ’ Branding in Footer",
-    ],
-  },
-];
+import { SAAS_PLANS } from "@/data/pricing-details";
+import { Check, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export function PricingSection() {
+  const plans = Object.values(SAAS_PLANS);
+
   return (
-    <section id="pricing" className="border-b border-border bg-background">
-      <SiteContainer className="py-12 md:py-16">
-        <div className="mb-8 space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Pricing & Packages</h2>
-          <p className="text-muted-foreground">
-            Suitable for Mudra, PMEGP, Standup India, MSME & more.
+    <section id="pricing" className="py-20 md:py-28 bg-muted/20 border-y">
+      <SiteContainer>
+        <div className="flex flex-col items-center text-center mb-16 gap-4">
+          <Badge
+            variant="outline"
+            className="px-4 py-1.5 rounded-full border-primary/30 text-primary bg-primary/5 text-sm font-semibold"
+          >
+            SaaS Subscription
+          </Badge>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
+            Simple Plans for Every Business
+          </h2>
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
+            Choose the plan that fits your loan proposal needs. Automated bank-compliant financial reports in minutes.
           </p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
           {plans.map((plan) => (
             <Card
-              key={plan.name}
-              className={[
-                "border-border bg-card",
-                plan.highlight ? "ring-1 ring-ring" : "",
-              ].join(" ")}
+              key={plan.id}
+              className={`relative flex flex-col justify-between rounded-2xl shadow-sm transition-all duration-300 hover:shadow-xl ${
+                plan.isMostPopular
+                  ? "border-2 border-primary bg-card shadow-lg shadow-primary/10"
+                  : "border border-border/80 bg-card"
+              }`}
             >
-              <CardHeader>
-                <CardTitle className="flex items-baseline justify-between">
-                  <span className="text-lg">{plan.name}</span>
-                  <span className="text-2xl font-bold">{plan.price}</span>
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">{plan.description}</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="grid gap-2 text-sm text-muted-foreground">
-                  {plan.bullets.map((b) => (
-                    <li
-                      key={b}
-                      className="rounded-lg border border-border bg-background px-3 py-2"
-                    >
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-                <Button asChild className="w-full" size="lg">
-                  <Link href="/create-project">Get Started</Link>
+              {plan.isMostPopular && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground px-5 py-1 rounded-full text-xs font-bold tracking-wider uppercase shadow-md flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Most Popular
+                  </Badge>
+                </div>
+              )}
+
+              <div>
+                <CardHeader className="text-center pt-8 pb-4">
+                  <CardTitle className="text-2xl font-bold">
+                    {plan.cardTitle}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2 min-h-[40px]">
+                    {plan.cardDescription}
+                  </p>
+                  <div className="pt-6 pb-2">
+                    <span className="text-lg font-bold text-muted-foreground mr-1">
+                      ₹
+                    </span>
+                    <span className="text-5xl font-black text-foreground">
+                      {plan.price}
+                    </span>
+                    <span className="text-sm font-semibold text-muted-foreground ml-1">
+                      /month
+                    </span>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="px-6 pb-6">
+                  <div className="space-y-3 pt-4 border-t">
+                    {plan.checkListDetails.map((item) => (
+                      <div key={item.id} className="flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span className="text-sm text-muted-foreground">
+                          {item.checkItemDescription}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </div>
+
+              <div className="p-6 pt-0">
+                <Button
+                  asChild
+                  className="w-full h-11 text-base font-bold rounded-xl"
+                  variant={plan.isMostPopular ? "default" : "outline"}
+                >
+                  <Link href="/pricing">Get Started with {plan.cardTitle}</Link>
                 </Button>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
@@ -155,3 +98,4 @@ export function PricingSection() {
   );
 }
 
+export default PricingSection;

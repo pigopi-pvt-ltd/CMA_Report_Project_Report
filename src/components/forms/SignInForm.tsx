@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FaGoogle, FaSignInAlt } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
@@ -43,11 +44,15 @@ export default function SignInForm() {
       router.push("/dashboard")
       toast.success("Signed in successfully");
     } catch (error: any) {
-      const err = error as AxiosError;
+      const data = error?.response?.data;
+      const errorMessage =
+        data?.message ||
+        data?.error ||
+        (Array.isArray(data?.errors) && data.errors[0]?.message) ||
+        error?.message ||
+        "Failed to sign in. Please try again.";
 
-      if (error.response) {
-        toast.error('Error data:', error.response.data.message);
-      }
+      toast.error(errorMessage);
       console.log(error);
     } finally {
       setIsLoading(false);
@@ -64,7 +69,12 @@ export default function SignInForm() {
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="grid grid-cols-1 gap-4">
-          <Button variant="outline" className="w-full py-6 flex items-center justify-center gap-2 border-border hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer" onClick={() => { socialSignIn("google") }}>
+          <Button
+            variant="outline"
+            disabled={isLoading}
+            className="w-full py-6 flex items-center justify-center gap-2 border-border hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => { socialSignIn("google") }}
+          >
             <FaGoogle className="text-2xl" />
             Sign in with Google
           </Button>
@@ -103,9 +113,23 @@ export default function SignInForm() {
               Forgot password?
             </Link>
 
-            <Button type="submit" variant="default" className="w-full py-6 font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer">
-              <FaSignInAlt className="text-2xl" />
-              Sign in
+            <Button
+              type="submit"
+              variant="default"
+              disabled={isLoading}
+              className="w-full py-6 font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <FaSignInAlt className="text-2xl" />
+                  Sign in
+                </>
+              )}
             </Button>
           </form>
         </Form>

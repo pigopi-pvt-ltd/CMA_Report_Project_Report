@@ -26,10 +26,16 @@ export async function generateProjectReport(data: any) {
 
   const interestRate = (data.assumptions?.particulars?.interestRateTermLoan || DEFAULT_INTEREST_RATE) / 100;
   const yearlyGrowthRateValue = data.revenueDetails?.yearlyGrowthRate;
-  const yearlyGrowthRate =
+  const rawGrowth =
     (yearlyGrowthRateValue !== undefined && yearlyGrowthRateValue !== null && yearlyGrowthRateValue !== '' && !isNaN(Number(yearlyGrowthRateValue)))
-      ? Number(yearlyGrowthRateValue) / 100
-      : DEFAULT_GROWTH_RATE;
+      ? Number(yearlyGrowthRateValue)
+      : DEFAULT_GROWTH_RATE * 100;
+
+  // Decimal rate used for internal calculations (e.g. 0.10 for 10%)
+  const yearlyGrowthRate = rawGrowth >= 1 ? rawGrowth / 100 : rawGrowth;
+
+  // Percentage value preserved for storage/display (e.g. 10 instead of 0.10)
+  const storedGrowthRate = rawGrowth < 1 ? Math.round(rawGrowth * 100) : rawGrowth;
 
   const businessReq = data.businessRequirements ?? {};
   const monthlyExpenses = data.monthlyExpenses ?? {};
@@ -312,7 +318,7 @@ export async function generateProjectReport(data: any) {
       salesType: revenueDetails.salesType,
       salesRevenue: Number(revenueDetails.salesRevenue) || 0,
       totalSalesRevenueAnually: revenueDetails.salesType === "monthly" ? (Number(revenueDetails.salesRevenue) || 0) * 12 : (Number(revenueDetails.salesRevenue) || 0),
-      yearlyGrowthRate: yearlyGrowthRate
+      yearlyGrowthRate: storedGrowthRate
     },
 
     revenueData,

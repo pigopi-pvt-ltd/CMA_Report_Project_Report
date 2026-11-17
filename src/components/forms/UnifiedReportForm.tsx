@@ -115,7 +115,12 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 try {
                     const response = await axios.get(`/api/unified-reports/edit?id=${reportId}&type=${type}`);
                     if (response.data.data) {
-                        form.reset(response.data.data);
+                        const reportData = response.data.data;
+                        const growthRate = Number(reportData.revenueDetails?.yearlyGrowthRate);
+                        if (!isNaN(growthRate) && growthRate > 0 && growthRate < 1) {
+                            reportData.revenueDetails.yearlyGrowthRate = Math.round(growthRate * 100);
+                        }
+                        form.reset(reportData);
                         setDataLoaded(true);
                     }
                 } catch (error) {
@@ -180,6 +185,12 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
             router.push(type === 'cma' ? "/dashboard?tab=cma" : "/dashboard");
         } catch (error: any) {
             console.error("Submit error:", error);
+            const errData = error.response?.data;
+            if (errData?.code === "SUBSCRIPTION_REQUIRED" || errData?.code === "PLAN_UPGRADE_REQUIRED") {
+                toast.error(errData.message || "Active subscription required");
+                router.push("/pricing");
+                return;
+            }
             toast.error(isEditMode ? "Failed to update report" : "Failed to create report");
         }
     };

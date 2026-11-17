@@ -78,8 +78,13 @@ export default function ProjectReports({ reports }: { reports: ProjectReport[] }
       document.body.appendChild(a);
       a.click();
       a.remove();
-    } catch (err) {
-      toast.error("Download error");
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("Active subscription required to download PDF report. Redirecting to plans...");
+        window.location.href = "/pricing";
+      } else {
+        toast.error("Download error");
+      }
     }
   };
 

@@ -20,7 +20,6 @@ export async function POST(request: Request) {
         callbackURL,
       },
     });
-console.log(data)
     return NextResponse.json({
       message: "Signed-Up Successfully",
       data
@@ -28,8 +27,11 @@ console.log(data)
 
   } catch (error: any) {
     if (error instanceof ZodError) {
+      const firstIssue = error.issues[0]?.message || "Validation failed";
       return NextResponse.json(
         {
+          message: firstIssue,
+          error: firstIssue,
           errors: error.issues.map((err: any) => ({
             field: err.path.join("."),
             message: err.message,
@@ -38,8 +40,21 @@ console.log(data)
         { status: 400 }
       );
     }
+
+    const message =
+      error?.body?.message ||
+      error?.message ||
+      "An unexpected error occurred during sign up";
+    const statusCode =
+      typeof error?.statusCode === "number"
+        ? error.statusCode
+        : typeof error?.status === "number"
+        ? error.status
+        : 500;
+
     return NextResponse.json({
-      message: error.message
-    }, { status: error.statusCode })
+      message,
+      error: message,
+    }, { status: statusCode })
   }
 }

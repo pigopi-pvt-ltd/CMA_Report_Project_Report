@@ -14,6 +14,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
 import { FaGoogle } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
@@ -41,7 +42,7 @@ export default function SignUpForm() {
    if (termsAndConditions) {
     setIsLoading(true);
     const url = nextParam ? `/api/sign-up?next=${encodeURIComponent(nextParam)}` : "/api/sign-up";
-    const response = await axios.post(url, {
+    await axios.post(url, {
      ...values
     });
     toast.success("Account created successfully");
@@ -49,8 +50,27 @@ export default function SignUpForm() {
     toast.warning("You must agree to the terms and conditions");
    }
   } catch (error: any) {
-   toast.error(error.response.data.error);
-   console.error(error);
+   const data = error?.response?.data;
+   const errorMessage =
+     data?.message ||
+     data?.error ||
+     (Array.isArray(data?.errors) && data.errors[0]?.message) ||
+     error?.message ||
+     "Failed to create account. Please try again.";
+
+   if (
+     typeof errorMessage === "string" &&
+     (errorMessage.toLowerCase().includes("user already exists") ||
+      errorMessage.toLowerCase().includes("email"))
+   ) {
+     form.setError("email", {
+       type: "manual",
+       message: errorMessage,
+     });
+   }
+
+   toast.error(errorMessage);
+   console.error("Sign up error:", error);
   } finally {
    setIsLoading(false);
   }
@@ -65,7 +85,12 @@ export default function SignUpForm() {
    </CardHeader>
    <CardContent className="grid gap-4">
     <div className="grid grid-cols-1 gap-4">
-     <Button variant="outline" className="w-full py-6 flex items-center justify-center gap-2 border-border hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer" onClick={() => { socialSignIn("google") }}>
+     <Button
+      variant="outline"
+      disabled={isLoading}
+      className="w-full py-6 flex items-center justify-center gap-2 border-border hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      onClick={() => { socialSignIn("google") }}
+     >
       <FaGoogle className="text-2xl" />
       Sign up with Google
      </Button>
@@ -128,8 +153,20 @@ export default function SignUpForm() {
        </Label>
       </div>
 
-      <Button type="submit" variant="default" className="w-full py-6 font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer">
-       Create Account
+      <Button
+       type="submit"
+       variant="default"
+       disabled={isLoading}
+       className="w-full py-6 font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      >
+       {isLoading ? (
+        <>
+         <Loader2 className="h-5 w-5 animate-spin" />
+         Creating account...
+        </>
+       ) : (
+        "Create Account"
+       )}
       </Button>
      </form>
     </Form>
