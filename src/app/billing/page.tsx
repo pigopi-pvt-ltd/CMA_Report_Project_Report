@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, AlertCircle, Calendar, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { CheckCircle2, AlertCircle, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-export default function BillingPage() {
+function BillingContent() {
   const [subData, setSubData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -146,5 +146,13 @@ export default function BillingPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-muted-foreground">Loading billing...</div>}>
+      <BillingContent />
+    </Suspense>
   );
 }
