@@ -39,6 +39,7 @@ interface UserSub {
   planName?: string;
   daysRemaining?: number;
   endDate?: string;
+  isLifetime?: boolean;
 }
 
 function Pricing({ cardDetail }: { cardDetail: CardDetail[] }) {
@@ -122,7 +123,7 @@ function Pricing({ cardDetail }: { cardDetail: CardDetail[] }) {
           {activeSub?.hasActiveSubscription && (
             <div className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
               <CheckCircle2 className="w-4 h-4" />
-              You currently have an active subscription: <strong>{activeSub.planName}</strong> ({activeSub.daysRemaining} days remaining)
+              You currently have an active subscription: <strong>{activeSub.planName}</strong> ({activeSub.isLifetime ? "Lifetime Access" : `${activeSub.daysRemaining} days remaining`})
             </div>
           )}
         </div>

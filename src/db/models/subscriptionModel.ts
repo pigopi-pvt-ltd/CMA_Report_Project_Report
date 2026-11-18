@@ -11,6 +11,9 @@ export interface ISubscription extends Document {
   txnid: string;
   paymentId?: string;
   payuResponse?: any;
+  isLifetime?: boolean;
+  isFreeAdminGrant?: boolean;
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +39,9 @@ const SubscriptionSchema = new Schema<ISubscription>(
     txnid: { type: String, required: true, unique: true },
     paymentId: { type: String },
     payuResponse: { type: Schema.Types.Mixed },
+    isLifetime: { type: Boolean, default: false },
+    isFreeAdminGrant: { type: Boolean, default: false },
+    notes: { type: String },
   },
   { timestamps: true }
 );

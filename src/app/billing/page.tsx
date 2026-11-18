@@ -81,16 +81,20 @@ function BillingContent() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-muted-foreground">Days Remaining</span>
-                    <span className="font-semibold text-primary">{subData.daysRemaining} days</span>
+                    <span className="font-semibold text-primary">
+                      {subData.isLifetime ? "Lifetime Access" : `${subData.daysRemaining} days`}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-muted-foreground">Renews / Expires on</span>
                     <span className="text-sm font-medium text-foreground">
-                      {new Date(subData.endDate).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      {subData.isLifetime
+                        ? "Lifetime (Never Expires)"
+                        : new Date(subData.endDate).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
                     </span>
                   </div>
                 </div>

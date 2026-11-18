@@ -15,14 +15,12 @@ type AnimatedThemeTogglerProps = {
 
 export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null)
-  // const [darkMode, setDarkMode] = useState(() =>
-  //   typeof window !== "undefined"
-  //     ? document.documentElement.classList.contains("dark")
-  //     : false
-  // )
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(false)
 
   useEffect(() => {
+    // Initial sync with DOM state
+    setDarkMode(document.documentElement.classList.contains("dark"))
+
     const syncTheme = () =>
       setDarkMode(document.documentElement.classList.contains("dark"))
 
@@ -37,9 +35,17 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
   const onToggle = useCallback(async () => {
     if (!buttonRef.current) return
 
+    const toggled = !document.documentElement.classList.contains("dark")
+
+    if (!document.startViewTransition) {
+      setDarkMode(toggled)
+      document.documentElement.classList.toggle("dark", toggled)
+      localStorage.setItem("theme", toggled ? "dark" : "light")
+      return
+    }
+
     await document.startViewTransition(() => {
       flushSync(() => {
-        const toggled = !darkMode
         setDarkMode(toggled)
         document.documentElement.classList.toggle("dark", toggled)
         localStorage.setItem("theme", toggled ? "dark" : "light")
@@ -67,7 +73,7 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
         pseudoElement: "::view-transition-new(root)",
       }
     )
-  }, [darkMode])
+  }, [])
 
   return (
     <button

@@ -9,6 +9,7 @@ export interface UserSubscriptionStatus {
   canCreateCMAReport: boolean;
   endDate?: Date;
   daysRemaining?: number;
+  isLifetime?: boolean;
 }
 
 /**
@@ -23,7 +24,7 @@ export async function getUserSubscription(
   const activeSub = await Subscription.findOne({
     userId,
     status: "active",
-    endDate: { $gt: now },
+    $or: [{ endDate: { $gt: now } }, { isLifetime: true }],
   }).sort({ endDate: -1 });
 
   if (!activeSub) {
@@ -34,13 +35,16 @@ export async function getUserSubscription(
     };
   }
 
-  const daysRemaining = Math.max(
-    0,
-    Math.ceil(
-      (new Date(activeSub.endDate).getTime() - now.getTime()) /
-        (1000 * 60 * 60 * 24)
-    )
-  );
+  const isLifetime = !!activeSub.isLifetime;
+  const daysRemaining = isLifetime
+    ? 99999
+    : Math.max(
+        0,
+        Math.ceil(
+          (new Date(activeSub.endDate).getTime() - now.getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+      );
 
   return {
     hasActiveSubscription: true,
@@ -50,5 +54,6 @@ export async function getUserSubscription(
     canCreateCMAReport: activeSub.planId === "combo_plan", // only combo_plan can create CMA report
     endDate: activeSub.endDate,
     daysRemaining,
+    isLifetime,
   };
 }
