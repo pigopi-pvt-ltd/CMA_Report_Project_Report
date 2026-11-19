@@ -11,6 +11,8 @@ export interface ICmaReport extends Document {
   businessSummary: string;  // added new field in interface 
   industryType: "manufacturing" | "service" | "trading" | "agriculture";
   loanType: "mudra" | "pmegp" | "msme" | "others";
+  termLoanPercentage?: number;
+  workingCapitalPercentage?: number;
   loanPeriod: number;
 
   personalDetails: {
@@ -54,6 +56,9 @@ export interface ICmaReport extends Document {
     totalLoanAmountNeeded: number;
     promotersContribution: number;
     averageDSCR: number;
+    termLoanPercentage?: number;
+    workingCapitalPercentage?: number;
+    promotersContributionPercentage?: number;
   };
   costStatement: any[];
   depreciationSchedule: any[];
@@ -107,6 +112,8 @@ const cmaReportSchema = new Schema<ICmaReport>(
     businessSummary: { type: String, default: "" },      // added new field in schema
     industryType: { type: String, enum: ["manufacturing", "service", "trading", "agriculture"], required: true },
     loanType: { type: String, enum: ["mudra", "pmegp", "msme", "others"], required: true },
+    termLoanPercentage: { type: Number, default: 54 },
+    workingCapitalPercentage: { type: Number, default: 36 },
     loanPeriod: { type: Number, required: true, min: 5, max: 10 },
 
     personalDetails: {
@@ -129,7 +136,10 @@ const cmaReportSchema = new Schema<ICmaReport>(
     loanDetails: {
       fixedCapitalInvested: Number, workingCapitalInvested: Number, totalProjectCost: Number,
       termLoan: Number, workingCapitalLoan: Number, totalLoanAmountNeeded: Number,
-      promotersContribution: Number, averageDSCR: Number
+      promotersContribution: Number, averageDSCR: Number,
+      termLoanPercentage: { type: Number, default: 54 },
+      workingCapitalPercentage: { type: Number, default: 36 },
+      promotersContributionPercentage: { type: Number, default: 10 }
     },
     costStatement: [Schema.Types.Mixed],
     depreciationSchedule: [Schema.Types.Mixed],

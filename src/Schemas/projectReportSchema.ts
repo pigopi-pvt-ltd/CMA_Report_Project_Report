@@ -92,6 +92,14 @@ export const projectReportSchema = z.object({
   businessSummary: z.string({ message: "Business Summary is required" }).min(20, "Please write at least 2-3 lines explaining your business plan"),
   industryType: industryTypeEnum,
   loanType: loanTypeEnum,
+  termLoanPercentage: z.union([
+    z.number().min(0, "Term loan percentage cannot be negative").max(100, "Term loan percentage cannot exceed 100%"),
+    z.string().refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100), "Term loan percentage must be between 0% and 100%")
+  ]).optional(),
+  workingCapitalPercentage: z.union([
+    z.number().min(0, "Working capital percentage cannot be negative").max(100, "Working capital percentage cannot exceed 100%"),
+    z.string().refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100), "Working capital percentage must be between 0% and 100%")
+  ]).optional(),
   businessRequirements: businessRequirementsSchema.optional(),
   monthlyExpenses: monthlyExpensesSchema.optional(),
   revenueDetails: salesRevenueDetailsSchema,

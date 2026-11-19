@@ -340,6 +340,18 @@ export const drawMeansOfFinance = (
   formatRupees: Function,
   fonts: any
 ) => {
+  const tlShare = lDetails?.termLoanPercentage !== undefined
+    ? `${Number(lDetails.termLoanPercentage).toFixed(2)}%`
+    : (lDetails?.totalProjectCost ? `${((lDetails.termLoan / lDetails.totalProjectCost) * 100).toFixed(2)}%` : "54.00%");
+
+  const wcShare = lDetails?.workingCapitalPercentage !== undefined
+    ? `${Number(lDetails.workingCapitalPercentage).toFixed(2)}%`
+    : (lDetails?.totalProjectCost ? `${((lDetails.workingCapitalLoan / lDetails.totalProjectCost) * 100).toFixed(2)}%` : "36.00%");
+
+  const promoterShare = lDetails?.promotersContributionPercentage !== undefined
+    ? `${Number(lDetails.promotersContributionPercentage).toFixed(2)}%`
+    : (lDetails?.totalProjectCost ? `${((lDetails.promotersContribution / lDetails.totalProjectCost) * 100).toFixed(2)}%` : "10.00%");
+
   const rows: TableRow[] = [
     [
       {
@@ -358,19 +370,19 @@ export const drawMeansOfFinance = (
     ],
     [
       { text: "TERM LOAN FINANCE", width: 190 },
-      { text: "54.00%", width: 80 },
+      { text: tlShare, width: 80 },
       { text: "11.10", width: 140 },
       { text: formatRupees(lDetails.termLoan), width: 140 },
     ],
     [
       { text: "WORKING CAPITAL FINANCE", width: 190 },
-      { text: "36.00%", width: 80 },
+      { text: wcShare, width: 80 },
       { text: "11.10", width: 140 },
       { text: formatRupees(lDetails.workingCapitalLoan), width: 140 },
     ],
     [
       { text: "PROMOTERS CONTRIBUTION", width: 190 },
-      { text: "10.00%", width: 80 },
+      { text: promoterShare, width: 80 },
       { text: "NIL", width: 140 },
       { text: formatRupees(lDetails.promotersContribution), width: 140 },
     ],

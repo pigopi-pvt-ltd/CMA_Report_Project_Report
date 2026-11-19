@@ -59,7 +59,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
         { fields: ["businessName"] },
         { fields: ["businessType", "businessSummary"] },
         { fields: ["industryType"] },
-        { fields: ["loanType"] },
+        { fields: ["loanType", "termLoanPercentage", "workingCapitalPercentage"] },
         { fields: ["businessRequirements"] },
         { fields: ["monthlyExpenses"] },
         { fields: ["revenueDetails"] },
@@ -76,6 +76,8 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
             businessSummary: "",
             industryType: "",
             loanType: "",
+            termLoanPercentage: 54,
+            workingCapitalPercentage: 36,
             businessRequirements: {},
             monthlyExpenses: {},
             revenueDetails: {
@@ -120,6 +122,23 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                         if (!isNaN(growthRate) && growthRate > 0 && growthRate < 1) {
                             reportData.revenueDetails.yearlyGrowthRate = Math.round(growthRate * 100);
                         }
+
+                        if (reportData.termLoanPercentage === undefined && reportData.loanDetails?.termLoanPercentage !== undefined) {
+                            reportData.termLoanPercentage = reportData.loanDetails.termLoanPercentage;
+                        } else if (reportData.termLoanPercentage === undefined && reportData.loanDetails?.totalProjectCost) {
+                            reportData.termLoanPercentage = Math.round((reportData.loanDetails.termLoan / reportData.loanDetails.totalProjectCost) * 100);
+                        } else if (reportData.termLoanPercentage === undefined) {
+                            reportData.termLoanPercentage = 54;
+                        }
+
+                        if (reportData.workingCapitalPercentage === undefined && reportData.loanDetails?.workingCapitalPercentage !== undefined) {
+                            reportData.workingCapitalPercentage = reportData.loanDetails.workingCapitalPercentage;
+                        } else if (reportData.workingCapitalPercentage === undefined && reportData.loanDetails?.totalProjectCost) {
+                            reportData.workingCapitalPercentage = Math.round((reportData.loanDetails.workingCapitalLoan / reportData.loanDetails.totalProjectCost) * 100);
+                        } else if (reportData.workingCapitalPercentage === undefined) {
+                            reportData.workingCapitalPercentage = 36;
+                        }
+
                         form.reset(reportData);
                         setDataLoaded(true);
                     }
@@ -137,6 +156,38 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
     // 4. Handle Navigation Logic
     const handleNextButton = async () => {
         const currentFields = stepsConfig[currentStep].fields;
+
+        // Step 4 Custom Validation for Loan Percentages
+        if (currentStep === 3) {
+            const tlVal = form.getValues("termLoanPercentage");
+            const wcVal = form.getValues("workingCapitalPercentage");
+            const tl = Number(tlVal === "" || tlVal === undefined ? 54 : tlVal);
+            const wc = Number(wcVal === "" || wcVal === undefined ? 36 : wcVal);
+
+            if (isNaN(tl) || tl < 0 || tl > 100) {
+                form.setError('termLoanPercentage', {
+                    type: 'manual',
+                    message: 'Term loan percentage must be between 0 and 100%',
+                });
+                return;
+            }
+
+            if (isNaN(wc) || wc < 0 || wc > 100) {
+                form.setError('workingCapitalPercentage', {
+                    type: 'manual',
+                    message: 'Working capital percentage must be between 0 and 100%',
+                });
+                return;
+            }
+
+            if (tl + wc > 100) {
+                form.setError('workingCapitalPercentage', {
+                    type: 'manual',
+                    message: `Total loan percentage (${tl + wc}%) cannot exceed 100%`,
+                });
+                return;
+            }
+        }
 
         // Step 7 Custom Validation for Growth Rate
         if (currentStep === 6) {

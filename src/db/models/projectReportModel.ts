@@ -88,6 +88,9 @@ export type LoanDetails = {
   totalLoanAmountNeeded: number;
   promotersContribution: number;
   averageDSCR: number;
+  termLoanPercentage?: number;
+  workingCapitalPercentage?: number;
+  promotersContributionPercentage?: number;
 };
 
 export type costStatementType = {
@@ -482,6 +485,8 @@ export interface ProjectData extends Document {
   businessSummary: string; // added new field in interface
   industryType: "manufacturing" | "service" | "trading" | "agriculture";
   loanType: "mudra" | "pmegp" | "msme" | "others";
+  termLoanPercentage?: number;
+  workingCapitalPercentage?: number;
   businessRequirements: businessRequirementsMap;
   monthlyExpenses: monthlyExpensesMap;
   revenueDetails: salesRevenueDetails;
@@ -556,6 +561,16 @@ const ProjectReportSchema = new Schema<ProjectData>(
       type: String,
       enum: ["mudra", "pmegp", "msme", "others"],
       required: true,
+    },
+
+    termLoanPercentage: {
+      type: Number,
+      default: 54,
+    },
+
+    workingCapitalPercentage: {
+      type: Number,
+      default: 36,
     },
 
     businessRequirements: {
@@ -698,6 +713,18 @@ const ProjectReportSchema = new Schema<ProjectData>(
         type: Number,
         required: true,
         min: 0,
+      },
+      termLoanPercentage: {
+        type: Number,
+        default: 54,
+      },
+      workingCapitalPercentage: {
+        type: Number,
+        default: 36,
+      },
+      promotersContributionPercentage: {
+        type: Number,
+        default: 10,
       },
     },
     costStatement: [

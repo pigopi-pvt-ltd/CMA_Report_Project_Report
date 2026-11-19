@@ -23,6 +23,32 @@ export async function generateProjectReport(data: any) {
 
   const DEFAULT_INTEREST_RATE = 11.1;
   const DEFAULT_GROWTH_RATE = 0.10;
+  const DEFAULT_TERM_LOAN_RATE = 54;
+  const DEFAULT_WORKING_CAPITAL_RATE = 36;
+
+  const rawTermLoanRate = (data.termLoanPercentage !== undefined && data.termLoanPercentage !== null && data.termLoanPercentage !== '' && !isNaN(Number(data.termLoanPercentage)))
+    ? Number(data.termLoanPercentage)
+    : ((data.loanDetails?.termLoanPercentage !== undefined && !isNaN(Number(data.loanDetails?.termLoanPercentage)))
+      ? Number(data.loanDetails.termLoanPercentage)
+      : DEFAULT_TERM_LOAN_RATE);
+
+  const rawWCRate = ((data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !== undefined &&
+    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !== null &&
+    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !== '' &&
+    !isNaN(Number(data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage)))
+    ? Number(data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage)
+    : ((data.loanDetails?.workingCapitalPercentage !== undefined && !isNaN(Number(data.loanDetails?.workingCapitalPercentage)))
+      ? Number(data.loanDetails.workingCapitalPercentage)
+      : DEFAULT_WORKING_CAPITAL_RATE);
+
+  // Decimal rate used for internal calculations (e.g. 0.54 for 54%)
+  const termLoanRate = rawTermLoanRate >= 1 ? rawTermLoanRate / 100 : rawTermLoanRate;
+  const workingCapitalRate = rawWCRate >= 1 ? rawWCRate / 100 : rawWCRate;
+
+  // Stored percentage value (e.g. 54 instead of 0.54)
+  const storedTermLoanRate = rawTermLoanRate < 1 ? Math.round(rawTermLoanRate * 100) : rawTermLoanRate;
+  const storedWorkingCapitalRate = rawWCRate < 1 ? Math.round(rawWCRate * 100) : rawWCRate;
+  const storedPromoterRate = Math.max(0, 100 - storedTermLoanRate - storedWorkingCapitalRate);
 
   const interestRate = (data.assumptions?.particulars?.interestRateTermLoan || DEFAULT_INTEREST_RATE) / 100;
   const yearlyGrowthRateValue = data.revenueDetails?.yearlyGrowthRate;
@@ -46,10 +72,13 @@ export async function generateProjectReport(data: any) {
   const capital = calculateCapital(businessReq);
 
   const termLoan =
-    capital.totalProjectCost * 0.54;
+    capital.totalProjectCost * termLoanRate;
 
   const workingCapitalLoan =
-    capital.totalProjectCost * 0.36;
+    capital.totalProjectCost * workingCapitalRate;
+
+  const promotersContribution =
+    Math.max(0, capital.totalProjectCost - (termLoan + workingCapitalLoan));
 
   // LOAN
   const loanData = calculateLoanDetails(
@@ -303,6 +332,8 @@ export async function generateProjectReport(data: any) {
   };
 
   return {
+    termLoanPercentage: storedTermLoanRate,
+    workingCapitalPercentage: storedWorkingCapitalRate,
     loanDetails: {
       fixedCapitalInvested: capital.fixedCapitalInvested,
       workingCapitalInvested: capital.workingCapitalInvested,
@@ -310,8 +341,11 @@ export async function generateProjectReport(data: any) {
       termLoan,
       workingCapitalLoan,
       totalLoanAmountNeeded: termLoan + workingCapitalLoan,
-      promotersContribution: capital.totalProjectCost * 0.10,
+      promotersContribution,
       averageDSCR: averageDSCR,
+      termLoanPercentage: storedTermLoanRate,
+      workingCapitalPercentage: storedWorkingCapitalRate,
+      promotersContributionPercentage: storedPromoterRate,
     },
     revenueDetails: {
       productName: revenueDetails.productName,
