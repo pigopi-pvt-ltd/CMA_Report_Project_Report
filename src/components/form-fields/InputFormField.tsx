@@ -50,6 +50,7 @@ const InputFormField = <T extends FieldValues>({
             ) : (
               <Input
                 {...field}
+                type={type}
                 placeholder={placeholder}
                 className={className}
               />

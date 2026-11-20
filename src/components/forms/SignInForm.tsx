@@ -62,9 +62,9 @@ export default function SignInForm() {
   return (
     <Card className="w-full max-w-md bg-card shadow-lg border-border">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center text-foreground">Create an account</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-foreground">Sign in to your account</CardTitle>
         <CardDescription className="text-center text-muted-foreground">
-          Enter your information below to create your account
+          Enter your email and password to access your account
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -105,6 +105,7 @@ export default function SignInForm() {
               control={form.control}
               name="password"
               label="Password"
+              type="password"
               placeholder="••••••••"
             />
 

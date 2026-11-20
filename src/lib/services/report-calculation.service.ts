@@ -20,40 +20,64 @@ import { calculateMPBF } from "./mpbf.service";
 import { generateSWOT } from "./swot.service";
 
 export async function generateProjectReport(data: any) {
-
   const DEFAULT_INTEREST_RATE = 11.1;
-  const DEFAULT_GROWTH_RATE = 0.10;
+  const DEFAULT_GROWTH_RATE = 0.1;
   const DEFAULT_TERM_LOAN_RATE = 54;
   const DEFAULT_WORKING_CAPITAL_RATE = 36;
 
-  const rawTermLoanRate = (data.termLoanPercentage !== undefined && data.termLoanPercentage !== null && data.termLoanPercentage !== '' && !isNaN(Number(data.termLoanPercentage)))
-    ? Number(data.termLoanPercentage)
-    : ((data.loanDetails?.termLoanPercentage !== undefined && !isNaN(Number(data.loanDetails?.termLoanPercentage)))
-      ? Number(data.loanDetails.termLoanPercentage)
-      : DEFAULT_TERM_LOAN_RATE);
+  const rawTermLoanRate =
+    data.termLoanPercentage !== undefined &&
+    data.termLoanPercentage !== null &&
+    data.termLoanPercentage !== "" &&
+    !isNaN(Number(data.termLoanPercentage))
+      ? Number(data.termLoanPercentage)
+      : data.loanDetails?.termLoanPercentage !== undefined &&
+          !isNaN(Number(data.loanDetails?.termLoanPercentage))
+        ? Number(data.loanDetails.termLoanPercentage)
+        : DEFAULT_TERM_LOAN_RATE;
 
-  const rawWCRate = ((data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !== undefined &&
-    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !== null &&
-    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !== '' &&
-    !isNaN(Number(data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage)))
-    ? Number(data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage)
-    : ((data.loanDetails?.workingCapitalPercentage !== undefined && !isNaN(Number(data.loanDetails?.workingCapitalPercentage)))
-      ? Number(data.loanDetails.workingCapitalPercentage)
-      : DEFAULT_WORKING_CAPITAL_RATE);
+  const rawWCRate =
+    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !==
+      undefined &&
+    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !==
+      null &&
+    (data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage) !==
+      "" &&
+    !isNaN(
+      Number(data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage)
+    )
+      ? Number(
+          data.workingCapitalPercentage ?? data.workingCapitalLoanPercentage
+        )
+      : data.loanDetails?.workingCapitalPercentage !== undefined &&
+          !isNaN(Number(data.loanDetails?.workingCapitalPercentage))
+        ? Number(data.loanDetails.workingCapitalPercentage)
+        : DEFAULT_WORKING_CAPITAL_RATE;
 
   // Decimal rate used for internal calculations (e.g. 0.54 for 54%)
-  const termLoanRate = rawTermLoanRate >= 1 ? rawTermLoanRate / 100 : rawTermLoanRate;
+  const termLoanRate =
+    rawTermLoanRate >= 1 ? rawTermLoanRate / 100 : rawTermLoanRate;
   const workingCapitalRate = rawWCRate >= 1 ? rawWCRate / 100 : rawWCRate;
 
   // Stored percentage value (e.g. 54 instead of 0.54)
-  const storedTermLoanRate = rawTermLoanRate < 1 ? Math.round(rawTermLoanRate * 100) : rawTermLoanRate;
-  const storedWorkingCapitalRate = rawWCRate < 1 ? Math.round(rawWCRate * 100) : rawWCRate;
-  const storedPromoterRate = Math.max(0, 100 - storedTermLoanRate - storedWorkingCapitalRate);
+  const storedTermLoanRate =
+    rawTermLoanRate < 1 ? Math.round(rawTermLoanRate * 100) : rawTermLoanRate;
+  const storedWorkingCapitalRate =
+    rawWCRate < 1 ? Math.round(rawWCRate * 100) : rawWCRate;
+  const storedPromoterRate = Math.max(
+    0,
+    100 - storedTermLoanRate - storedWorkingCapitalRate
+  );
 
-  const interestRate = (data.assumptions?.particulars?.interestRateTermLoan || DEFAULT_INTEREST_RATE) / 100;
+  const interestRate =
+    (data.assumptions?.particulars?.interestRateTermLoan ||
+      DEFAULT_INTEREST_RATE) / 100;
   const yearlyGrowthRateValue = data.revenueDetails?.yearlyGrowthRate;
   const rawGrowth =
-    (yearlyGrowthRateValue !== undefined && yearlyGrowthRateValue !== null && yearlyGrowthRateValue !== '' && !isNaN(Number(yearlyGrowthRateValue)))
+    yearlyGrowthRateValue !== undefined &&
+    yearlyGrowthRateValue !== null &&
+    yearlyGrowthRateValue !== "" &&
+    !isNaN(Number(yearlyGrowthRateValue))
       ? Number(yearlyGrowthRateValue)
       : DEFAULT_GROWTH_RATE * 100;
 
@@ -61,7 +85,8 @@ export async function generateProjectReport(data: any) {
   const yearlyGrowthRate = rawGrowth >= 1 ? rawGrowth / 100 : rawGrowth;
 
   // Percentage value preserved for storage/display (e.g. 10 instead of 0.10)
-  const storedGrowthRate = rawGrowth < 1 ? Math.round(rawGrowth * 100) : rawGrowth;
+  const storedGrowthRate =
+    rawGrowth < 1 ? Math.round(rawGrowth * 100) : rawGrowth;
 
   const businessReq = data.businessRequirements ?? {};
   const monthlyExpenses = data.monthlyExpenses ?? {};
@@ -71,14 +96,14 @@ export async function generateProjectReport(data: any) {
   // CAPITAL
   const capital = calculateCapital(businessReq);
 
-  const termLoan =
-    capital.totalProjectCost * termLoanRate;
+  const termLoan = capital.totalProjectCost * termLoanRate;
 
-  const workingCapitalLoan =
-    capital.totalProjectCost * workingCapitalRate;
+  const workingCapitalLoan = capital.totalProjectCost * workingCapitalRate;
 
-  const promotersContribution =
-    Math.max(0, capital.totalProjectCost - (termLoan + workingCapitalLoan));
+  const promotersContribution = Math.max(
+    0,
+    capital.totalProjectCost - (termLoan + workingCapitalLoan)
+  );
 
   // LOAN
   const loanData = calculateLoanDetails(
@@ -97,8 +122,7 @@ export async function generateProjectReport(data: any) {
   );
 
   // COST (USES LOAN DATA FOR PRINCIPAL REPAYMENT)
-  const costStatement =
-    generateCostStatement(revenueData, loanData);
+  const costStatement = generateCostStatement(revenueData, loanData);
 
   // PRODUCTION COST
   const purchaseCostStatement = calculateProductionCost(
@@ -110,46 +134,41 @@ export async function generateProjectReport(data: any) {
   );
 
   // DEPRECIATION
-  const depreciationSchedule =
-    calculateDepreciation(
-      businessReq,
-      loanPeriod
-    );
+  const depreciationSchedule = calculateDepreciation(businessReq, loanPeriod);
 
   // PROFITABILITY
-  const profitabilityStatement =
-    calculateProfitability(
-      costStatement,
-      monthlyExpenses,
-      depreciationSchedule,
-      loanData,
-      workingCapitalLoan,
-      interestRate,
-      yearlyGrowthRate
-    );
+  const profitabilityStatement = calculateProfitability(
+    costStatement,
+    monthlyExpenses,
+    depreciationSchedule,
+    loanData,
+    workingCapitalLoan,
+    interestRate,
+    yearlyGrowthRate
+  );
 
   // DSCR
-  const { dscrStatement, averageDSCR } =
-    calculateDSCR(
-      profitabilityStatement,
-      depreciationSchedule,
-      loanData,
-      costStatement,
-      loanPeriod
-    );
+  const { dscrStatement, averageDSCR } = calculateDSCR(
+    profitabilityStatement,
+    depreciationSchedule,
+    loanData,
+    costStatement,
+    loanPeriod
+  );
 
   // EBITDA
-  const ebidtaAnalysis =
-    calculateEBITDA(profitabilityStatement, depreciationSchedule);
+  const ebidtaAnalysis = calculateEBITDA(
+    profitabilityStatement,
+    depreciationSchedule
+  );
 
   // ROI
-  const returnOnInvestmentAnalysis =
-    calculateROI(
-      profitabilityStatement,
-      depreciationSchedule,
-      capital.totalProjectCost,
-      loanPeriod
-    );
+  const returnOnInvestmentAnalysis = calculateROI(
+    profitabilityStatement,
+    depreciationSchedule,
+    capital.totalProjectCost,
+    loanPeriod
+  );
 
   // MPBF
   const mpbfAnalysis = calculateMPBF(
@@ -161,79 +180,67 @@ export async function generateProjectReport(data: any) {
   );
 
   // Balance Sheet
-  const projectedBalanceSheet =
-    calculateBalanceSheet(
-      capital.totalProjectCost * 0.10,
-      profitabilityStatement,
-      depreciationSchedule,
-      loanData.loanCalculation,
-      workingCapitalLoan,
-      purchaseCostStatement
-    );
+  const projectedBalanceSheet = calculateBalanceSheet(
+    capital.totalProjectCost * 0.1,
+    profitabilityStatement,
+    depreciationSchedule,
+    loanData.loanCalculation,
+    workingCapitalLoan,
+    purchaseCostStatement
+  );
 
   // Cash Flow
-  const projectedCashFlow =
-    calculateCashFlow(
-      profitabilityStatement,
-      depreciationSchedule,
-      projectedBalanceSheet,
-      capital.totalProjectCost,
-      termLoan,
-      workingCapitalLoan,
-      capital.fixedCapitalInvested
-    );
+  const projectedCashFlow = calculateCashFlow(
+    profitabilityStatement,
+    depreciationSchedule,
+    projectedBalanceSheet,
+    capital.totalProjectCost,
+    termLoan,
+    workingCapitalLoan,
+    capital.fixedCapitalInvested
+  );
 
   // Ratios
-  const ratioAnalysis =
-    calculateRatios(
-      profitabilityStatement,
-      depreciationSchedule,
-      mpbfAnalysis,
-      costStatement,
-      termLoan,
-      capital.totalProjectCost,
-      capital.fixedCapitalInvested,
-      loanPeriod
-    );
+  const ratioAnalysis = calculateRatios(
+    profitabilityStatement,
+    depreciationSchedule,
+    mpbfAnalysis,
+    costStatement,
+    termLoan,
+    capital.totalProjectCost,
+    capital.fixedCapitalInvested,
+    loanPeriod
+  );
 
   // BREAK EVEN
-  const breakEvenAnalysis =
-    calculateBreakEven(
-      profitabilityStatement
-    );
+  const breakEvenAnalysis = calculateBreakEven(profitabilityStatement);
 
   // SENSITIVITY
-  const sensitivityAnalysis =
-    calculateSensitivity(
-      profitabilityStatement,
-      purchaseCostStatement,
-      loanPeriod
-    );
+  const sensitivityAnalysis = calculateSensitivity(
+    profitabilityStatement,
+    purchaseCostStatement,
+    loanPeriod
+  );
 
   // FINANCIAL POSITION
-  const financialPosition =
-    calculateFinancialPosition(
-      profitabilityStatement,
-      ratioAnalysis,
-      projectedBalanceSheet,
-      loanPeriod
-    );
+  const financialPosition = calculateFinancialPosition(
+    profitabilityStatement,
+    ratioAnalysis,
+    projectedBalanceSheet,
+    loanPeriod
+  );
 
   // AFP
-  const AFPTable =
-    calculateAFP(
-      projectedBalanceSheet
-    );
+  const AFPTable = calculateAFP(projectedBalanceSheet);
 
   // SWOT & ACTION PLAN
   const { swotAnalysis, actionPlan } = generateSWOT();
 
   // PROJECT PROSPECTS
-  const projectProspects =
-    generateProjectProspects(
-      data.industryType,
-      averageDSCR
-    );
+  const projectProspects = generateProjectProspects(
+    data.industryType,
+    averageDSCR
+  );
 
   // GENERAL EXPENSES STATEMENT
   const generalExpensesStatement = profitabilityStatement.map((p, i) => {
@@ -252,7 +259,10 @@ export async function generateProjectReport(data: any) {
       rent: p.rent,
       electricityExpenses: p.electricityExpenses,
     };
-    const totalOpsExp = Object.values(yearExp).reduce((a, b: any) => a + (Number(b) || 0), 0);
+    const totalOpsExp = Object.values(yearExp).reduce(
+      (a, b: any) => a + (Number(b) || 0),
+      0
+    );
     const totalGeneralExpenses = totalOpsExp + yearDepr;
     const currentGrossProfit = purchaseCostStatement[i].grossProfit;
     const operatingProfit = currentGrossProfit - totalGeneralExpenses;
@@ -265,7 +275,7 @@ export async function generateProjectReport(data: any) {
       totalFinanceCharges: p.interestOnTermLoan + p.interestOnWorkingCapital,
       depreciation: yearDepr,
       totalGeneralExpenses,
-      operatingProfit
+      operatingProfit,
     };
   });
 
@@ -276,12 +286,14 @@ export async function generateProjectReport(data: any) {
     const sales = profit.totalA;
     const fixedCosts = bep.fixedCostTotal;
     const grossProfit = purExp.grossProfit;
-    const breakEvenSales = grossProfit > 0 ? Math.round((sales * fixedCosts) / grossProfit) : 0;
+    const breakEvenSales =
+      grossProfit > 0 ? Math.round((sales * fixedCosts) / grossProfit) : 0;
 
     return {
       year: profit.year,
       sales: sales,
-      variableCosts: profit.totalPurchaseEquipment +
+      variableCosts:
+        profit.totalPurchaseEquipment +
         profit.powerAndFuel +
         profit.printingAndStationery +
         profit.miscellaneousExpenses +
@@ -292,7 +304,7 @@ export async function generateProjectReport(data: any) {
       interestOnTermLoan: profit.interestOnTermLoan,
       interestOnCC: profit.interestOnWorkingCapital || 0,
       fixedCosts: fixedCosts,
-      breakEvenSales: breakEvenSales
+      breakEvenSales: breakEvenSales,
     };
   });
 
@@ -300,35 +312,37 @@ export async function generateProjectReport(data: any) {
   const finalAssumption = {
     loanDurationYearsCount: loanPeriod,
     averageDebtServiceCoverageRatio: averageDSCR,
-    
+
     // Revenue from sales summary (based on profitability data)
     revenueFromSalesSummary: profitabilityStatement.map((profit: any) => ({
       year: profit.year,
-      grossReceipts: profit.totalA || 0
+      grossReceipts: profit.totalA || 0,
     })),
-    
+
     // Total expenses summary
     totalExpensesSummary: profitabilityStatement.map((profit: any) => ({
       year: profit.year,
-      totalExpenditure: profit.totalB || 0
+      totalExpenditure: profit.totalB || 0,
     })),
-    
+
     // Taxation provision summary
     taxationProvisionSummary: profitabilityStatement.map((profit: any) => ({
       year: profit.year,
-      taxAmount: profit.provisionForTaxation || 0
+      taxAmount: profit.provisionForTaxation || 0,
     })),
-    
+
     // Financial assumptions
     financialAssumptions: {
-      incrementInGrossReceipts: data.assumptions?.particulars?.projectedIncrementReceipts || "135%",
-      incrementInExpenditure: data.assumptions?.particulars?.projectedIncrementExpenditure || "112%"
+      incrementInGrossReceipts:
+        data.assumptions?.particulars?.projectedIncrementReceipts || "135%",
+      incrementInExpenditure:
+        data.assumptions?.particulars?.projectedIncrementExpenditure || "112%",
     },
-    
+
     // Workforce details
     workforceDetails: {
-      employmentPotentialCount: "10 Above" // This could be made dynamic based on business requirements
-    }
+      employmentPotentialCount: "10 Above", // This could be made dynamic based on business requirements
+    },
   };
 
   return {
@@ -351,8 +365,11 @@ export async function generateProjectReport(data: any) {
       productName: revenueDetails.productName,
       salesType: revenueDetails.salesType,
       salesRevenue: Number(revenueDetails.salesRevenue) || 0,
-      totalSalesRevenueAnually: revenueDetails.salesType === "monthly" ? (Number(revenueDetails.salesRevenue) || 0) * 12 : (Number(revenueDetails.salesRevenue) || 0),
-      yearlyGrowthRate: storedGrowthRate
+      totalSalesRevenueAnually:
+        revenueDetails.salesType === "monthly"
+          ? (Number(revenueDetails.salesRevenue) || 0) * 12
+          : Number(revenueDetails.salesRevenue) || 0,
+      yearlyGrowthRate: storedGrowthRate,
     },
 
     revenueData,
@@ -384,36 +401,61 @@ export async function generateProjectReport(data: any) {
     targetMarket: [
       {
         srNo: 1,
-        targetCustomer: "Our initial plan is to target the customer base in our locality. The local customer base is large, and we will also get direct feedback from our customers.",
-        expectedShare: "75%"
+        targetCustomer:
+          "Our initial plan is to target the customer base in our locality. The local customer base is large, and we will also get direct feedback from our customers.",
+        expectedShare: "75%",
       },
       {
         srNo: 2,
-        targetCustomer: "We will expand our reach to B2B Businesses by offering bulk orders and subscription-based services to enhance brand loyalty.",
-        expectedShare: "15%"
+        targetCustomer:
+          "We will expand our reach to B2B Businesses by offering bulk orders and subscription-based services to enhance brand loyalty.",
+        expectedShare: "15%",
       },
       {
         srNo: 3,
-        targetCustomer: "Our long-term strategy focuses on targeting online consumers through e-commerce platforms and social media marketing, ensuring accessibility beyond local boundaries.",
-        expectedShare: "10%"
-      }
+        targetCustomer:
+          "Our long-term strategy focuses on targeting online consumers through e-commerce platforms and social media marketing, ensuring accessibility beyond local boundaries.",
+        expectedShare: "10%",
+      },
     ],
     projectProspects,
     industryJustifications: data.assumptions?.industryJustifications || [
-      { industry: "Manufacturing", receiptsIncrement: "115%", expenditureIncrement: "120%", justification: "Govt. incentives like PLI, Make in India, rising raw material costs." },
-      { industry: "Service", receiptsIncrement: "135%", expenditureIncrement: "112%", justification: "IT, fintech, outsourcing boom, automation reducing costs." },
-      { industry: "Trading", receiptsIncrement: "128%", expenditureIncrement: "115%", justification: "E-commerce growth, supply chain efficiency, rising logistics costs." },
-      { industry: "Agriculture", receiptsIncrement: "118%", expenditureIncrement: "122%", justification: "MSP hikes, agri-tech adoption, high fertilizer & labor costs." }
+      {
+        industry: "Manufacturing",
+        receiptsIncrement: "115%",
+        expenditureIncrement: "120%",
+        justification:
+          "Govt. incentives like PLI, Make in India, rising raw material costs.",
+      },
+      {
+        industry: "Service",
+        receiptsIncrement: "135%",
+        expenditureIncrement: "112%",
+        justification:
+          "IT, fintech, outsourcing boom, automation reducing costs.",
+      },
+      {
+        industry: "Trading",
+        receiptsIncrement: "128%",
+        expenditureIncrement: "115%",
+        justification:
+          "E-commerce growth, supply chain efficiency, rising logistics costs.",
+      },
+      {
+        industry: "Agriculture",
+        receiptsIncrement: "118%",
+        expenditureIncrement: "122%",
+        justification:
+          "MSP hikes, agri-tech adoption, high fertilizer & labor costs.",
+      },
     ],
     assumptions: data.assumptions || {
       particulars: {
         projectedIncrementReceipts: "135%",
         projectedIncrementExpenditure: "112%",
-        interestRateTermLoan: 11.10,
-        interestRateCashCredit: 11.10
-      }
-    }
+        interestRateTermLoan: 11.1,
+        interestRateCashCredit: 11.1,
+      },
+    },
   };
 }
-
-
