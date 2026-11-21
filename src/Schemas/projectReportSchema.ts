@@ -100,6 +100,15 @@ export const projectReportSchema = z.object({
     z.number().min(0, "Working capital percentage cannot be negative").max(100, "Working capital percentage cannot exceed 100%"),
     z.string().refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100), "Working capital percentage must be between 0% and 100%")
   ]).optional(),
+  interestRateTermLoan: z.union([
+    z.number().min(0, "Interest rate cannot be negative").max(100, "Interest rate cannot exceed 100%"),
+    z.string().refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100), "Interest rate must be between 0% and 100%")
+  ]).optional(),
+  interestRateCashCredit: z.union([
+    z.number().min(0, "Interest rate cannot be negative").max(100, "Interest rate cannot exceed 100%"),
+    z.string().refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 100), "Interest rate must be between 0% and 100%")
+  ]).optional(),
+  assumptions: z.any().optional(),
   businessRequirements: businessRequirementsSchema.optional(),
   monthlyExpenses: monthlyExpensesSchema.optional(),
   revenueDetails: salesRevenueDetailsSchema,

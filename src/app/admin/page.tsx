@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -134,9 +135,17 @@ export default function AdminLoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="admin-password" className="text-xs font-semibold text-slate-300">
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="admin-password" className="text-xs font-semibold text-slate-300">
+                    Password
+                  </Label>
+                  <Link
+                    href="/admin/forgot-password"
+                    className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                   <Input

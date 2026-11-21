@@ -23,6 +23,14 @@ export const step4Schema = z.object({
     z.number().min(0, "Percentage cannot be negative").max(100, "Percentage cannot exceed 100%"),
     z.string()
   ]).optional(),
+  interestRateTermLoan: z.union([
+    z.number().min(0, "Interest rate cannot be negative").max(100, "Interest rate cannot exceed 100%"),
+    z.string()
+  ]).optional(),
+  interestRateCashCredit: z.union([
+    z.number().min(0, "Interest rate cannot be negative").max(100, "Interest rate cannot exceed 100%"),
+    z.string()
+  ]).optional(),
 }).superRefine((data, ctx) => {
   if (data.loanType === "others" && (!data.otherLoanType || data.otherLoanType.trim() === "")) {
     ctx.addIssue({
@@ -154,6 +162,77 @@ const Step4 = ({ currentStep, form }: Props) => {
           </Field>
         )}
       />
+
+      {/* Interest Rates (Term Loan & Working Capital) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Term Loan Interest Rate */}
+        <Controller
+          name={"interestRateTermLoan" as any}
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="interestRateTermLoan">
+                Term Loan Interest Rate (% p.a.)
+              </FieldLabel>
+              <Input
+                id="interestRateTermLoan"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                placeholder="11.1"
+                autoComplete="off"
+                aria-invalid={fieldState.invalid}
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+              />
+              <FieldDescription>
+                Annual interest rate for Term Loan (Default: 11.1%)
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        {/* Working Capital Loan Interest Rate */}
+        <Controller
+          name={"interestRateCashCredit" as any}
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="interestRateCashCredit">
+                Cash Credit / WC Interest Rate (% p.a.)
+              </FieldLabel>
+              <Input
+                id="interestRateCashCredit"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                placeholder="11.1"
+                autoComplete="off"
+                aria-invalid={fieldState.invalid}
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+              />
+              <FieldDescription>
+                Annual interest rate for Cash Credit (Default: 11.1%)
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </div>
 
       {/* Breakdown Summary Box */}
       <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-2 text-sm">

@@ -69,9 +69,50 @@ export async function generateProjectReport(data: any) {
     100 - storedTermLoanRate - storedWorkingCapitalRate
   );
 
+  const rawTermLoanInterestRate =
+    data.interestRateTermLoan !== undefined &&
+    data.interestRateTermLoan !== null &&
+    data.interestRateTermLoan !== "" &&
+    !isNaN(Number(data.interestRateTermLoan))
+      ? Number(data.interestRateTermLoan)
+      : data.assumptions?.particulars?.interestRateTermLoan !== undefined &&
+          !isNaN(Number(data.assumptions?.particulars?.interestRateTermLoan))
+        ? Number(data.assumptions.particulars.interestRateTermLoan)
+        : DEFAULT_INTEREST_RATE;
+
+  const rawWCInterestRate =
+    data.interestRateCashCredit !== undefined &&
+    data.interestRateCashCredit !== null &&
+    data.interestRateCashCredit !== "" &&
+    !isNaN(Number(data.interestRateCashCredit))
+      ? Number(data.interestRateCashCredit)
+      : data.assumptions?.particulars?.interestRateCashCredit !== undefined &&
+          !isNaN(Number(data.assumptions?.particulars?.interestRateCashCredit))
+        ? Number(data.assumptions.particulars.interestRateCashCredit)
+        : rawTermLoanInterestRate;
+
+  // Stored percentage value (e.g. 11.1 instead of 0.111)
+  const storedTermLoanInterestRate =
+    rawTermLoanInterestRate < 1 && rawTermLoanInterestRate > 0
+      ? Math.round(rawTermLoanInterestRate * 1000) / 10
+      : rawTermLoanInterestRate;
+
+  const storedWCInterestRate =
+    rawWCInterestRate < 1 && rawWCInterestRate > 0
+      ? Math.round(rawWCInterestRate * 1000) / 10
+      : rawWCInterestRate;
+
+  // Decimal rate used for internal calculations
   const interestRate =
-    (data.assumptions?.particulars?.interestRateTermLoan ||
-      DEFAULT_INTEREST_RATE) / 100;
+    storedTermLoanInterestRate >= 1
+      ? storedTermLoanInterestRate / 100
+      : storedTermLoanInterestRate;
+
+  const wcInterestRateDecimal =
+    storedWCInterestRate >= 1
+      ? storedWCInterestRate / 100
+      : storedWCInterestRate;
+
   const yearlyGrowthRateValue = data.revenueDetails?.yearlyGrowthRate;
   const rawGrowth =
     yearlyGrowthRateValue !== undefined &&
@@ -109,8 +150,9 @@ export async function generateProjectReport(data: any) {
   const loanData = calculateLoanDetails(
     termLoan,
     workingCapitalLoan,
-    data.assumptions?.particulars?.interestRateTermLoan || 11.1,
-    loanPeriod
+    storedTermLoanInterestRate,
+    loanPeriod,
+    storedWCInterestRate
   );
 
   // REVENUE
@@ -143,7 +185,7 @@ export async function generateProjectReport(data: any) {
     depreciationSchedule,
     loanData,
     workingCapitalLoan,
-    interestRate,
+    wcInterestRateDecimal,
     yearlyGrowthRate
   );
 
@@ -449,13 +491,49 @@ export async function generateProjectReport(data: any) {
           "MSP hikes, agri-tech adoption, high fertilizer & labor costs.",
       },
     ],
-    assumptions: data.assumptions || {
+    interestRateTermLoan: storedTermLoanInterestRate,
+    interestRateCashCredit: storedWCInterestRate,
+    assumptions: {
+      ...(data.assumptions || {}),
       particulars: {
-        projectedIncrementReceipts: "135%",
-        projectedIncrementExpenditure: "112%",
-        interestRateTermLoan: 11.1,
-        interestRateCashCredit: 11.1,
+        projectedIncrementReceipts:
+          data.assumptions?.particulars?.projectedIncrementReceipts || "135%",
+        projectedIncrementExpenditure:
+          data.assumptions?.particulars?.projectedIncrementExpenditure || "112%",
+        interestRateTermLoan: storedTermLoanInterestRate,
+        interestRateCashCredit: storedWCInterestRate,
       },
+      industryJustifications:
+        data.assumptions?.industryJustifications || [
+          {
+            industry: "Manufacturing",
+            receiptsIncrement: "135%",
+            expenditureIncrement: "112%",
+            justification:
+              "Capacity expansion, steady raw material prices, scale-driven margin gains.",
+          },
+          {
+            industry: "Service",
+            receiptsIncrement: "140%",
+            expenditureIncrement: "110%",
+            justification:
+              "Higher digital adoption, low capex requirement, improved billable hours.",
+          },
+          {
+            industry: "Trading",
+            receiptsIncrement: "128%",
+            expenditureIncrement: "115%",
+            justification:
+              "E-commerce growth, supply chain efficiency, rising logistics costs.",
+          },
+          {
+            industry: "Agriculture",
+            receiptsIncrement: "118%",
+            expenditureIncrement: "122%",
+            justification:
+              "MSP hikes, agri-tech adoption, high fertilizer & labor costs.",
+          },
+        ],
     },
   };
 }

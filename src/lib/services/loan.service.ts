@@ -2,10 +2,12 @@ export function calculateLoanDetails(
   termLoan: number,
   workingCapitalLoan: number,
   annualRate: number,
-  loanPeriodYears: number
+  loanPeriodYears: number,
+  workingCapitalAnnualRate?: number
 ) {
   const totalMonths = loanPeriodYears * 12;
   const monthlyRate = annualRate / 12 / 100;
+  const wcRate = workingCapitalAnnualRate !== undefined ? workingCapitalAnnualRate : annualRate;
 
   const emi =
     (termLoan * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) /
@@ -63,7 +65,7 @@ export function calculateLoanDetails(
     const yearInterest = yearChunk.reduce((sum, m) => sum + m.interest, 0);
     const totalEMI = yearChunk.reduce((sum, m) => sum + m.emi, 0);
 
-    const ccInterest = Math.round(workingCapitalLoan * (annualRate / 100));
+    const ccInterest = Math.round(workingCapitalLoan * (wcRate / 100));
 
     loanInterestTablesDetail.push({
       year: yearChunk[0].date.split("/")[2],

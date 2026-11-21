@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/db/dbConnect";
+import AdminModel from "@/db/models/adminModel";
 
 export const ADMIN_COOKIE_NAME = "cma_admin_session";
 
@@ -14,6 +16,24 @@ export interface AdminSessionPayload {
   exp: number; // Unix timestamp in seconds
 }
 
+export function hashAdminPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
+
+export function verifyAdminPassword(password: string, storedHash: string): boolean {
+  try {
+    const [salt, key] = storedHash.split(":");
+    if (!salt || !key) return false;
+    const keyBuffer = Buffer.from(key, "hex");
+    const derivedKey = crypto.scryptSync(password, salt, 64);
+    return crypto.timingSafeEqual(keyBuffer, derivedKey);
+  } catch {
+    return false;
+  }
+}
+
 export function getAdminCredentials() {
   return {
     email: (process.env.ADMIN_EMAIL || "admin@cma.com").trim().toLowerCase(),
@@ -21,10 +41,48 @@ export function getAdminCredentials() {
   };
 }
 
-export function verifyAdminCredentials(email?: string, password?: string): boolean {
+/**
+ * Ensures an admin document exists in MongoDB seeded from .env credentials if not already present.
+ */
+export async function ensureAdminSeeded(): Promise<void> {
+  try {
+    await dbConnect();
+    const creds = getAdminCredentials();
+    const existing = await AdminModel.findOne({ email: creds.email });
+
+    if (!existing) {
+      console.log(`[Admin] Initializing and seeding admin account from env: ${creds.email}`);
+      const passwordHash = hashAdminPassword(creds.password);
+      await AdminModel.create({
+        email: creds.email,
+        passwordHash,
+      });
+      console.log(`[Admin] Seeded admin successfully.`);
+    }
+  } catch (error) {
+    console.error("[Admin] ensureAdminSeeded error:", error);
+  }
+}
+
+export async function verifyAdminCredentials(email?: string, password?: string): Promise<boolean> {
   if (!email || !password) return false;
-  const creds = getAdminCredentials();
   const inputEmail = email.trim().toLowerCase();
+
+  try {
+    await dbConnect();
+    await ensureAdminSeeded();
+
+    const admin = await AdminModel.findOne({ email: inputEmail });
+    if (admin && admin.passwordHash) {
+      const isMatch = verifyAdminPassword(password, admin.passwordHash);
+      if (isMatch) return true;
+    }
+  } catch (error) {
+    console.error("[Admin] Error querying admin from database:", error);
+  }
+
+  // Fallback: If DB query fails or user matches environment fallback credentials
+  const creds = getAdminCredentials();
   return inputEmail === creds.email && password === creds.password;
 }
 

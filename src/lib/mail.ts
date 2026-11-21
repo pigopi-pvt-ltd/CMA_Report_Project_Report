@@ -168,3 +168,74 @@ export async function sendPasswordResetLinkEmail({
     text: `Reset your password by visiting this link: ${resetUrl}`,
   });
 }
+
+export async function sendAdminPasswordResetEmail({
+  to,
+  otp,
+  resetUrl,
+}: {
+  to: string;
+  otp: string;
+  resetUrl: string;
+}) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Admin Password Reset Request</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0f19; margin: 0; padding: 24px; color: #e2e8f0; }
+        .container { max-width: 520px; margin: 0 auto; background: #131b2e; border-radius: 14px; border: 1px solid #1e293b; padding: 36px 32px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+        .badge { display: inline-block; padding: 6px 14px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 20px; color: #818cf8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 20px; }
+        .logo { font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px; }
+        h1 { font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
+        p { font-size: 14px; line-height: 1.6; color: #94a3b8; margin: 0 0 16px; }
+        .otp-box { background: #0f172a; border: 1.5px dashed #334155; border-radius: 10px; padding: 20px 24px; text-align: center; margin: 24px 0; }
+        .otp-code { font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace; font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #a5b4fc; }
+        .otp-sub { font-size: 12px; color: #64748b; margin-top: 8px; }
+        .btn-wrapper { text-align: center; margin: 28px 0; }
+        .btn { display: inline-block; background-color: #4f46e5; color: #ffffff !important; font-size: 14px; font-weight: 600; padding: 12px 30px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35); }
+        .divider { height: 1px; background: #1e293b; margin: 28px 0; border: none; }
+        .footer { font-size: 12px; color: #64748b; line-height: 1.5; text-align: center; }
+        .link-alt { word-break: break-all; color: #818cf8; font-size: 13px; text-decoration: underline; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="badge">Security Notification</div>
+        <div class="logo">CMA Admin Console</div>
+        <h1>Reset Administrator Password</h1>
+        <p>A password reset request was initiated for your administrative account.</p>
+        <p>Use the 6-digit verification code below to complete the reset:</p>
+        
+        <div class="otp-box">
+          <div class="otp-code">${otp}</div>
+          <div class="otp-sub">This verification code expires in 15 minutes</div>
+        </div>
+
+        <p style="text-align: center; margin-bottom: 8px;">Or click the button below to reset your password directly:</p>
+        <div class="btn-wrapper">
+          <a href="${resetUrl}" class="btn" target="_blank">Reset Admin Password</a>
+        </div>
+
+        <p style="font-size: 13px; color: #64748b;">If the button above does not work, copy and paste this link into your browser:</p>
+        <p><a href="${resetUrl}" class="link-alt" target="_blank">${resetUrl}</a></p>
+
+        <hr class="divider" />
+        <div class="footer">
+          <p>If you did not initiate this request, someone may be trying to access the admin portal. Your password remains unchanged until you complete the reset.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `[CMA Admin] Password Reset Code: ${otp}`,
+    html,
+    text: `Admin Password Reset Code: ${otp}. It expires in 15 minutes. Alternatively, visit this link: ${resetUrl}`,
+  });
+}

@@ -31,6 +31,7 @@ export default function SignUpForm() {
   defaultValues: {
    name: "",
    email: "",
+   mobileNumber: "",
    password: "",
    confirmPassword: "",
   },
@@ -122,6 +123,15 @@ export default function SignUpForm() {
        name="email"
        label="Email"
        placeholder="name@example.com"
+       type="email"
+      />
+
+      <InputFormField
+       control={form.control}
+       name="mobileNumber"
+       label="Mobile Number"
+       placeholder="e.g. 9876543210"
+       type="tel"
       />
 
       <InputFormField
@@ -129,6 +139,7 @@ export default function SignUpForm() {
        name="password"
        label="Password"
        placeholder="••••••••"
+       type="password"
       />
 
       <InputFormField
@@ -136,6 +147,7 @@ export default function SignUpForm() {
        name="confirmPassword"
        label="Confirm Password"
        placeholder="••••••••"
+       type="password"
       />
 
       <div className="flex items-center space-x-2">

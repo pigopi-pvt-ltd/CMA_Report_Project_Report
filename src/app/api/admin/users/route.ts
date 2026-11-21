@@ -21,6 +21,8 @@ export async function GET(request: Request) {
       userQuery.$or = [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
+        { mobileNumber: { $regex: search, $options: "i" } },
+        { phoneNumber: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -108,6 +110,7 @@ export async function GET(request: Request) {
         id: uid,
         name: u.name || "Unnamed User",
         email: u.email,
+        mobileNumber: u.mobileNumber || u.phoneNumber || null,
         emailVerified: !!u.emailVerified,
         createdAt: u.createdAt,
         subscription: sub

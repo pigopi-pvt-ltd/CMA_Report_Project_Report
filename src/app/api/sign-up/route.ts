@@ -1,7 +1,9 @@
-import { auth } from '@/lib/auth'
+import { auth } from '@/lib/auth';
 import { signUpServerSchema } from '@/Schemas/sign-up-schema';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
+import dbConnect from '@/db/dbConnect';
+import UserModel from '@/db/models/userModel';
 
 export async function POST(request: Request) {
   try {
@@ -9,21 +11,37 @@ export async function POST(request: Request) {
     const nextParam = searchParams.get("next");
     const baseUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000";
     const callbackURL = nextParam ? `${baseUrl}${nextParam}` : `${baseUrl}/dashboard`;
-    const body = await request.json()
-    const { email, password, name } = signUpServerSchema.parse(body);
+    const body = await request.json();
+    const { email, password, name, mobileNumber } = signUpServerSchema.parse(body);
 
     const data = await auth.api.signUpEmail({
       body: {
         name,
         email,
         password,
+        mobileNumber,
+        phoneNumber: mobileNumber,
         callbackURL,
       },
     });
+
+    // Ensure mobileNumber is persisted in MongoDB
+    if (data?.user?.id) {
+      try {
+        await dbConnect();
+        await UserModel.updateOne(
+          { _id: data.user.id },
+          { $set: { mobileNumber, phoneNumber: mobileNumber } }
+        );
+      } catch (dbErr) {
+        console.error("Failed to sync mobileNumber to MongoDB user model:", dbErr);
+      }
+    }
+
     return NextResponse.json({
       message: "Signed-Up Successfully",
       data
-    }, { status: 200 })
+    }, { status: 200 });
 
   } catch (error: any) {
     if (error instanceof ZodError) {

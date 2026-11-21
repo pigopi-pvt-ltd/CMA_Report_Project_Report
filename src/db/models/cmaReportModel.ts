@@ -13,6 +13,8 @@ export interface ICmaReport extends Document {
   loanType: "mudra" | "pmegp" | "msme" | "others";
   termLoanPercentage?: number;
   workingCapitalPercentage?: number;
+  interestRateTermLoan?: number;
+  interestRateCashCredit?: number;
   loanPeriod: number;
 
   personalDetails: {
@@ -114,6 +116,8 @@ const cmaReportSchema = new Schema<ICmaReport>(
     loanType: { type: String, enum: ["mudra", "pmegp", "msme", "others"], required: true },
     termLoanPercentage: { type: Number, default: 54 },
     workingCapitalPercentage: { type: Number, default: 36 },
+    interestRateTermLoan: { type: Number, default: 11.1 },
+    interestRateCashCredit: { type: Number, default: 11.1 },
     loanPeriod: { type: Number, required: true, min: 5, max: 10 },
 
     personalDetails: {

@@ -38,6 +38,7 @@ interface UserRecord {
   id: string;
   name: string;
   email: string;
+  mobileNumber?: string | null;
   emailVerified: boolean;
   createdAt: string;
   subscription: {
@@ -103,6 +104,7 @@ export default function AdminUsersPage() {
       (u) =>
         u.name?.toLowerCase().includes(q) ||
         u.email?.toLowerCase().includes(q) ||
+        u.mobileNumber?.toLowerCase().includes(q) ||
         u.subscription?.planName?.toLowerCase().includes(q)
     );
   }, [users, search]);
@@ -297,6 +299,11 @@ export default function AdminUsersPage() {
                                 </Badge>
                               )}
                             </div>
+                            {user.mobileNumber && (
+                              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 font-mono">
+                                {user.mobileNumber}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

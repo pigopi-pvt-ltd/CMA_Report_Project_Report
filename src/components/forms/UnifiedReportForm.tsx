@@ -59,7 +59,7 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
         { fields: ["businessName"] },
         { fields: ["businessType", "businessSummary"] },
         { fields: ["industryType"] },
-        { fields: ["loanType", "termLoanPercentage", "workingCapitalPercentage"] },
+        { fields: ["loanType", "termLoanPercentage", "workingCapitalPercentage", "interestRateTermLoan", "interestRateCashCredit"] },
         { fields: ["businessRequirements"] },
         { fields: ["monthlyExpenses"] },
         { fields: ["revenueDetails"] },
@@ -78,6 +78,8 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
             loanType: "",
             termLoanPercentage: 54,
             workingCapitalPercentage: 36,
+            interestRateTermLoan: 11.1,
+            interestRateCashCredit: 11.1,
             businessRequirements: {},
             monthlyExpenses: {},
             revenueDetails: {
@@ -139,6 +141,16 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                             reportData.workingCapitalPercentage = 36;
                         }
 
+                        if (reportData.interestRateTermLoan === undefined) {
+                            reportData.interestRateTermLoan =
+                                reportData.assumptions?.particulars?.interestRateTermLoan ?? 11.1;
+                        }
+
+                        if (reportData.interestRateCashCredit === undefined) {
+                            reportData.interestRateCashCredit =
+                                reportData.assumptions?.particulars?.interestRateCashCredit ?? 11.1;
+                        }
+
                         form.reset(reportData);
                         setDataLoaded(true);
                     }
@@ -184,6 +196,26 @@ export const UnifiedReportForm = ({ reportId, type }: UnifiedFormProps) => {
                 form.setError('workingCapitalPercentage', {
                     type: 'manual',
                     message: `Total loan percentage (${tl + wc}%) cannot exceed 100%`,
+                });
+                return;
+            }
+
+            const tlRateVal = form.getValues("interestRateTermLoan");
+            const tlRate = Number(tlRateVal === "" || tlRateVal === undefined ? 11.1 : tlRateVal);
+            if (isNaN(tlRate) || tlRate < 0 || tlRate > 100) {
+                form.setError('interestRateTermLoan', {
+                    type: 'manual',
+                    message: 'Term loan interest rate must be between 0% and 100%',
+                });
+                return;
+            }
+
+            const wcRateVal = form.getValues("interestRateCashCredit");
+            const wcRate = Number(wcRateVal === "" || wcRateVal === undefined ? 11.1 : wcRateVal);
+            if (isNaN(wcRate) || wcRate < 0 || wcRate > 100) {
+                form.setError('interestRateCashCredit', {
+                    type: 'manual',
+                    message: 'Working capital interest rate must be between 0% and 100%',
                 });
                 return;
             }

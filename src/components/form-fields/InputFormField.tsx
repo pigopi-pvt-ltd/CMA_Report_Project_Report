@@ -20,7 +20,7 @@ interface FormFieldProps<T extends FieldValues> {
   className?: string;
   labelClassName?: string;
   wrapperClassName?: string;
-  type?: "text" | "email" | "password" | "textarea";
+  type?: "text" | "email" | "password" | "textarea" | "tel" | "number";
 }
 
 const InputFormField = <T extends FieldValues>({

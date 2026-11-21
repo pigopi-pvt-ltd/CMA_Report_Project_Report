@@ -90,6 +90,8 @@ export type LoanDetails = {
   averageDSCR: number;
   termLoanPercentage?: number;
   workingCapitalPercentage?: number;
+  interestRateTermLoan?: number;
+  interestRateCashCredit?: number;
   promotersContributionPercentage?: number;
 };
 
@@ -487,6 +489,8 @@ export interface ProjectData extends Document {
   loanType: "mudra" | "pmegp" | "msme" | "others";
   termLoanPercentage?: number;
   workingCapitalPercentage?: number;
+  interestRateTermLoan?: number;
+  interestRateCashCredit?: number;
   businessRequirements: businessRequirementsMap;
   monthlyExpenses: monthlyExpensesMap;
   revenueDetails: salesRevenueDetails;
@@ -571,6 +575,16 @@ const ProjectReportSchema = new Schema<ProjectData>(
     workingCapitalPercentage: {
       type: Number,
       default: 36,
+    },
+
+    interestRateTermLoan: {
+      type: Number,
+      default: 11.1,
+    },
+
+    interestRateCashCredit: {
+      type: Number,
+      default: 11.1,
     },
 
     businessRequirements: {

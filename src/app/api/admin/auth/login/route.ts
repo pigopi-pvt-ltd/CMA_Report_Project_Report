@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const isValid = verifyAdminCredentials(email, password);
+    const isValid = await verifyAdminCredentials(email, password);
 
     if (!isValid) {
       return NextResponse.json(
