@@ -499,41 +499,41 @@ export async function generateProjectReport(data: any) {
         projectedIncrementReceipts:
           data.assumptions?.particulars?.projectedIncrementReceipts || "135%",
         projectedIncrementExpenditure:
-          data.assumptions?.particulars?.projectedIncrementExpenditure || "112%",
+          data.assumptions?.particulars?.projectedIncrementExpenditure ||
+          "112%",
         interestRateTermLoan: storedTermLoanInterestRate,
         interestRateCashCredit: storedWCInterestRate,
       },
-      industryJustifications:
-        data.assumptions?.industryJustifications || [
-          {
-            industry: "Manufacturing",
-            receiptsIncrement: "135%",
-            expenditureIncrement: "112%",
-            justification:
-              "Capacity expansion, steady raw material prices, scale-driven margin gains.",
-          },
-          {
-            industry: "Service",
-            receiptsIncrement: "140%",
-            expenditureIncrement: "110%",
-            justification:
-              "Higher digital adoption, low capex requirement, improved billable hours.",
-          },
-          {
-            industry: "Trading",
-            receiptsIncrement: "128%",
-            expenditureIncrement: "115%",
-            justification:
-              "E-commerce growth, supply chain efficiency, rising logistics costs.",
-          },
-          {
-            industry: "Agriculture",
-            receiptsIncrement: "118%",
-            expenditureIncrement: "122%",
-            justification:
-              "MSP hikes, agri-tech adoption, high fertilizer & labor costs.",
-          },
-        ],
+      industryJustifications: data.assumptions?.industryJustifications || [
+        {
+          industry: "Manufacturing",
+          receiptsIncrement: "135%",
+          expenditureIncrement: "112%",
+          justification:
+            "Capacity expansion, steady raw material prices, scale-driven margin gains.",
+        },
+        {
+          industry: "Service",
+          receiptsIncrement: "140%",
+          expenditureIncrement: "110%",
+          justification:
+            "Higher digital adoption, low capex requirement, improved billable hours.",
+        },
+        {
+          industry: "Trading",
+          receiptsIncrement: "128%",
+          expenditureIncrement: "115%",
+          justification:
+            "E-commerce growth, supply chain efficiency, rising logistics costs.",
+        },
+        {
+          industry: "Agriculture",
+          receiptsIncrement: "118%",
+          expenditureIncrement: "122%",
+          justification:
+            "MSP hikes, agri-tech adoption, high fertilizer & labor costs.",
+        },
+      ],
     },
   };
 }
